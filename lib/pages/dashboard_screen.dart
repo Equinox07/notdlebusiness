@@ -8,6 +8,7 @@ import 'package:notdle/pages/sections/insight_card.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
   static const String tag = "dashboard";
 
   @override

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/pages/dashboard_screen.dart';
 
 class SignupSuccessScreen extends StatelessWidget {
   const SignupSuccessScreen({super.key});
+
+  static const String tag = "sigup_successful";
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +31,7 @@ class SignupSuccessScreen extends StatelessWidget {
               Text(
                 'Your account has been successfully created.',
                 textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  color: Colors.black54,
-                ),
+                style: GoogleFonts.poppins(fontSize: 16, color: Colors.black54),
               ),
               const SizedBox(height: 30),
               SizedBox(
@@ -44,16 +44,7 @@ class SignupSuccessScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {
-                    // Navigate back or to home
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const DashboardScreen(),
-                      ),
-                      (route) => false,
-                    );
-                  },
+                  onPressed: () => AppNavigator.toHome(),
                   child: Text(
                     'Continue',
                     style: GoogleFonts.poppins(
@@ -63,7 +54,7 @@ class SignupSuccessScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),

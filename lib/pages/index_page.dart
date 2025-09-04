@@ -7,6 +7,7 @@ import 'package:notdle/pages/login_screen.dart';
 import 'package:notdle/pages/screens/add_customer_screen.dart';
 import 'package:notdle/pages/screens/all_measurement_screen.dart';
 import 'package:notdle/pages/screens/customers_screen.dart';
+import 'package:notdle/pages/signup_page.dart';
 
 class IndexPage extends StatelessWidget {
   const IndexPage({super.key});
@@ -21,6 +22,7 @@ class IndexPage extends StatelessWidget {
       onGenerateRoute: AppNavigator.onGenerateRoute,
       routes: {
         LoginApp.tag: (context) => const LoginApp(),
+        SignupApp.tag: (context) => const SignupApp(),
         CustomersScreen.tag: (context) => const CustomersScreen(),
         AllMeasurementScreen.tag: (context) => const AllMeasurementScreen(),
         AddCustomerScreen.tag: (context) => const AddCustomerScreen(),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/pages/dashboard_screen.dart';
 import 'package:notdle/pages/signup_page.dart';
 
@@ -232,15 +233,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 20),
                             Center(
                               child: GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const SignupApp(),
-                                    ),
-                                  );
-                                  // Navigate to Sign Up
-                                },
+                                onTap: () => AppNavigator.toSignUp(),
+
+                                // Navigate to Sign Up
                                 child: RichText(
                                   text: const TextSpan(
                                     text: "Don't have an account? ",

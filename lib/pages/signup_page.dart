@@ -6,6 +6,8 @@ import 'package:notdle/pages/signup_success_screen.dart';
 class SignupApp extends StatelessWidget {
   const SignupApp({super.key});
 
+  static const String tag = "signup";
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

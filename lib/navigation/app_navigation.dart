@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:notdle/models/customer.dart';
+import 'package:notdle/pages/dashboard_screen.dart';
 import 'package:notdle/pages/login_app.dart';
 import 'package:notdle/pages/screens/add_customer_screen.dart';
 import 'package:notdle/pages/screens/add_measurement_screen.dart';
@@ -7,6 +8,8 @@ import 'package:notdle/pages/screens/all_measurement_screen.dart';
 import 'package:notdle/pages/screens/customer_details_screen.dart';
 import 'package:notdle/pages/screens/customers_screen.dart';
 import 'package:notdle/pages/screens/orders_screen.dart';
+import 'package:notdle/pages/signup_page.dart';
+import 'package:notdle/pages/signup_success_screen.dart';
 
 class AppNavigator {
   static final GlobalKey<NavigatorState> navigatorKey =
@@ -40,7 +43,7 @@ class AppNavigator {
   // Navigation helper methods
   static void toHome() {
     navigatorKey.currentState?.pushNamedAndRemoveUntil(
-      '/home',
+      DashboardScreen.tag,
       (route) => false,
     );
   }
@@ -48,6 +51,20 @@ class AppNavigator {
   static void toLogin() {
     navigatorKey.currentState?.pushNamedAndRemoveUntil(
       LoginApp.tag,
+      (route) => false,
+    );
+  }
+
+  static void toSignUp() {
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      SignupApp.tag,
+      (route) => false,
+    );
+  }
+
+  static void toSignUpSuccess() {
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      SignupSuccessScreen.tag,
       (route) => false,
     );
   }

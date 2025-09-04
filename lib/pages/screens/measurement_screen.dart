@@ -7,16 +7,16 @@ import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/measurement.dart';
 
-class MeasurementsScreen extends StatefulWidget {
+class MeasurementScreen extends StatefulWidget {
   final Customer customer;
 
-  const MeasurementsScreen({super.key, required this.customer});
+  const MeasurementScreen({super.key, required this.customer});
 
   @override
-  State<MeasurementsScreen> createState() => _MeasurementsScreenState();
+  State<MeasurementScreen> createState() => _MeasurementScreenState();
 }
 
-class _MeasurementsScreenState extends State<MeasurementsScreen> {
+class _MeasurementScreenState extends State<MeasurementScreen> {
   final _formKey = GlobalKey<FormState>();
   final Map<String, TextEditingController> _controllers = {};
   late Measurement measurement;

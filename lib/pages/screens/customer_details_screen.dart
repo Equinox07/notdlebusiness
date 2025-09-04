@@ -63,11 +63,11 @@ class CustomerDetailScreen extends StatelessWidget {
                     radius: isTablet ? 60 : 50,
                     backgroundColor: Colors.indigo.shade100,
                     backgroundImage:
-                        customer.imageUrl != null
-                            ? NetworkImage(customer.imageUrl!)
+                        customer.imagePath != null
+                            ? NetworkImage(customer.imagePath!)
                             : null,
                     child:
-                        customer.imageUrl == null
+                        customer.imagePath == null
                             ? Icon(
                               Icons.person,
                               size: isTablet ? 70 : 60,

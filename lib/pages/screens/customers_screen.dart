@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/pages/screens/add_customer_screen.dart';
 import 'package:notdle/pages/screens/customer_details_screen.dart';
@@ -15,30 +16,39 @@ class _CustomersScreenState extends State<CustomersScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   // Mock customers
-  final List<Customer> customers = [
+  late List<Customer> customers = [
     Customer(
       id: '1',
       name: 'John Doe',
       phone: '+1 234 567 8900',
       email: 'john.doe@email.com',
+      gender: "Male",
+      address: "",
       orders: 3,
       lastVisit: DateTime.now().subtract(const Duration(days: 5)),
+      createdDate: DateTime.now(),
     ),
     Customer(
       id: '2',
       name: 'Jane Smith',
       phone: '+1 234 567 8901',
       email: 'jane.smith@email.com',
+      gender: "Male",
+      address: "",
       orders: 7,
       lastVisit: DateTime.now().subtract(const Duration(days: 2)),
+      createdDate: DateTime.now(),
     ),
     Customer(
       id: '3',
       name: 'Michael Johnson',
       phone: '+1 234 567 8902',
       email: 'michael.j@email.com',
+      gender: "Male",
+      address: "",
       orders: 12,
       lastVisit: DateTime.now().subtract(const Duration(days: 1)),
+      createdDate: DateTime.now(),
     ),
   ];
 
@@ -49,6 +59,15 @@ class _CustomersScreenState extends State<CustomersScreen> {
     super.initState();
     filteredCustomers = customers;
     _searchController.addListener(_filterCustomers);
+    _loadCustomers();
+  }
+
+  Future<void> _loadCustomers() async {
+    final data = await DatabaseHelper.instance.fetchCustomers();
+    setState(() {
+      customers = data;
+      filteredCustomers = data;
+    });
   }
 
   void _filterCustomers() {
@@ -169,10 +188,13 @@ class _CustomersScreenState extends State<CustomersScreen> {
             });
           }
         },
-        icon: const Icon(Icons.person_add, color: Colors.white,),
+        icon: const Icon(Icons.person_add, color: Colors.white),
         label: Text(
           "Add Customer",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
         ),
         backgroundColor: Colors.indigo,
       ),
@@ -223,11 +245,7 @@ class CustomerCard extends StatelessWidget {
   final Customer customer;
   final VoidCallback onTap;
 
-  const CustomerCard({
-    super.key,
-    required this.customer,
-    required this.onTap,
-  });
+  const CustomerCard({super.key, required this.customer, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -253,8 +271,11 @@ class CustomerCard extends StatelessWidget {
               CircleAvatar(
                 radius: 24,
                 backgroundColor: Colors.indigo.shade100,
-                child: Icon(Icons.person,
-                    color: Colors.indigo.shade600, size: 24),
+                child: Icon(
+                  Icons.person,
+                  color: Colors.indigo.shade600,
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 16),
 
@@ -292,8 +313,10 @@ class CustomerCard extends StatelessWidget {
 
               // Orders count
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.indigo.shade50,
                   borderRadius: BorderRadius.circular(12),

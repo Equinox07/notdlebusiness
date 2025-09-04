@@ -17,22 +17,33 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final _emailController = TextEditingController();
   final _addressController = TextEditingController();
 
-  String? _selectedGender;
+  String _selectedGender = "Other";
 
-  void _saveCustomer() {
+  void _saveCustomer({String? action}) {
     if (_formKey.currentState!.validate()) {
-      final newCustomer = Customer(
+      final customer = Customer(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         name: _nameController.text,
         phone: _phoneController.text,
         email: _emailController.text,
-        orders: 0,
-        lastVisit: DateTime.now(),
         gender: _selectedGender,
         address: _addressController.text,
+        orders: 0,
+        lastVisit: DateTime.now(),
+        createdDate: DateTime.now(),
       );
 
-      Navigator.pop(context, newCustomer);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Customer saved (${action ?? 'normal'})")),
+      );
+
+      if (action == "measurement") {
+        // Navigate to measurement screen
+      } else if (action == "order") {
+        // Navigate to order screen
+      } else {
+        Navigator.pop(context, customer);
+      }
     }
   }
 
@@ -46,6 +57,19 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         ),
         backgroundColor: Colors.white,
         elevation: 1,
+        actions: [
+          TextButton(
+            onPressed: () => _saveCustomer(action: "save"),
+            child: Text(
+              "Save",
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.indigo,
+              ),
+            ),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -58,8 +82,11 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 child: CircleAvatar(
                   radius: 40,
                   backgroundColor: Colors.indigo.shade100,
-                  child: Icon(Icons.person,
-                      size: 40, color: Colors.indigo.shade600),
+                  child: Icon(
+                    Icons.person,
+                    size: 40,
+                    color: Colors.indigo.shade600,
+                  ),
                 ),
               ),
               const SizedBox(height: 24),
@@ -73,8 +100,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                validator: (val) =>
-                    val == null || val.isEmpty ? "Enter name" : null,
+                validator:
+                    (val) => val == null || val.isEmpty ? "Enter name" : null,
               ),
               const SizedBox(height: 16),
 
@@ -88,8 +115,11 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                validator: (val) =>
-                    val == null || val.isEmpty ? "Enter phone number" : null,
+                validator:
+                    (val) =>
+                        val == null || val.isEmpty
+                            ? "Enter phone number"
+                            : null,
               ),
               const SizedBox(height: 16),
 
@@ -103,33 +133,32 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                validator: (val) =>
-                    val == null || !val.contains("@") ? "Enter valid email" : null,
+                validator:
+                    (val) =>
+                        val == null || !val.contains("@")
+                            ? "Enter valid email"
+                            : null,
               ),
               const SizedBox(height: 16),
 
               // Gender Dropdown
               DropdownButtonFormField<String>(
                 value: _selectedGender,
-                decoration: InputDecoration(
-                  labelText: "Gender",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                items: ["Male", "Female", "Other"]
-                    .map((gender) => DropdownMenuItem(
-                          value: gender,
-                          child: Text(gender),
-                        ))
-                    .toList(),
-                onChanged: (val) {
+                hint: const Text("Select Gender"),
+                items:
+                    ["Male", "Female", "Other"].map((gender) {
+                      return DropdownMenuItem(
+                        value: gender,
+                        child: Text(gender),
+                      );
+                    }).toList(),
+                onChanged: (value) {
                   setState(() {
-                    _selectedGender = val;
+                    _selectedGender = value!;
                   });
                 },
-                validator: (val) =>
-                    val == null || val.isEmpty ? "Select gender" : null,
+                validator:
+                    (value) => value == null ? "Please select a gender" : null,
               ),
               const SizedBox(height: 16),
 
@@ -144,30 +173,76 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
-
-              // Save Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _saveCustomer,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.indigo,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+              const SizedBox(height: 32),
+            ],
+          ),
+        ),
+      ),
+      // ✅ Fixed bottom buttons
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => _saveCustomer(action: "measurement"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Text(
-                    "Save Customer",
-                    style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 16, fontWeight: FontWeight.w600),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                icon: const Icon(Icons.straighten, color: Colors.white),
+                label: Text(
+                  "Save & Take Measurement",
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => _saveCustomer(action: "order"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.indigo,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                icon: const Icon(
+                  Icons.shopping_bag_outlined,
+                  color: Colors.white,
+                ),
+                label: Text(
+                  "Save & Create Order",
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

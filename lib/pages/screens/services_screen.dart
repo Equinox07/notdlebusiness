@@ -1,8 +1,8 @@
-
 //
 // ----------------- SERVICES + NAVIGATION -----------------
 //
 import 'package:flutter/material.dart';
+import 'package:notdle/models/customer.dart';
 import 'package:notdle/pages/dashboard_screen.dart';
 import 'package:notdle/pages/screens/customers_screen.dart';
 import 'package:notdle/pages/screens/designs_screen.dart';
@@ -15,6 +15,18 @@ class ServicesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+
+     Customer newCustomer = Customer(
+      id: "123",
+      name: "John Doe",
+      phone: "+123456789",
+      email: "john@email.com",
+      orders: 0,
+      lastVisit: DateTime.now(),
+      gender: "Male",
+      address: "Accra",
+      createdDate: DateTime.now(), // 🔹 auto
+    );
 
     return Scaffold(
       appBar: AppBar(title: const Text("Services")),
@@ -32,8 +44,10 @@ class ServicesScreen extends StatelessWidget {
               icon: Icons.people_outline,
               color: Colors.blue.shade600,
               onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const CustomersScreen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CustomersScreen()),
+                );
               },
             ),
             HomeMenuCard(
@@ -42,10 +56,13 @@ class ServicesScreen extends StatelessWidget {
               icon: Icons.straighten,
               color: Colors.orange.shade600,
               onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const MeasurementsScreen()));
+                debugPrint("Measurements");
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (_) => const MeasurementsScreen(customer: newCustomer ),
+                //   ),
+                // );
               },
             ),
             HomeMenuCard(
@@ -54,8 +71,10 @@ class ServicesScreen extends StatelessWidget {
               icon: Icons.shopping_bag_outlined,
               color: Colors.green.shade600,
               onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const OrdersScreen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const OrdersScreen()),
+                );
               },
             ),
             HomeMenuCard(
@@ -64,8 +83,10 @@ class ServicesScreen extends StatelessWidget {
               icon: Icons.palette_outlined,
               color: Colors.purple.shade600,
               onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const DesignsScreen()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const DesignsScreen()),
+                );
               },
             ),
           ],

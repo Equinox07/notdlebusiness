@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/measurement.dart';
+import 'package:notdle/pages/screens/add_measurement_screen.dart';
 
 class MeasurementDetailScreen extends StatelessWidget {
   final Measurement measurement;
@@ -28,6 +29,7 @@ class MeasurementDetailScreen extends StatelessWidget {
       "Across Back",
       "Around Arm",
       "Sleeve Length/Short/3 Quarters/Full",
+      "Sleeve Measurement",
       "Trouser Waist",
       "Thigh",
       "Hip",
@@ -53,8 +55,8 @@ class MeasurementDetailScreen extends StatelessWidget {
     final fields =
         customer!.gender.toLowerCase() == "female" ? femaleFields : maleFields;
 
-    final sleeveOptions = ["Short", "3 Quarters", "Full"];
-    final clothOptions = ["Trouser", "Skirt", "Full Dress"];
+    final sleeveOptions = ["None","Short", "3 Quarters", "Full"];
+    final clothOptions = ["None","Trouser", "Skirt", "Full Dress"];
 
     Widget buildField(String field) {
       if (field == "Sleeve Length/Short/3 Quarters/Full" &&
@@ -121,43 +123,33 @@ class MeasurementDetailScreen extends StatelessWidget {
             CircleAvatar(
               radius: 20,
               backgroundColor: Colors.indigo.shade100,
-              backgroundImage:
-                  customer.imagePath != null
-                      ? FileImage(File(customer.imagePath!))
-                      : null,
-              child:
-                  customer.imagePath == null
-                      ? Text(
-                        customer.name.isNotEmpty
-                            ? customer.name[0].toUpperCase()
-                            : "?",
-                        style: GoogleFonts.poppins(
+              backgroundImage: customer.imagePath != null
+                  ? FileImage(File(customer.imagePath!))
+                  : null,
+              child: customer.imagePath == null
+                  ? Text(
+                      customer.name.isNotEmpty
+                          ? customer.name[0].toUpperCase()
+                          : "?",
+                      style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.indigo,
-                        ),
-                      )
-                      : null,
+                          color: Colors.indigo),
+                    )
+                  : null,
             ),
             const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  customer.name,
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                    color: Colors.black,
-                  ),
-                ),
-                Text(
-                  "${customer.gender} • ${customer.phone}",
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
+                Text(customer.name,
+                    style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        color: Colors.black)),
+                Text("${customer.gender} • ${customer.phone}",
+                    style: GoogleFonts.poppins(
+                        fontSize: 12, color: Colors.grey.shade600)),
               ],
             ),
           ],
@@ -169,6 +161,23 @@ class MeasurementDetailScreen extends StatelessWidget {
         itemBuilder: (context, index) => buildField(fields[index]),
         separatorBuilder: (_, __) => const SizedBox(height: 16),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => AddMeasurementScreen(customer: customer),
+            ),
+          );
+        },
+        backgroundColor: Colors.indigo,
+        icon: const Icon(Icons.add, color: Colors.white,),
+        label: Text(
+          "Add",
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.white),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
 }

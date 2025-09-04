@@ -19,6 +19,22 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
   final _formKey = GlobalKey<FormState>();
   final Map<String, TextEditingController> _controllers = {};
 
+  final ImagePicker _picker = ImagePicker();
+  File? _profileImage;
+
+  Future<void> _pickImage(ImageSource source) async {
+    final picked = await _picker.pickImage(source: source);
+    if (picked != null) {
+      setState(() {
+        _profileImage = File(picked.path);
+        widget.customer.imagePath = picked.path;
+      });
+
+      // ✅ Save update to SQLite
+      await DatabaseHelper.instance.updateCustomer(widget.customer);
+    }
+  }
+
   final List<String> _femaleFields = [
     "Bust",
     "Niple to Niple",
@@ -55,20 +71,19 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
   late List<String> _fields;
 
   // Dropdown options
-  final List<String> sleeveOptions = ["Short", "3 Quarters", "Full"];
-  String _selectedSleeve = "Short";
+  final List<String> sleeveOptions = ["None","Short", "3 Quarters", "Full"];
+  String _selectedSleeve = "None";
 
-  final List<String> clothOptions = ["Trouser", "Skirt", "Full Dress"];
-  String _selectedCloth = "Trouser";
-
-  File? _profileImage;
+  final List<String> clothOptions = ["None","Trouser", "Skirt", "Full Dress"];
+  String _selectedCloth = "None";
 
   @override
   void initState() {
     super.initState();
-    _fields = widget.customer.gender.toLowerCase() == "female"
-        ? _femaleFields
-        : _maleFields;
+    _fields =
+        widget.customer.gender.toLowerCase() == "female"
+            ? _femaleFields
+            : _maleFields;
 
     for (var field in _fields) {
       _controllers[field] = TextEditingController();
@@ -81,11 +96,24 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
     final values = <String, double>{};
     for (var entry in _controllers.entries) {
       final val = double.tryParse(entry.value.text);
-      if (val != null) values[entry.key] = val;
+      if (val != null) {
+        values[entry.key] = val; // only store non-empty values
+      }
     }
 
+    if (widget.customer.id == null) {
+      throw Exception("Customer must be saved before adding measurement.");
+    }
+
+    // final measurement = Measurement(
+    //   customerId: widget.customer.id!,
+    //   values: values,
+    //   createdDate: DateTime.now(),
+    // );
+
     if (widget.customer.gender.toLowerCase() == "female") {
-      values["SleeveLength"] = sleeveOptions.indexOf(_selectedSleeve).toDouble();
+      values["SleeveLength"] =
+          sleeveOptions.indexOf(_selectedSleeve).toDouble();
       values["ClothType"] = clothOptions.indexOf(_selectedCloth).toDouble();
     }
 
@@ -98,19 +126,46 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
     final saved = await DatabaseHelper.instance.insertMeasurement(measurement);
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text("Measurement saved")));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Measurement saved")));
     Navigator.pop(context, saved);
   }
 
   Future<void> _showImageSourceActionSheet() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _profileImage = File(pickedFile.path);
-      });
-    }
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt, color: Colors.indigo),
+                title: Text("Take Photo", style: GoogleFonts.poppins()),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library, color: Colors.green),
+                title: Text(
+                  "Choose from Gallery",
+                  style: GoogleFonts.poppins(),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Widget buildSleeveField() {
@@ -127,15 +182,19 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
         decoration: InputDecoration(
           labelText: "Sleeve Length",
           labelStyle: GoogleFonts.poppins(
-              fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey.shade800),
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey.shade800,
+          ),
           border: InputBorder.none,
         ),
-        items: sleeveOptions.map((option) {
-          return DropdownMenuItem(
-            value: option,
-            child: Text(option, style: GoogleFonts.poppins(fontSize: 16)),
-          );
-        }).toList(),
+        items:
+            sleeveOptions.map((option) {
+              return DropdownMenuItem(
+                value: option,
+                child: Text(option, style: GoogleFonts.poppins(fontSize: 16)),
+              );
+            }).toList(),
         onChanged: (val) {
           if (val != null) setState(() => _selectedSleeve = val);
         },
@@ -159,12 +218,16 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
             value: _selectedCloth,
             isExpanded: true,
             underline: const SizedBox(),
-            items: clothOptions.map((option) {
-              return DropdownMenuItem(
-                value: option,
-                child: Text(option, style: GoogleFonts.poppins(fontSize: 16)),
-              );
-            }).toList(),
+            items:
+                clothOptions.map((option) {
+                  return DropdownMenuItem(
+                    value: option,
+                    child: Text(
+                      option,
+                      style: GoogleFonts.poppins(fontSize: 16),
+                    ),
+                  );
+                }).toList(),
             onChanged: (val) {
               if (val != null) setState(() => _selectedCloth = val);
             },
@@ -175,18 +238,29 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
           child: TextFormField(
             controller: _controllers["Cloth"]!,
             keyboardType: TextInputType.number,
-            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w500),
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+            ),
             decoration: InputDecoration(
               labelText: "Measurement",
-              labelStyle: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600),
-              contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+              labelStyle: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 20,
+                horizontal: 16,
+              ),
               filled: true,
               fillColor: Colors.grey.shade100,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
-            validator: (value) => value == null || value.isEmpty ? "Enter measurement" : null,
+            validator:
+                (value) =>
+                    value == null || value.isEmpty ? "Enter measurement" : null,
           ),
         ),
       ],
@@ -217,36 +291,47 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
                 child: CircleAvatar(
                   radius: 20,
                   backgroundColor: Colors.indigo.shade100,
-                  backgroundImage: _profileImage != null
-                      ? FileImage(_profileImage!)
-                      : (widget.customer.imagePath != null
-                          ? FileImage(File(widget.customer.imagePath!))
-                          : null),
-                  child: (_profileImage == null && widget.customer.imagePath == null)
-                      ? Text(
-                          widget.customer.name.isNotEmpty
-                              ? widget.customer.name[0].toUpperCase()
-                              : "?",
-                          style: GoogleFonts.poppins(
+                  backgroundImage:
+                      _profileImage != null
+                          ? FileImage(_profileImage!)
+                          : (widget.customer.imagePath != null
+                              ? FileImage(File(widget.customer.imagePath!))
+                              : null),
+                  child:
+                      (_profileImage == null &&
+                              widget.customer.imagePath == null)
+                          ? Text(
+                            widget.customer.name.isNotEmpty
+                                ? widget.customer.name[0].toUpperCase()
+                                : "?",
+                            style: GoogleFonts.poppins(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.indigo),
-                        )
-                      : null,
+                              color: Colors.indigo,
+                            ),
+                          )
+                          : null,
                 ),
               ),
               const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.customer.name,
-                      style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                          color: Colors.black)),
-                  Text("${widget.customer.gender} • ${widget.customer.phone}",
-                      style: GoogleFonts.poppins(
-                          fontSize: 12, color: Colors.grey.shade600)),
+                  Text(
+                    widget.customer.name,
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                  ),
+                  Text(
+                    "${widget.customer.gender} • ${widget.customer.phone}",
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -265,7 +350,8 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
                 return buildSleeveField();
               }
 
-              if (field == "Cloth" && widget.customer.gender.toLowerCase() == "female") {
+              if (field == "Cloth" &&
+                  widget.customer.gender.toLowerCase() == "female") {
                 return buildClothField();
               }
 
@@ -274,19 +360,32 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
                 child: TextFormField(
                   controller: _controllers[field],
                   keyboardType: TextInputType.number,
-                  style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w500),
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                  ),
                   decoration: InputDecoration(
                     labelText: field,
                     labelStyle: GoogleFonts.poppins(
-                        fontSize: 16, fontWeight: FontWeight.w600, color: Colors.grey.shade800),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade800,
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 20,
+                      horizontal: 16,
+                    ),
                     filled: true,
                     fillColor: Colors.grey.shade50,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-                  validator: (value) => value == null || value.isEmpty ? "Enter $field" : null,
+                  validator:
+                      (value) =>
+                          value == null || value.isEmpty
+                              ? "Enter $field"
+                              : null,
                 ),
               );
             },
@@ -299,9 +398,10 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, -2)),
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, -2),
+              ),
             ],
           ),
           child: SizedBox(
@@ -319,7 +419,10 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
               label: Text(
                 "Save Measurements",
                 style: GoogleFonts.poppins(
-                    fontSize: 15, fontWeight: FontWeight.w600, color: Colors.white),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),

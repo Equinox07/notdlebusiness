@@ -1,6 +1,3 @@
-//
-// ----------------- SERVICES + NAVIGATION -----------------
-//
 import 'package:flutter/material.dart';
 import 'package:notdle/pages/dashboard_screen.dart';
 import 'package:notdle/pages/screens/all_measurement_screen.dart';
@@ -10,6 +7,8 @@ import 'package:notdle/pages/screens/orders_screen.dart';
 
 class ServicesScreen extends StatelessWidget {
   const ServicesScreen({super.key});
+
+  static const String tag = "services";
 
   @override
   Widget build(BuildContext context) {

@@ -9,6 +9,8 @@ import 'package:url_launcher/url_launcher.dart'; // ✅ import
 class CustomerDetailScreen extends StatelessWidget {
   final Customer customer;
 
+  static const String tag = "customer_details";
+
   const CustomerDetailScreen({super.key, required this.customer});
 
   // 🔹 Launch phone dialer

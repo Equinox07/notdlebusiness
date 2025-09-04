@@ -1,9 +1,9 @@
-
-
 import 'package:flutter/material.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
+
+  static const String tag = "orders";
 
   @override
   State<OrdersScreen> createState() => _OrdersScreenState();
@@ -11,7 +11,11 @@ class OrdersScreen extends StatefulWidget {
 
 class _OrdersScreenState extends State<OrdersScreen> {
   final List<Map<String, String>> orders = [
-    {"order": "Wedding Dress", "client": "Emma Johnson", "status": "In Progress"},
+    {
+      "order": "Wedding Dress",
+      "client": "Emma Johnson",
+      "status": "In Progress",
+    },
     {"order": "Business Suit", "client": "Michael Chen", "status": "Completed"},
     {"order": "Blazer", "client": "Lisa Rodriguez", "status": "Pending"},
   ];
@@ -42,9 +46,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: _statusColor(order["status"]!).withOpacity(0.2),
-                child: Icon(Icons.shopping_bag,
-                    color: _statusColor(order["status"]!)),
+                backgroundColor: _statusColor(
+                  order["status"]!,
+                ).withOpacity(0.2),
+                child: Icon(
+                  Icons.shopping_bag,
+                  color: _statusColor(order["status"]!),
+                ),
               ),
               title: Text(order["order"]!),
               subtitle: Text(order["client"]!),

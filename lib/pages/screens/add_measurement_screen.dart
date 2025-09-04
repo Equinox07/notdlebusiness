@@ -9,6 +9,8 @@ import 'package:notdle/models/measurement.dart';
 class AddMeasurementScreen extends StatefulWidget {
   final Customer customer;
 
+  static const String tag = "add_measurement";
+
   const AddMeasurementScreen({super.key, required this.customer});
 
   @override
@@ -71,10 +73,10 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
   late List<String> _fields;
 
   // Dropdown options
-  final List<String> sleeveOptions = ["None","Short", "3 Quarters", "Full"];
+  final List<String> sleeveOptions = ["None", "Short", "3 Quarters", "Full"];
   String _selectedSleeve = "None";
 
-  final List<String> clothOptions = ["None","Trouser", "Skirt", "Full Dress"];
+  final List<String> clothOptions = ["None", "Trouser", "Skirt", "Full Dress"];
   String _selectedCloth = "None";
 
   @override

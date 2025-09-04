@@ -3,11 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/pages/screens/add_measurement_screen.dart';
-import 'package:notdle/pages/screens/measurements_screen.dart';
 import 'package:notdle/pages/screens/orders_screen.dart';
 
 class AddCustomerScreen extends StatefulWidget {
   const AddCustomerScreen({super.key});
+
+  static const String tag = "add_customer";
 
   @override
   State<AddCustomerScreen> createState() => _AddCustomerScreenState();

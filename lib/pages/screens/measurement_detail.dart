@@ -6,6 +6,8 @@ import 'package:notdle/pages/screens/add_measurement_screen.dart';
 
 class MeasurementDetailScreen extends StatelessWidget {
   final Measurement measurement;
+
+  static const String tag = "measurement_details";
   // final customer = measurement.customer; // linked customer
   // final Customer customer;
 
@@ -55,13 +57,14 @@ class MeasurementDetailScreen extends StatelessWidget {
     final fields =
         customer!.gender.toLowerCase() == "female" ? femaleFields : maleFields;
 
-    final sleeveOptions = ["None","Short", "3 Quarters", "Full"];
-    final clothOptions = ["None","Trouser", "Skirt", "Full Dress"];
+    final sleeveOptions = ["None", "Short", "3 Quarters", "Full"];
+    final clothOptions = ["None", "Trouser", "Skirt", "Full Dress"];
 
     Widget buildField(String field) {
       if (field == "Sleeve Length/Short/3 Quarters/Full" &&
           customer.gender.toLowerCase() == "female") {
-        final index = measurement.measurementValues["SleeveLength"]?.toInt() ?? 0;
+        final index =
+            measurement.measurementValues["SleeveLength"]?.toInt() ?? 0;
         return Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
@@ -123,33 +126,43 @@ class MeasurementDetailScreen extends StatelessWidget {
             CircleAvatar(
               radius: 20,
               backgroundColor: Colors.indigo.shade100,
-              backgroundImage: customer.imagePath != null
-                  ? FileImage(File(customer.imagePath!))
-                  : null,
-              child: customer.imagePath == null
-                  ? Text(
-                      customer.name.isNotEmpty
-                          ? customer.name[0].toUpperCase()
-                          : "?",
-                      style: GoogleFonts.poppins(
+              backgroundImage:
+                  customer.imagePath != null
+                      ? FileImage(File(customer.imagePath!))
+                      : null,
+              child:
+                  customer.imagePath == null
+                      ? Text(
+                        customer.name.isNotEmpty
+                            ? customer.name[0].toUpperCase()
+                            : "?",
+                        style: GoogleFonts.poppins(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.indigo),
-                    )
-                  : null,
+                          color: Colors.indigo,
+                        ),
+                      )
+                      : null,
             ),
             const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(customer.name,
-                    style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        color: Colors.black)),
-                Text("${customer.gender} • ${customer.phone}",
-                    style: GoogleFonts.poppins(
-                        fontSize: 12, color: Colors.grey.shade600)),
+                Text(
+                  customer.name,
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  "${customer.gender} • ${customer.phone}",
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
               ],
             ),
           ],
@@ -171,10 +184,13 @@ class MeasurementDetailScreen extends StatelessWidget {
           );
         },
         backgroundColor: Colors.indigo,
-        icon: const Icon(Icons.add, color: Colors.white,),
+        icon: const Icon(Icons.add, color: Colors.white),
         label: Text(
           "Add",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.white),
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,

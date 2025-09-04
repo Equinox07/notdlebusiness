@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:notdle/models/customer.dart';
+import 'package:notdle/pages/login_app.dart';
+import 'package:notdle/pages/screens/add_customer_screen.dart';
+import 'package:notdle/pages/screens/add_measurement_screen.dart';
+import 'package:notdle/pages/screens/all_measurement_screen.dart';
+import 'package:notdle/pages/screens/customer_details_screen.dart';
+import 'package:notdle/pages/screens/customers_screen.dart';
+import 'package:notdle/pages/screens/orders_screen.dart';
 
 class AppNavigator {
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
 
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -38,39 +47,39 @@ class AppNavigator {
 
   static void toLogin() {
     navigatorKey.currentState?.pushNamedAndRemoveUntil(
-      '/login',
+      LoginApp.tag,
       (route) => false,
     );
   }
 
   static void toCustomers() {
-    navigatorKey.currentState?.pushNamed('/customers');
+    navigatorKey.currentState?.pushNamed(CustomersScreen.tag);
   }
 
-  // static void toCustomerDetails(Customer customer) {
-  //   navigatorKey.currentState?.pushNamed(
-  //     '/customer-details',
-  //     arguments: customer,
-  //   );
-  // }
+  static void toCustomerDetails(Customer customer) {
+    navigatorKey.currentState?.pushNamed(
+      CustomerDetailScreen.tag,
+      arguments: customer,
+    );
+  }
 
-  // static void toMeasurement({Customer? customer}) {
-  //   if (customer != null) {
-  //     navigatorKey.currentState?.pushNamed(
-  //       '/measurement-with-customer',
-  //       arguments: customer,
-  //     );
-  //   } else {
-  //     navigatorKey.currentState?.pushNamed('/measurement');
-  //   }
-  // }
+  static void toMeasurement({Customer? customer}) {
+    if (customer != null) {
+      navigatorKey.currentState?.pushNamed(
+        AddMeasurementScreen.tag,
+        arguments: customer,
+      );
+    } else {
+      navigatorKey.currentState?.pushNamed(AllMeasurementScreen.tag);
+    }
+  }
 
   static void toAddCustomer() {
-    navigatorKey.currentState?.pushNamed('/add-customer');
+    navigatorKey.currentState?.pushNamed(AddCustomerScreen.tag);
   }
 
   static void toOrders() {
-    navigatorKey.currentState?.pushNamed('/orders');
+    navigatorKey.currentState?.pushNamed(OrdersScreen.tag);
   }
 
   static void toDesigns() {
@@ -88,9 +97,7 @@ class AppNavigator {
   static void back() {
     navigatorKey.currentState?.pop();
   }
-
 }
-
 
 class RandomeScreen extends StatelessWidget {
   const RandomeScreen({super.key});

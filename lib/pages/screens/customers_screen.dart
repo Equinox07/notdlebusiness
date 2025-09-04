@@ -8,6 +8,8 @@ import 'package:notdle/pages/screens/customer_details_screen.dart';
 class CustomersScreen extends StatefulWidget {
   const CustomersScreen({super.key});
 
+  static const String tag = "customers";
+
   @override
   State<CustomersScreen> createState() => _CustomersScreenState();
 }
@@ -42,8 +44,8 @@ class _CustomersScreenState extends State<CustomersScreen> {
       filteredCustomers =
           customers.where((c) {
             return c.name.toLowerCase().contains(query) ||
-                c.phone.contains(query); 
-                // || c.email.toLowerCase().contains(query);
+                c.phone.contains(query);
+            // || c.email.toLowerCase().contains(query);
           }).toList();
     });
   }

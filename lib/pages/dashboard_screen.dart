@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:notdle/pages/screens/customers_screen.dart';
 import 'package:notdle/pages/screens/services_screen.dart';
 import 'package:notdle/pages/sections/appointment_card.dart';
 import 'package:notdle/pages/sections/dashboard_home.dart';
@@ -18,11 +19,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   final List<Widget> _screens = const [
     DashboardHome(),
-    ClientsScreen(),
+    CustomersScreen(),
     ProjectsScreen(),
     FabricsScreen(),
-    InvoicesScreen(),
-    ServicesScreen(),
+    // InvoicesScreen(),
+    // ServicesScreen(),
   ];
 
   void _onNavTapped(int index) {
@@ -43,13 +44,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(
-              icon: Icon(Icons.dashboard), label: "Dashboard"),
+            icon: Icon(Icons.dashboard),
+            label: "Dashboard",
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.people), label: "Clients"),
           BottomNavigationBarItem(icon: Icon(Icons.folder), label: "Projects"),
           BottomNavigationBarItem(icon: Icon(Icons.texture), label: "Fabrics"),
-          BottomNavigationBarItem(icon: Icon(Icons.receipt), label: "Invoices"),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.design_services), label: "Services"),
+          // BottomNavigationBarItem(icon: Icon(Icons.receipt), label: "Invoices"),
+          // BottomNavigationBarItem(
+          //     icon: Icon(Icons.design_services), label: "Services"),
         ],
       ),
     );
@@ -59,8 +62,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 //
 // ----------------- DASHBOARD HOME -----------------
 //
-
-
 
 class HomeMenuCard extends StatelessWidget {
   final String title;
@@ -184,5 +185,3 @@ class InvoicesScreen extends StatelessWidget {
 
 //
 // ----------------- SERVICES DETAIL SCREENS -----------------
-
-

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:notdle/pages/dashboard_screen.dart';
+import 'package:notdle/pages/signup_page.dart';
 
 class LoginApp extends StatelessWidget {
+  static const String tag = "login";
+
   const LoginApp({super.key});
 
   @override
@@ -90,9 +94,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                   children: [
                                     Image.asset(
                                       'assets/images/logo.png',
-                                      width: isTablet
-                                          ? screenWidth * 0.08
-                                          : screenWidth * 0.12,
+                                      width:
+                                          isTablet
+                                              ? screenWidth * 0.08
+                                              : screenWidth * 0.12,
                                     ),
                                     const SizedBox(width: 8),
                                     Column(
@@ -120,9 +125,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                   borderRadius: BorderRadius.circular(12),
                                   child: Image.asset(
                                     'assets/images/us_flag.png',
-                                    width: isTablet
-                                        ? screenWidth * 0.05
-                                        : screenWidth * 0.08,
+                                    width:
+                                        isTablet
+                                            ? screenWidth * 0.05
+                                            : screenWidth * 0.08,
                                   ),
                                 ),
                               ],
@@ -204,7 +210,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                   elevation: 4,
                                   shadowColor: Colors.green.withOpacity(0.3),
                                 ),
-                                onPressed: () {},
+                                onPressed: () async {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const DashboardScreen(),
+                                    ),
+                                  );
+                                },
                                 child: Text(
                                   "LOGIN",
                                   style: GoogleFonts.poppins(
@@ -220,6 +233,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             Center(
                               child: GestureDetector(
                                 onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const SignupApp(),
+                                    ),
+                                  );
                                   // Navigate to Sign Up
                                 },
                                 child: RichText(
@@ -297,11 +316,10 @@ class _LoginScreenState extends State<LoginScreen> {
         obscureText: obscureText,
         decoration: InputDecoration(
           labelText: label,
-          suffixIcon: suffixIconButton ??
+          suffixIcon:
+              suffixIconButton ??
               (suffixIcon != null ? Icon(suffixIcon) : null),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           filled: true,
           fillColor: Colors.white,
         ),

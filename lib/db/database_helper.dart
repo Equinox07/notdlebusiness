@@ -49,10 +49,11 @@ class DatabaseHelper {
 
     await db.execute('''
       CREATE TABLE measurements(
-        customerId INTEGER,
-        measurementData TEXT,
-        createdDate TEXT,
-        FOREIGN KEY(customerId) REFERENCES customers(id) ON DELETE CASCADE
+       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      customerId INTEGER NOT NULL,
+      values TEXT,
+      createdDate TEXT NOT NULL,
+      FOREIGN KEY(customerId) REFERENCES customers(id) ON DELETE CASCADE
       )
     ''');
   }
@@ -126,44 +127,63 @@ class DatabaseHelper {
   }
 
   // -------------------- MEASUREMENT OPERATIONS --------------------
+// ------------------ Measurements CRUD ------------------
 
-  Future<int> insertMeasurement(Measurement measurement) async {
+  Future<Measurement> insertMeasurement(Measurement measurement) async {
     final db = await instance.database;
-    return await db.insert(
-      "measurements",
+    final id = await db.insert(
+      'measurements',
       measurement.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    return Measurement(
+      id: id,
+      customerId: measurement.customerId,
+      values: measurement.values,
+      createdDate: measurement.createdDate,
+    );
+  }
+
+  Future<Measurement?> fetchMeasurementById(int id) async {
+    final db = await instance.database;
+    final maps = await db.query(
+      'measurements',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (maps.isNotEmpty) {
+      return Measurement.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  Future<List<Measurement>> fetchMeasurementsByCustomer(int customerId) async {
+    final db = await instance.database;
+    final maps = await db.query(
+      'measurements',
+      where: 'customerId = ?',
+      whereArgs: [customerId],
+    );
+    return maps.map((map) => Measurement.fromMap(map)).toList();
   }
 
   Future<int> updateMeasurement(Measurement measurement) async {
     final db = await instance.database;
+    if (measurement.id == null) throw Exception("Measurement ID is null!");
     return await db.update(
-      "measurements",
+      'measurements',
       measurement.toMap(),
-      where: "customerId = ?",
-      whereArgs: [measurement.customerId],
+      where: 'id = ?',
+      whereArgs: [measurement.id],
     );
   }
 
-  Future<int> deleteMeasurement(int customerId) async {
+  Future<int> deleteMeasurement(int id) async {
     final db = await instance.database;
     return await db.delete(
-      "measurements",
-      where: "customerId = ?",
-      whereArgs: [customerId],
+      'measurements',
+      where: 'id = ?',
+      whereArgs: [id],
     );
-  }
-
-  Future<Measurement?> fetchMeasurementByCustomerId(int customerId) async {
-    final db = await instance.database;
-    final result = await db.query(
-      "measurements",
-      where: "customerId = ?",
-      whereArgs: [customerId],
-      limit: 1,
-    );
-    if (result.isNotEmpty) return Measurement.fromMap(result.first);
-    return null;
   }
 }

@@ -16,41 +16,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   // Mock customers
-  late List<Customer> customers = [
-    Customer(
-      id: '1',
-      name: 'John Doe',
-      phone: '+1 234 567 8900',
-      email: 'john.doe@email.com',
-      gender: "Male",
-      address: "",
-      orders: 3,
-      lastVisit: DateTime.now().subtract(const Duration(days: 5)),
-      createdDate: DateTime.now(),
-    ),
-    Customer(
-      id: '2',
-      name: 'Jane Smith',
-      phone: '+1 234 567 8901',
-      email: 'jane.smith@email.com',
-      gender: "Male",
-      address: "",
-      orders: 7,
-      lastVisit: DateTime.now().subtract(const Duration(days: 2)),
-      createdDate: DateTime.now(),
-    ),
-    Customer(
-      id: '3',
-      name: 'Michael Johnson',
-      phone: '+1 234 567 8902',
-      email: 'michael.j@email.com',
-      gender: "Male",
-      address: "",
-      orders: 12,
-      lastVisit: DateTime.now().subtract(const Duration(days: 1)),
-      createdDate: DateTime.now(),
-    ),
-  ];
+  late List<Customer> customers = [];
 
   List<Customer> filteredCustomers = [];
 
@@ -76,8 +42,8 @@ class _CustomersScreenState extends State<CustomersScreen> {
       filteredCustomers =
           customers.where((c) {
             return c.name.toLowerCase().contains(query) ||
-                c.phone.contains(query) ||
-                c.email.toLowerCase().contains(query);
+                c.phone.contains(query); 
+                // || c.email.toLowerCase().contains(query);
           }).toList();
     });
   }
@@ -237,10 +203,6 @@ class _CustomersScreenState extends State<CustomersScreen> {
 }
 
 // ---------------- Customer Card ---------------
-// import 'package:flutter/material.dart';
-// import 'package:google_fonts/google_fonts.dart';
-// import '../models/customer.dart';
-
 class CustomerCard extends StatelessWidget {
   final Customer customer;
   final VoidCallback onTap;
@@ -301,7 +263,7 @@ class CustomerCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      customer.email,
+                      customer.email ?? "N/A",
                       style: GoogleFonts.poppins(
                         fontSize: 13,
                         color: Colors.grey.shade600,

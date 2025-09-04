@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
+import 'package:notdle/pages/screens/measurement_screen.dart';
+import 'package:notdle/pages/screens/orders_screen.dart';
 
 class AddCustomerScreen extends StatefulWidget {
   const AddCustomerScreen({super.key});
@@ -19,33 +22,53 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
 
   String _selectedGender = "Other";
 
-  void _saveCustomer({String? action}) {
-    if (_formKey.currentState!.validate()) {
-      final customer = Customer(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: _nameController.text,
-        phone: _phoneController.text,
-        email: _emailController.text,
-        gender: _selectedGender,
-        address: _addressController.text,
-        orders: 0,
-        lastVisit: DateTime.now(),
-        createdDate: DateTime.now(),
-      );
+  Future<Customer?> _saveCustomer() async {
+    if (!_formKey.currentState!.validate()) return null;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Customer saved (${action ?? 'normal'})")),
-      );
+    final newCustomer = Customer(
+      name: _nameController.text.trim(),
+      gender: _selectedGender,
+      orders: 0,
+      phone: _phoneController.text.trim(),
+      email: _emailController.text.trim(),
+      address: _addressController.text.trim(),
+      lastVisit: DateTime.now(),
+      createdDate: DateTime.now(),
+    );
 
-      if (action == "measurement") {
-        // Navigate to measurement screen
-      } else if (action == "order") {
-        // Navigate to order screen
-      } else {
-        Navigator.pop(context, customer);
-      }
-    }
+    final savedCustomer = await DatabaseHelper.instance.insertCustomer(
+      newCustomer,
+    );
+    return savedCustomer;
   }
+
+  // void _saveCustomer({String? action}) {
+  //   if (_formKey.currentState!.validate()) {
+  //     final customer = Customer(
+  //       id: DateTime.now().millisecondsSinceEpoch.toString(),
+  //       name: _nameController.text,
+  //       phone: _phoneController.text,
+  //       email: _emailController.text,
+  //       gender: _selectedGender,
+  //       address: _addressController.text,
+  //       orders: 0,
+  //       lastVisit: DateTime.now(),
+  //       createdDate: DateTime.now(),
+  //     );
+
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text("Customer saved (${action ?? 'normal'})")),
+  //     );
+
+  //     if (action == "measurement") {
+  //       // Navigate to measurement screen
+  //     } else if (action == "order") {
+  //       // Navigate to order screen
+  //     } else {
+  //       Navigator.pop(context, customer);
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +82,10 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         elevation: 1,
         actions: [
           TextButton(
-            onPressed: () => _saveCustomer(action: "save"),
+            onPressed: () async {
+              final saved = await _saveCustomer();
+              if (saved != null) Navigator.pop(context, saved);
+            },
             child: Text(
               "Save",
               style: GoogleFonts.poppins(
@@ -197,7 +223,17 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () => _saveCustomer(action: "measurement"),
+                onPressed: () async {
+                  final saved = await _saveCustomer();
+                  if (saved != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => MeasurementScreen(customer: saved),
+                      ),
+                    );
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
                   shape: RoundedRectangleBorder(
@@ -220,7 +256,15 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () => _saveCustomer(action: "order"),
+                onPressed: () async {
+                  final saved = await _saveCustomer();
+                  if (saved != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => OrdersScreen()),
+                    );
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.indigo,
                   shape: RoundedRectangleBorder(

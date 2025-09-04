@@ -17,7 +17,6 @@ class ServicesScreen extends StatelessWidget {
     final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
 
      Customer newCustomer = Customer(
-      id: "123",
       name: "John Doe",
       phone: "+123456789",
       email: "john@email.com",

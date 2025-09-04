@@ -128,8 +128,12 @@ class _MeasurementScreenState extends State<MeasurementScreen> {
       }
     }
 
+    if (widget.customer.id == null) {
+      throw Exception("Customer must be saved before adding measurement.");
+    }
+
     final measurement = Measurement(
-      customerId: widget.customer.id,
+      customerId: widget.customer.id!,
       values: values,
       createdDate: DateTime.now(),
     );

@@ -85,7 +85,7 @@ class CustomerDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    customer.email,
+                    customer.email ?? "",
                     style: GoogleFonts.poppins(
                       fontSize: isTablet ? 16 : 14,
                       color: Colors.grey.shade600,
@@ -115,7 +115,7 @@ class CustomerDetailScreen extends StatelessWidget {
                         icon: Icons.email,
                         label: "Email",
                         color: Colors.red,
-                        onTap: () => _sendEmail(customer.email),
+                        onTap: () => _sendEmail(customer.email ?? ""),
                       ),
                     ],
                   ),

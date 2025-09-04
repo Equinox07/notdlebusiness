@@ -1,5 +1,5 @@
 class Measurement {
-  final String customerId;
+  final int customerId;
   final Map<String, double> values;
   final DateTime createdDate; // 🔹 New
 

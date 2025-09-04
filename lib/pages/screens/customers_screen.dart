@@ -65,6 +65,11 @@ class _CustomersScreenState extends State<CustomersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth >= 600;
+    final maxFormWidth = isTablet ? 500.0 : double.infinity;
+    final horizontalPadding = isTablet ? 32.0 : 24.0;
+
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
@@ -117,8 +122,11 @@ class _CustomersScreenState extends State<CustomersScreen> {
             child:
                 filteredCustomers.isEmpty
                     ? _buildEmptyState()
-                    : ListView.builder(
-                      padding: const EdgeInsets.all(16),
+                    : ListView.separated(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isTablet ? 24 : 16,
+                        vertical: isTablet ? 20 : 12,
+                      ),
                       itemCount: filteredCustomers.length,
                       itemBuilder: (context, index) {
                         final customer = filteredCustomers[index];
@@ -137,6 +145,10 @@ class _CustomersScreenState extends State<CustomersScreen> {
                           },
                         );
                       },
+                      separatorBuilder:
+                          (context, index) => SizedBox(
+                            height: isTablet ? 16 : 12,
+                          ), // ✅ space between cards
                     ),
           ),
         ],
@@ -157,10 +169,10 @@ class _CustomersScreenState extends State<CustomersScreen> {
             });
           }
         },
-        icon: const Icon(Icons.person_add),
+        icon: const Icon(Icons.person_add, color: Colors.white,),
         label: Text(
           "Add Customer",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600, color: Colors.white),
         ),
         backgroundColor: Colors.indigo,
       ),
@@ -202,45 +214,100 @@ class _CustomersScreenState extends State<CustomersScreen> {
   }
 }
 
-// ---------------- Customer Card ----------------
+// ---------------- Customer Card ---------------
+// import 'package:flutter/material.dart';
+// import 'package:google_fonts/google_fonts.dart';
+// import '../models/customer.dart';
+
 class CustomerCard extends StatelessWidget {
   final Customer customer;
   final VoidCallback onTap;
 
-  const CustomerCard({super.key, required this.customer, required this.onTap});
+  const CustomerCard({
+    super.key,
+    required this.customer,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 2,
-      child: ListTile(
-        onTap: onTap,
-        leading: CircleAvatar(
-          backgroundColor: Colors.indigo.shade100,
-          child: Text(
-            customer.name[0],
-            style: GoogleFonts.poppins(
-              color: Colors.indigo.shade700,
-              fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16), // ✅ rounded corners
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05), // ✅ subtle shadow
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-          ),
+          ],
         ),
-        title: Text(
-          customer.name,
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Text(
-          customer.email,
-          style: GoogleFonts.poppins(color: Colors.grey.shade600),
-        ),
-        trailing: Text(
-          "${customer.orders} orders",
-          style: GoogleFonts.poppins(
-            color: Colors.indigo.shade700,
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // Avatar placeholder
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: Colors.indigo.shade100,
+                child: Icon(Icons.person,
+                    color: Colors.indigo.shade600, size: 24),
+              ),
+              const SizedBox(width: 16),
+
+              // Customer info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      customer.name,
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      customer.phone,
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    Text(
+                      customer.email,
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Orders count
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.indigo.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  "${customer.orders} orders",
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.indigo.shade700,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

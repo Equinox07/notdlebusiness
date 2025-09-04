@@ -12,29 +12,33 @@ class AddCustomerScreen extends StatefulWidget {
 class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _addressController = TextEditingController();
+
+  String? _selectedGender;
 
   void _saveCustomer() {
     if (_formKey.currentState!.validate()) {
       final newCustomer = Customer(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: _nameController.text.trim(),
-        phone: _phoneController.text.trim(),
-        email: _emailController.text.trim(),
+        name: _nameController.text,
+        phone: _phoneController.text,
+        email: _emailController.text,
         orders: 0,
         lastVisit: DateTime.now(),
+        gender: _selectedGender,
+        address: _addressController.text,
       );
 
-      Navigator.pop(context, newCustomer); // ✅ return new customer
+      Navigator.pop(context, newCustomer);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: Text(
           "Add Customer",
@@ -49,30 +53,37 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              // 👤 Name
+              // Avatar Placeholder
+              Center(
+                child: CircleAvatar(
+                  radius: 40,
+                  backgroundColor: Colors.indigo.shade100,
+                  child: Icon(Icons.person,
+                      size: 40, color: Colors.indigo.shade600),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Name
               TextFormField(
                 controller: _nameController,
-                style: GoogleFonts.poppins(),
                 decoration: InputDecoration(
                   labelText: "Full Name",
-                  labelStyle: GoogleFonts.poppins(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 validator: (val) =>
-                    val == null || val.isEmpty ? "Enter customer name" : null,
+                    val == null || val.isEmpty ? "Enter name" : null,
               ),
               const SizedBox(height: 16),
 
-              // 📞 Phone
+              // Phone
               TextFormField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
-                style: GoogleFonts.poppins(),
                 decoration: InputDecoration(
                   labelText: "Phone Number",
-                  labelStyle: GoogleFonts.poppins(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -82,39 +93,76 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               ),
               const SizedBox(height: 16),
 
-              // 📧 Email
+              // Email
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                style: GoogleFonts.poppins(),
                 decoration: InputDecoration(
                   labelText: "Email Address",
-                  labelStyle: GoogleFonts.poppins(),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 validator: (val) =>
-                    val == null || val.isEmpty ? "Enter email address" : null,
+                    val == null || !val.contains("@") ? "Enter valid email" : null,
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 16),
 
-              // 💾 Save button
-              ElevatedButton(
-                onPressed: _saveCustomer,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.indigo,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
+              // Gender Dropdown
+              DropdownButtonFormField<String>(
+                value: _selectedGender,
+                decoration: InputDecoration(
+                  labelText: "Gender",
+                  border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text(
-                  "Save Customer",
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                items: ["Male", "Female", "Other"]
+                    .map((gender) => DropdownMenuItem(
+                          value: gender,
+                          child: Text(gender),
+                        ))
+                    .toList(),
+                onChanged: (val) {
+                  setState(() {
+                    _selectedGender = val;
+                  });
+                },
+                validator: (val) =>
+                    val == null || val.isEmpty ? "Select gender" : null,
+              ),
+              const SizedBox(height: 16),
+
+              // Address
+              TextFormField(
+                controller: _addressController,
+                maxLines: 2,
+                decoration: InputDecoration(
+                  labelText: "Address",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Save Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _saveCustomer,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.indigo,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: Text(
+                    "Save Customer",
+                    style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),

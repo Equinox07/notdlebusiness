@@ -43,6 +43,7 @@ class DatabaseHelper {
         gender TEXT,
         address TEXT,
         imagePath TEXT,
+        imageUrl TEXT,
         createdDate TEXT NOT NULL
       )
     ''');
@@ -51,7 +52,7 @@ class DatabaseHelper {
       CREATE TABLE measurements(
        id INTEGER PRIMARY KEY AUTOINCREMENT,
       customerId INTEGER NOT NULL,
-      values TEXT,
+      measurementValues TEXT,
       createdDate TEXT NOT NULL,
       FOREIGN KEY(customerId) REFERENCES customers(id) ON DELETE CASCADE
       )
@@ -127,7 +128,7 @@ class DatabaseHelper {
   }
 
   // -------------------- MEASUREMENT OPERATIONS --------------------
-// ------------------ Measurements CRUD ------------------
+  // ------------------ Measurements CRUD ------------------
 
   Future<Measurement> insertMeasurement(Measurement measurement) async {
     final db = await instance.database;
@@ -139,7 +140,7 @@ class DatabaseHelper {
     return Measurement(
       id: id,
       customerId: measurement.customerId,
-      values: measurement.values,
+      measurementValues: measurement.measurementValues,
       createdDate: measurement.createdDate,
     );
   }
@@ -180,10 +181,63 @@ class DatabaseHelper {
 
   Future<int> deleteMeasurement(int id) async {
     final db = await instance.database;
-    return await db.delete(
-      'measurements',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.delete('measurements', where: 'id = ?', whereArgs: [id]);
   }
+
+  Future<List<MeasurementWithCustomer>> fetchMeasurementsWithCustomer() async {
+    final db = await database;
+    final measurementMaps = await db.query('measurements');
+
+    List<MeasurementWithCustomer> list = [];
+
+    for (var m in measurementMaps) {
+      final customerId = m['customerId'] as int;
+      final customerMap =
+          (await db.query(
+            'customers',
+            where: 'id = ?',
+            whereArgs: [customerId],
+          )).first;
+      final customer = Customer.fromMap(customerMap);
+
+      final measurement = Measurement.fromMap(m);
+      list.add(
+        MeasurementWithCustomer(measurement: measurement, customer: customer),
+      );
+    }
+
+    return list;
+  }
+
+  Future<List<Measurement>> fetchAllMeasurementsWithCustomer() async {
+    final db = await database;
+    final measurementMaps = await db.query('measurements');
+
+    List<Measurement> list = [];
+
+    for (var m in measurementMaps) {
+      final measurement = Measurement.fromMap(m);
+
+      // fetch linked customer
+      final customerMap =
+          (await db.query(
+            'customers',
+            where: 'id = ?',
+            whereArgs: [measurement.customerId],
+          )).first;
+      final customer = Customer.fromMap(customerMap);
+
+      measurement.linkCustomer(customer);
+      list.add(measurement);
+    }
+
+    return list;
+  }
+}
+
+class MeasurementWithCustomer {
+  final Measurement measurement;
+  final Customer customer;
+
+  MeasurementWithCustomer({required this.measurement, required this.customer});
 }

@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/customer.dart';
+import 'package:notdle/pages/screens/add_measurement_screen.dart';
+import 'package:notdle/pages/screens/measurements_screen.dart';
 import 'package:url_launcher/url_launcher.dart'; // ✅ import
 
 class CustomerDetailScreen extends StatelessWidget {
@@ -63,11 +67,14 @@ class CustomerDetailScreen extends StatelessWidget {
                     radius: isTablet ? 60 : 50,
                     backgroundColor: Colors.indigo.shade100,
                     backgroundImage:
-                        customer.imagePath != null
-                            ? NetworkImage(customer.imagePath!)
-                            : null,
+                        customer.imageUrl != null
+                            ? NetworkImage(customer.imageUrl!) as ImageProvider
+                            : (customer.imagePath != null
+                                ? FileImage(File(customer.imagePath!))
+                                : null),
                     child:
-                        customer.imagePath == null
+                        (customer.imageUrl == null &&
+                                customer.imagePath == null)
                             ? Icon(
                               Icons.person,
                               size: isTablet ? 70 : 60,
@@ -75,6 +82,7 @@ class CustomerDetailScreen extends StatelessWidget {
                             )
                             : null,
                   ),
+
                   const SizedBox(height: 16),
                   Text(
                     customer.name,
@@ -185,7 +193,18 @@ class CustomerDetailScreen extends StatelessWidget {
                           icon: Icons.straighten,
                           label: 'Measurements',
                           color: Colors.blue.shade600,
-                          onTap: () => {},
+                          onTap:
+                              () => {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (_) => AddMeasurementScreen(
+                                          customer: customer,
+                                        ),
+                                  ),
+                                ),
+                              },
                           // AppNavigator.toMeasurement(customer: customer),
                         ),
                       ),
@@ -229,7 +248,7 @@ class CustomerDetailScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // 📦 Order History
             const SizedBox(height: 16),
 

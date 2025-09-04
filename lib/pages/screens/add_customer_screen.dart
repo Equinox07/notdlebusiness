@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
-import 'package:notdle/pages/screens/measurement_screen.dart';
+import 'package:notdle/pages/screens/measurements_screen.dart';
 import 'package:notdle/pages/screens/orders_screen.dart';
 
 class AddCustomerScreen extends StatefulWidget {
@@ -229,7 +229,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => MeasurementScreen(customer: saved),
+                        builder: (_) => MeasurementsScreen(customer: saved),
                       ),
                     );
                   }

@@ -1,24 +1,30 @@
 import 'dart:convert';
 
+import 'package:notdle/models/customer.dart';
+
 class Measurement {
   final int? id; // 🔹 Auto-generated primary key
   final int customerId; // links to Customer.id
-  final Map<String, double> values; // all measurement fields
+  final Map<String, double> measurementValues; // all measurement fields
   final DateTime createdDate;
+
+   // 🔹 Linked customer object (not stored in DB)
+  Customer? customer;
 
   Measurement({
     this.id,
     required this.customerId,
-    required this.values,
+    required this.measurementValues,
     DateTime? createdDate,
+    this.customer, // optional
   }) : createdDate = createdDate ?? DateTime.now();
 
   factory Measurement.fromMap(Map<String, dynamic> map) {
     return Measurement(
       id: map['id'] as int?,
       customerId: map['customerId'] as int,
-      values: map['values'] != null
-          ? Map<String, double>.from(jsonDecode(map['values']))
+      measurementValues: map['measurementValues'] != null
+          ? Map<String, double>.from(jsonDecode(map['measurementValues']))
           : {},
       createdDate: DateTime.parse(map['createdDate']),
     );
@@ -27,11 +33,16 @@ class Measurement {
   Map<String, dynamic> toMap() {
     final map = {
       'customerId': customerId,
-      'values': jsonEncode(values),
+      'measurementValues': jsonEncode(measurementValues),
       'createdDate': createdDate.toIso8601String(),
     };
     if (id != null) map['id'] = id!;
     return map;
+  }
+
+   // Optional: assign customer after fetching from DB
+  void linkCustomer(Customer c) {
+    customer = c;
   }
 }
 

@@ -73,6 +73,9 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
     );
   }
 
+  // Keep track of selected dropdown values
+  late Map<String, String> _selectedDropdowns;
+
   final List<String> _femaleFields = [
     "Bust",
     "Niple to Niple",
@@ -88,22 +91,29 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
     "Hip",
     "Knee",
     "Base",
-    "Trouser/Skirt/Full Dress",
+    "Cloth", // dropdown field
   ];
+
+  final List<String> _femaleClothTypes = ["Trouser", "Skirt", "Full Dress"];
 
   final List<String> _maleFields = [
     "Chest",
     "Across Back",
     "Sleeve",
     "Cuff",
-    "Shirt/Kaftan",
+    "Shirt", // dropdown field
     "Waist",
     "Thigh",
     "Knee",
     "Base",
-    "Trouser",
+    "Trouser", // dropdown field
     "Chin",
   ];
+
+  final Map<String, List<String>> _maleDropdownOptions = {
+    "Shirt": ["Shirt", "Kaftan"],
+    "Trouser": ["Trouser", "Shorts"],
+  };
 
   List<String> get _fields =>
       widget.customer.gender.toLowerCase() == "female"
@@ -116,6 +126,17 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
     super.initState();
     for (var field in _fields) {
       _controllers[field] = TextEditingController();
+    }
+
+    // Initialize selected dropdown values
+    _selectedDropdowns = {};
+    for (var field in _fields) {
+      if (field == "Cloth" &&
+          widget.customer.gender.toLowerCase() == "female") {
+        _selectedDropdowns[field] = _femaleClothTypes[0];
+      } else if (_maleDropdownOptions.containsKey(field)) {
+        _selectedDropdowns[field] = _maleDropdownOptions[field]![0];
+      }
     }
   }
 
@@ -132,10 +153,9 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
       throw Exception("Customer must be saved before adding measurement.");
     }
 
-
     final measurement = Measurement(
       customerId: widget.customer.id!,
-      values: values,
+      measurementValues: values,
       createdDate: DateTime.now(),
     );
 
@@ -231,22 +251,32 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
             itemCount: fields.length,
             itemBuilder: (context, index) {
               final field = fields[index];
-              return TextFormField(
-                controller: _controllers[field],
-                decoration: InputDecoration(
-                  labelText: field,
-                  labelStyle: GoogleFonts.poppins(),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                ),
-                keyboardType: TextInputType.number,
-                validator:
-                    (value) =>
-                        value == null || value.isEmpty ? "Enter $field" : null,
-              );
+
+              if (widget.customer.gender.toLowerCase() == "female" &&
+                  field == "Cloth") {
+                return _buildDropdownField(field, _femaleClothTypes);
+              } else if (_maleDropdownOptions.containsKey(field)) {
+                return _buildDropdownField(field, _maleDropdownOptions[field]!);
+              }
+
+              return _buildNormalField(field);
+
+              // return TextFormField(
+              //   controller: _controllers[field],
+              //   decoration: InputDecoration(
+              //     labelText: field,
+              //     labelStyle: GoogleFonts.poppins(),
+              //     border: OutlineInputBorder(
+              //       borderRadius: BorderRadius.circular(12),
+              //     ),
+              //     filled: true,
+              //     fillColor: Colors.grey.shade50,
+              //   ),
+              //   keyboardType: TextInputType.number,
+              //   validator:
+              //       (value) =>
+              //           value == null || value.isEmpty ? "Enter $field" : null,
+              // );
             },
             separatorBuilder: (_, __) => const SizedBox(height: 16),
           ),
@@ -289,6 +319,76 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  //Building fields
+  Widget _buildNormalField(String field) {
+    return TextFormField(
+      controller: _controllers[field],
+      decoration: InputDecoration(
+        labelText: field,
+        labelStyle: GoogleFonts.poppins(),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+      ),
+      keyboardType: TextInputType.number,
+      validator:
+          (value) => value == null || value.isEmpty ? "Enter $field" : null,
+    );
+  }
+
+  // Custom Builder
+  Widget _buildDropdownField(String field, List<String> options) {
+    return Row(
+      children: [
+        Expanded(
+          flex: 4,
+          child: DropdownButtonFormField<String>(
+            value: _selectedDropdowns[field],
+            items:
+                options
+                    .map(
+                      (type) => DropdownMenuItem(
+                        value: type,
+                        child: Text(type, style: GoogleFonts.poppins()),
+                      ),
+                    )
+                    .toList(),
+            onChanged:
+                (val) => setState(() => _selectedDropdowns[field] = val!),
+            decoration: InputDecoration(
+              labelText: "Type",
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              filled: true,
+              fillColor: Colors.grey.shade50,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          flex: 6,
+          child: TextFormField(
+            controller: _controllers[field],
+            decoration: InputDecoration(
+              labelText: "Measurement",
+              labelStyle: GoogleFonts.poppins(),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              filled: true,
+              fillColor: Colors.grey.shade50,
+            ),
+            keyboardType: TextInputType.number,
+            validator:
+                (value) =>
+                    value == null || value.isEmpty ? "Enter value" : null,
+          ),
+        ),
+      ],
     );
   }
 }

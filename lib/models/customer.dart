@@ -8,6 +8,7 @@ class Customer {
   final String gender;
   final String? address;
   String? imagePath;
+  String? imageUrl;
   final DateTime createdDate;
 
   Customer({
@@ -20,6 +21,7 @@ class Customer {
     required this.gender,
     this.address,
     this.imagePath,
+    this.imageUrl,
     DateTime? createdDate,
   })  : lastVisit = lastVisit ?? DateTime.now(),
         createdDate = createdDate ?? DateTime.now();
@@ -37,6 +39,7 @@ class Customer {
       gender: map['gender'] as String,
       address: map['address'] as String?,
       imagePath: map['imagePath'] as String?,
+      imageUrl: map['imageUrl'] as String?,
       createdDate: map['createdDate'] != null
           ? DateTime.parse(map['createdDate'])
           : DateTime.now(),
@@ -53,6 +56,7 @@ class Customer {
       'gender': gender,
       'address': address,
       'imagePath': imagePath,
+      'imageUrl': imageUrl,
       'createdDate': createdDate.toIso8601String(),
     };
     if (id != null) map['id'] = id;

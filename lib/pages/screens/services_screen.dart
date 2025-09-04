@@ -2,11 +2,10 @@
 // ----------------- SERVICES + NAVIGATION -----------------
 //
 import 'package:flutter/material.dart';
-import 'package:notdle/models/customer.dart';
 import 'package:notdle/pages/dashboard_screen.dart';
+import 'package:notdle/pages/screens/all_measurement_screen.dart';
 import 'package:notdle/pages/screens/customers_screen.dart';
 import 'package:notdle/pages/screens/designs_screen.dart';
-import 'package:notdle/pages/screens/measurements_screen.dart';
 import 'package:notdle/pages/screens/orders_screen.dart';
 
 class ServicesScreen extends StatelessWidget {
@@ -16,16 +15,16 @@ class ServicesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
 
-     Customer newCustomer = Customer(
-      name: "John Doe",
-      phone: "+123456789",
-      email: "john@email.com",
-      orders: 0,
-      lastVisit: DateTime.now(),
-      gender: "Male",
-      address: "Accra",
-      createdDate: DateTime.now(), // 🔹 auto
-    );
+    //  Customer newCustomer = Customer(
+    //   name: "John Doe",
+    //   phone: "+123456789",
+    //   email: "john@email.com",
+    //   orders: 0,
+    //   lastVisit: DateTime.now(),
+    //   gender: "Male",
+    //   address: "Accra",
+    //   createdDate: DateTime.now(), // 🔹 auto
+    // );
 
     return Scaffold(
       appBar: AppBar(title: const Text("Services")),
@@ -55,13 +54,12 @@ class ServicesScreen extends StatelessWidget {
               icon: Icons.straighten,
               color: Colors.orange.shade600,
               onTap: () {
-                debugPrint("Measurements");
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (_) => const MeasurementsScreen(customer: newCustomer ),
-                //   ),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AllMeasurementScreen(),
+                  ),
+                );
               },
             ),
             HomeMenuCard(

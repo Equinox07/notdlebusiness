@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/pages/screens/add_customer_screen.dart';
-import 'package:notdle/pages/screens/customer_details_screen.dart';
+import 'package:notdle/pages/screens/customer_detail_screen.dart';
 
 class CustomersScreen extends StatefulWidget {
   const CustomersScreen({super.key});

@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/measurement.dart';
+import 'package:notdle/navigation/app_navigation.dart';
 
 // These are placeholder models and services.
 // Make sure to use your actual file paths.
@@ -12,7 +13,7 @@ import 'package:notdle/models/measurement.dart';
 class CustomerMeasurementScreen extends StatefulWidget {
   final Customer customer;
 
-  static const String tag = "add_measurement";
+  static const String tag = "customer_measurement";
 
   const CustomerMeasurementScreen({super.key, required this.customer});
 
@@ -72,6 +73,7 @@ class _CustomerMeasurementScreenState extends State<CustomerMeasurementScreen> {
 
   @override
   void initState() {
+    debugPrint("*****onCustomerMeasurement*******");
     super.initState();
     _fields =
         widget.customer.gender.toLowerCase() == "female"
@@ -95,7 +97,22 @@ class _CustomerMeasurementScreenState extends State<CustomerMeasurementScreen> {
   }
 
   Future<void> _saveMeasurement() async {
-    if (!_formKey.currentState!.validate()) return;
+    // Check if at least one measurement field has a value
+    final bool hasMeasurement = _controllers.values.any(
+      (controller) => controller.text.isNotEmpty,
+    );
+
+    if (!hasMeasurement) {
+      // Show a snackbar or an alert to the user
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please fill in at least one measurement field."),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     final values = <String, double>{};
     for (var entry in _controllers.entries) {
@@ -127,7 +144,7 @@ class _CustomerMeasurementScreenState extends State<CustomerMeasurementScreen> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text("Measurement saved")));
-    Navigator.pop(context, saved);
+    AppNavigator.toMeasurement2();
   }
 
   Future<void> _showImageSourceActionSheet() async {

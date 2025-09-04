@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/customer.dart';
-import 'package:notdle/pages/screens/add_measurement_screen.dart';
+import 'package:notdle/navigation/app_navigation.dart';
 import 'package:url_launcher/url_launcher.dart'; // ✅ import
 
 class CustomerDetailScreen extends StatelessWidget {
@@ -195,17 +195,9 @@ class CustomerDetailScreen extends StatelessWidget {
                           label: 'Measurements',
                           color: Colors.blue.shade600,
                           onTap:
-                              () => {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (_) => AddMeasurementScreen(
-                                          customer: customer,
-                                        ),
-                                  ),
-                                ),
-                              },
+                              () => AppNavigator.toMeasurement2(
+                                customer: customer,
+                              ),
                           // AppNavigator.toMeasurement(customer: customer),
                         ),
                       ),

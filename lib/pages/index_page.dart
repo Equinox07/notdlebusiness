@@ -5,6 +5,7 @@ import 'package:notdle/pages/landing_page.dart';
 import 'package:notdle/pages/login_app.dart';
 import 'package:notdle/pages/login_screen.dart';
 import 'package:notdle/pages/screens/add_customer_screen.dart';
+import 'package:notdle/pages/screens/add_measurement_screen.dart';
 import 'package:notdle/pages/screens/all_measurement_screen.dart';
 import 'package:notdle/pages/screens/customers_screen.dart';
 import 'package:notdle/pages/signup_page.dart';

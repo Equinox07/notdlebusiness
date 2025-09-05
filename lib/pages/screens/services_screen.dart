@@ -4,6 +4,7 @@ import 'package:notdle/pages/screens/all_measurement_screen.dart';
 import 'package:notdle/pages/screens/customers_screen.dart';
 import 'package:notdle/pages/screens/designs_screen.dart';
 import 'package:notdle/pages/screens/orders_screen.dart';
+import 'package:notdle/widgets/home_menu_card.dart';
 
 class ServicesScreen extends StatelessWidget {
   const ServicesScreen({super.key});

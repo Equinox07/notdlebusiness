@@ -1,13 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:notdle/models/order_details.dart';
+import 'package:notdle/models/order.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
   static const String tag = "order_details";
+  final Order order;
+  // This screen will need to fetch the detailed info based on the provided order.
+  // For this example, we'll use a dummy method.
 
-  const OrderDetailsScreen({super.key});
+  const OrderDetailsScreen({super.key, required this.order});
+
+  // A dummy method to fetch detailed order information.
+  // In a real app, this would be an asynchronous call to a database or API.
+  OrderDetails _fetchDetailedOrder(String orderId) {
+    // This is a placeholder for a real data source.
+    // The details returned depend on the specific order ID.
+    if (orderId == "1") {
+      return OrderDetails(
+        order: order,
+        customerPhone: "+1 (555) 123-4567",
+        customerEmail: "emma.j@example.com",
+        paymentStatus: "Partial",
+        dueDate: "Sep 30, 2025",
+        timeline: [
+          OrderEvent(title: "Order Placed", date: "Aug 15, 2025"),
+          OrderEvent(title: "Measurements Taken", date: "Aug 18, 2025"),
+          OrderEvent(
+            title: "In Progress",
+            date: "Aug 20, 2025",
+            isCurrent: true,
+          ),
+        ],
+        notes:
+            "Client requested an extra-long train and a pearl-beaded bodice. Contacted vendor for materials.",
+      );
+    } else if (orderId == "2") {
+      return OrderDetails(
+        order: order,
+        customerPhone: "+1 (555) 987-6543",
+        customerEmail: "michael.c@example.com",
+        paymentStatus: "Full",
+        dueDate: "Aug 25, 2025",
+        timeline: [
+          OrderEvent(title: "Order Placed", date: "Aug 10, 2025"),
+          OrderEvent(title: "Measurements Taken", date: "Aug 12, 2025"),
+          OrderEvent(title: "Completed", date: "Aug 25, 2025", isCurrent: true),
+        ],
+        notes: null,
+      );
+    } else {
+      return OrderDetails(
+        order: order,
+        customerPhone: "+1 (555) 555-1111",
+        customerEmail: "lisa.r@example.com",
+        paymentStatus: "Pending",
+        dueDate: "Oct 15, 2025",
+        timeline: [
+          OrderEvent(
+            title: "Order Placed",
+            date: "Sep 1, 2025",
+            isCurrent: true,
+          ),
+        ],
+        notes: null,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final orderDetails = _fetchDetailedOrder(order.id);
+
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
@@ -23,20 +87,25 @@ class OrderDetailsScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              _OrderSummaryCard(),
-              SizedBox(height: 16),
-              // Updated: New Time Card
-              _TimeInfoCard(dueDate: "Sep 30, 2025"),
-              SizedBox(height: 16),
-              // Updated: New Customer Info Card
-              _CustomerInfoCard(
-                customerName: "Emma Johnson",
-                phone: "+1 (555) 123-4567",
-                email: "emma.j@example.com",
+            children: [
+              _OrderSummaryCard(
+                order: order,
+                paymentStatus: orderDetails.paymentStatus,
               ),
-              SizedBox(height: 16),
-              _OrderTimelineCard(),
+              const SizedBox(height: 16),
+              _TimeInfoCard(dueDate: orderDetails.dueDate),
+              const SizedBox(height: 16),
+              _CustomerInfoCard(
+                customerName: order.customer.name,
+                phone: orderDetails.customerPhone,
+                email: orderDetails.customerEmail,
+              ),
+              const SizedBox(height: 16),
+              if (orderDetails.notes != null) ...[
+                _NotesCard(notes: orderDetails.notes!),
+                const SizedBox(height: 16),
+              ],
+              _OrderTimelineCard(timeline: orderDetails.timeline),
             ],
           ),
         ),
@@ -45,16 +114,63 @@ class OrderDetailsScreen extends StatelessWidget {
   }
 }
 
-// 📦 Order Summary Card
-class _OrderSummaryCard extends StatelessWidget {
-  const _OrderSummaryCard();
+// 📄 Notes Card Widget
+class _NotesCard extends StatelessWidget {
+  final String notes;
+
+  const _NotesCard({required this.notes});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Colors.indigo.shade600,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Notes",
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              notes,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// 📦 Flat Order Summary Card
+class _OrderSummaryCard extends StatelessWidget {
+  final Order order;
+  final String paymentStatus;
+
+  const _OrderSummaryCard({required this.order, required this.paymentStatus});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.indigo.shade600,
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -70,7 +186,7 @@ class _OrderSummaryCard extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    "Wedding Dress",
+                    order.title,
                     style: GoogleFonts.poppins(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -82,7 +198,7 @@ class _OrderSummaryCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              "Order ID: #12345",
+              "Order ID: #${order.id}",
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 color: Colors.white.withOpacity(0.8),
@@ -90,10 +206,10 @@ class _OrderSummaryCard extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Row(
-              children: const [
-                _StatusChip(status: "In Progress"),
-                SizedBox(width: 8),
-                _PaymentStatusChip(status: "Partial"),
+              children: [
+                _StatusChip(status: order.status),
+                const SizedBox(width: 8),
+                _PaymentStatusChip(status: paymentStatus),
               ],
             ),
           ],
@@ -103,16 +219,19 @@ class _OrderSummaryCard extends StatelessWidget {
   }
 }
 
-// ⌚ New Time Card
+// ⌚ Flat Time Info Card
 class _TimeInfoCard extends StatelessWidget {
   final String dueDate;
   const _TimeInfoCard({required this.dueDate});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Row(
@@ -151,7 +270,7 @@ class _TimeInfoCard extends StatelessWidget {
   }
 }
 
-// 👤 Updated Customer Info Card
+// 👤 Flat Customer Info Card
 class _CustomerInfoCard extends StatelessWidget {
   final String customerName;
   final String phone;
@@ -165,9 +284,12 @@ class _CustomerInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -191,18 +313,14 @@ class _CustomerInfoCard extends StatelessWidget {
                         Icons.call_outlined,
                         color: Colors.green.shade600,
                       ),
-                      onPressed: () {
-                        // Action to call the customer
-                      },
+                      onPressed: () {},
                     ),
                     IconButton(
                       icon: Icon(
                         Icons.email_outlined,
                         color: Colors.blue.shade600,
                       ),
-                      onPressed: () {
-                        // Action to email the customer
-                      },
+                      onPressed: () {},
                     ),
                   ],
                 ),
@@ -233,21 +351,26 @@ class _CustomerInfoCard extends StatelessWidget {
   }
 }
 
-// ⏳ Order Timeline Card
+// ⏳ Flat Order Timeline Card
 class _OrderTimelineCard extends StatelessWidget {
-  const _OrderTimelineCard();
+  final List<OrderEvent> timeline;
+
+  const _OrderTimelineCard({required this.timeline});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text(
+          children: [
+            const Text(
               "Order Timeline",
               style: TextStyle(
                 fontSize: 18,
@@ -255,29 +378,18 @@ class _OrderTimelineCard extends StatelessWidget {
                 color: Colors.blueGrey,
               ),
             ),
-            SizedBox(height: 16),
-            _TimelineItem(
-              title: "Order Placed",
-              subtitle: "Aug 15, 2025",
-              isCurrent: false,
-              isFirst: true,
-            ),
-            _TimelineItem(
-              title: "Measurements Taken",
-              subtitle: "Aug 18, 2025",
-              isCurrent: false,
-            ),
-            _TimelineItem(
-              title: "In Progress",
-              subtitle: "Aug 20, 2025",
-              isCurrent: true,
-            ),
-            _TimelineItem(
-              title: "Completed",
-              subtitle: "Sep 5, 2025",
-              isCurrent: false,
-              isLast: true,
-            ),
+            const SizedBox(height: 16),
+            ...timeline.map((event) {
+              final isFirst = timeline.indexOf(event) == 0;
+              final isLast = timeline.indexOf(event) == timeline.length - 1;
+              return _TimelineItem(
+                title: event.title,
+                subtitle: event.date,
+                isCurrent: event.isCurrent,
+                isFirst: isFirst,
+                isLast: isLast,
+              );
+            }).toList(),
           ],
         ),
       ),
@@ -422,14 +534,12 @@ class _TimelineItem extends StatelessWidget {
       children: [
         Column(
           children: [
-            // Line before circle
             if (!isFirst)
               Container(
                 height: 20,
                 width: 2,
                 color: isCurrent ? Colors.blue.shade600 : Colors.grey.shade300,
               ),
-            // Status Circle
             Container(
               height: 12,
               width: 12,
@@ -438,7 +548,6 @@ class _TimelineItem extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
             ),
-            // Line after circle
             if (!isLast)
               Container(
                 height: 20,

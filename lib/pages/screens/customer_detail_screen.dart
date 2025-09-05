@@ -251,7 +251,10 @@ class _QuickActionsCard extends StatelessWidget {
                   icon: Icons.add_shopping_cart,
                   label: 'New Order',
                   color: Colors.green.shade600,
-                  onTap: () {}, // AppNavigator.toOrders(),
+                  onTap: () => debugPrint("Create Order"),
+                  // AppNavigator.toCreateOrder(
+                  // customer: null,
+                  // ), // AppNavigator.toOrders(),
                 ),
               ),
             ],

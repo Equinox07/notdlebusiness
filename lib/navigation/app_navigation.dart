@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/measurement.dart';
+import 'package:notdle/models/order.dart';
 import 'package:notdle/pages/dashboard_screen.dart';
 import 'package:notdle/pages/login_app.dart';
 import 'package:notdle/pages/screens/add_customer_screen.dart';
 import 'package:notdle/pages/screens/add_measurement_screen.dart';
 import 'package:notdle/pages/screens/all_measurement_screen.dart';
+import 'package:notdle/pages/screens/create_order_screen.dart';
 import 'package:notdle/pages/screens/customer_detail_screen.dart';
 import 'package:notdle/pages/screens/customer_measurement.dart';
 import 'package:notdle/pages/screens/customers_screen.dart';
@@ -21,11 +23,24 @@ class AppNavigator {
 
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
-      // case OrderDetailsScreen.tag:
-      //   if (settings.arguments is Customer) {
-      //     return MaterialPageRoute(builder: (context) => OrderDetailsScreen());
+      // case CreateOrderScreen.tag:
+      //   if (settings.arguments is String) {
+      //     return MaterialPageRoute(
+      //       builder:
+      //           (context) =>
+      //               CreateOrderScreen(orderId: settings.arguments as String),
+      //     );
       //   }
       //   return null;
+      case OrderDetailsScreen.tag:
+        if (settings.arguments is String) {
+          return MaterialPageRoute(
+            builder:
+                (context) =>
+                    OrderDetailsScreen(order: settings.arguments as Order),
+          );
+        }
+        return null;
       case CustomerDetailScreen.tag:
         if (settings.arguments is Customer) {
           return MaterialPageRoute(
@@ -112,6 +127,17 @@ class AppNavigator {
     }
   }
 
+  static void toCreateOrder(List<Customer> customers) {
+    if (customers.isNotEmpty) {
+      navigatorKey.currentState?.pushNamed(
+        CreateOrderScreen.tag,
+        arguments: customers,
+      );
+    } else {
+      navigatorKey.currentState?.pushNamed(OrdersScreen.tag);
+    }
+  }
+
   static void toMeasurement2({Customer? customer}) {
     if (customer != null) {
       navigatorKey.currentState?.pushNamed(
@@ -134,11 +160,11 @@ class AppNavigator {
     }
   }
 
-  static void toOrderDetails({Measurement? measurement}) {
-    if (measurement != null) {
+  static void toOrderDetails({String? orderId}) {
+    if (orderId != null) {
       navigatorKey.currentState?.pushNamed(
         OrderDetailsScreen.tag,
-        arguments: measurement,
+        arguments: orderId,
       );
     } else {
       navigatorKey.currentState?.pushNamed(OrderDetailsScreen.tag);

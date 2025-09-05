@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:notdle/models/order.dart';
+import 'package:notdle/models/customer.dart';
 import 'package:notdle/navigation/app_navigation.dart';
+import 'package:notdle/pages/screens/create_order_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:notdle/models/order.dart';
+import 'package:notdle/models/customer.dart';
+import 'package:notdle/pages/screens/order_details_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -12,14 +20,44 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
-  final List<Map<String, String>> orders = [
-    {
-      "order": "Wedding Dress",
-      "client": "Emma Johnson",
-      "status": "In Progress",
-    },
-    {"order": "Business Suit", "client": "Michael Chen", "status": "Completed"},
-    {"order": "Blazer", "client": "Lisa Rodriguez", "status": "Pending"},
+  final List<Customer> customers = [
+    Customer(
+      id: 001,
+      gender: "Male",
+      name: "Emma Johnson",
+      phone: "+1 (555) 123-4567",
+      email: "emma.j@example.com",
+    ),
+    Customer(
+      id: 002,
+      gender: "Male",
+      name: "Michael Chen",
+      phone: "+1 (555) 987-6543",
+      email: "michael.c@example.com",
+    ),
+    Customer(
+      id: 003,
+      gender: "Male",
+      name: "Lisa Rodriguez",
+      phone: "+1 (555) 555-1111",
+      email: "lisa.r@example.com",
+    ),
+  ];
+
+  late final List<Order> orders = [
+    Order(
+      id: "1",
+      title: "Wedding Dress",
+      customer: customers[0],
+      status: "In Progress",
+    ),
+    Order(
+      id: "2",
+      title: "Business Suit",
+      customer: customers[1],
+      status: "Completed",
+    ),
+    Order(id: "3", title: "Blazer", customer: customers[2], status: "Pending"),
   ];
 
   @override
@@ -40,12 +78,32 @@ class _OrdersScreenState extends State<OrdersScreen> {
         itemBuilder: (context, index) {
           final order = orders[index];
           return _OrderCard(
-            orderTitle: order["order"]!,
-            clientName: order["client"]!,
-            status: order["status"]!,
-            onTap: () => AppNavigator.toOrderDetails(),
+            order: order,
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => OrderDetailsScreen(order: order),
+                ),
+              );
+            },
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          // **CORRECTED:** Pass the customers list to the CreateOrderScreen
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => CreateOrderScreen(customers: customers),
+            ),
+          );
+        },
+        label: Text(
+          "New Order",
+          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+        ),
+        icon: const Icon(Icons.add),
+        backgroundColor: Colors.indigo,
       ),
     );
   }
@@ -53,26 +111,20 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
 // Reusable Order Card Widget
 class _OrderCard extends StatelessWidget {
-  final String orderTitle;
-  final String clientName;
-  final String status;
+  final Order order;
   final VoidCallback onTap;
 
-  const _OrderCard({
-    required this.orderTitle,
-    required this.clientName,
-    required this.status,
-    required this.onTap,
-  });
+  const _OrderCard({required this.order, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 12),
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
@@ -81,12 +133,12 @@ class _OrderCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _getStatusColor(status).withOpacity(0.1),
+                  color: _getStatusColor(order.status).withOpacity(0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   Icons.shopping_bag_outlined,
-                  color: _getStatusColor(status),
+                  color: _getStatusColor(order.status),
                   size: 28,
                 ),
               ),
@@ -97,7 +149,7 @@ class _OrderCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      orderTitle,
+                      order.title,
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -105,7 +157,9 @@ class _OrderCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      clientName,
+                      order
+                          .customer
+                          .name, // Display the customer's name from the model
                       style: GoogleFonts.poppins(
                         fontSize: 14,
                         color: Colors.grey.shade600,
@@ -115,7 +169,7 @@ class _OrderCard extends StatelessWidget {
                 ),
               ),
               // Status Chip
-              _StatusChip(status: status),
+              _StatusChip(status: order.status),
             ],
           ),
         ),
@@ -137,7 +191,6 @@ class _OrderCard extends StatelessWidget {
   }
 }
 
-// Reusable Status Chip Widget
 class _StatusChip extends StatelessWidget {
   final String status;
 
@@ -176,3 +229,43 @@ class _StatusChip extends StatelessWidget {
     }
   }
 }
+
+// Part of OrdersScreen widget
+// ...
+
+// late final List<Customer> customers = [
+//   Customer(
+//     id: 001,
+//     gender: "Male",
+//     name: "Emma Johnson",
+//     phone: "+1 (555) 123-4567",
+//     email: "emma.j@example.com",
+//   ),
+//   Customer(
+//     id: 002,
+//     gender: "Male",
+//     name: "Michael Chen",
+//     phone: "+1 (555) 987-6543",
+//     email: "michael.c@example.com",
+//   ),
+//   Customer(
+//     id: 003,
+//     gender: "Male",
+//     name: "Lisa Rodriguez",
+//     phone: "+1 (555) 555-1111",
+//     email: "lisa.r@example.com",
+//   ),
+// ];
+
+// ...
+
+// Update the `FloatingActionButton`'s onPressed callback
+// onPressed: () {
+//     Navigator.of(context).push(
+//         MaterialPageRoute(
+//             builder: (context) => CreateOrderScreen(customers: customers), // Pass the customers list
+//         ),
+//     );
+// }
+
+// ...

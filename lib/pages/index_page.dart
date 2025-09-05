@@ -7,6 +7,7 @@ import 'package:notdle/pages/login_screen.dart';
 import 'package:notdle/pages/screens/add_customer_screen.dart';
 import 'package:notdle/pages/screens/add_measurement_screen.dart';
 import 'package:notdle/pages/screens/all_measurement_screen.dart';
+import 'package:notdle/pages/screens/create_order_screen.dart';
 import 'package:notdle/pages/screens/customers_screen.dart';
 import 'package:notdle/pages/screens/order_details_screen.dart';
 import 'package:notdle/pages/screens/orders_screen.dart';
@@ -31,7 +32,8 @@ class IndexPage extends StatelessWidget {
         AddCustomerScreen.tag: (context) => const AddCustomerScreen(),
         DashboardScreen.tag: (context) => const DashboardScreen(),
         OrdersScreen.tag: (context) => const OrdersScreen(),
-        OrderDetailsScreen.tag: (context) => const OrderDetailsScreen(),
+        // CreateOrderScreen.tag: (context) => const CreateOrderScreen(),
+        // OrderDetailsScreen.tag: (context) => const OrderDetailsScreen(),
       },
     );
   }

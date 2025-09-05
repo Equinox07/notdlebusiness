@@ -1,13 +1,12 @@
+// lib/screens/orders_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:notdle/models/order.dart';
+import 'package:intl/intl.dart';
+import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
-import 'package:notdle/navigation/app_navigation.dart';
+import 'package:notdle/models/order.dart';
 import 'package:notdle/pages/screens/create_order_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:notdle/models/order.dart';
-import 'package:notdle/models/customer.dart';
 import 'package:notdle/pages/screens/order_details_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
@@ -20,45 +19,25 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
-  final List<Customer> customers = [
-    Customer(
-      id: 001,
-      gender: "Male",
-      name: "Emma Johnson",
-      phone: "+1 (555) 123-4567",
-      email: "emma.j@example.com",
-    ),
-    Customer(
-      id: 002,
-      gender: "Male",
-      name: "Michael Chen",
-      phone: "+1 (555) 987-6543",
-      email: "michael.c@example.com",
-    ),
-    Customer(
-      id: 003,
-      gender: "Male",
-      name: "Lisa Rodriguez",
-      phone: "+1 (555) 555-1111",
-      email: "lisa.r@example.com",
-    ),
-  ];
+  final dbHelper = DatabaseHelper.instance;
+  late Future<List<Order>> _ordersFuture;
 
-  late final List<Order> orders = [
-    Order(
-      id: "1",
-      title: "Wedding Dress",
-      customer: customers[0],
-      status: "In Progress",
-    ),
-    Order(
-      id: "2",
-      title: "Business Suit",
-      customer: customers[1],
-      status: "Completed",
-    ),
-    Order(id: "3", title: "Blazer", customer: customers[2], status: "Pending"),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _ordersFuture = _fetchOrders();
+  }
+
+  Future<List<Order>> _fetchOrders() async {
+    return await dbHelper.getOrders();
+  }
+
+  // Reloads the screen when a new order is added.
+  void _onOrderCreated() {
+    setState(() {
+      _ordersFuture = _fetchOrders();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,31 +51,55 @@ class _OrdersScreenState extends State<OrdersScreen> {
         backgroundColor: Colors.white,
         elevation: 1,
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: orders.length,
-        itemBuilder: (context, index) {
-          final order = orders[index];
-          return _OrderCard(
-            order: order,
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => OrderDetailsScreen(order: order),
-                ),
-              );
-            },
-          );
+      body: FutureBuilder<List<Order>>(
+        future: _ordersFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                "Error: ${snapshot.error}",
+                style: GoogleFonts.poppins(),
+              ),
+            );
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(
+              child: Text(
+                "No orders found.",
+                style: GoogleFonts.poppins(fontSize: 16),
+              ),
+            );
+          } else {
+            final orders = snapshot.data!;
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: orders.length,
+              itemBuilder: (context, index) {
+                final order = orders[index];
+                return _OrderCard(
+                  order: order,
+                  onTap: () {
+                    // Pass the orderId instead of the entire Order object
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder:
+                            (context) => OrderDetailsScreen(orderId: order.id),
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          }
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // **CORRECTED:** Pass the customers list to the CreateOrderScreen
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => CreateOrderScreen(customers: customers),
-            ),
+        onPressed: () async {
+          await Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const CreateOrderScreen()),
           );
+          _onOrderCreated(); // Refresh the list after returning
         },
         label: Text(
           "New Order",
@@ -109,69 +112,113 @@ class _OrdersScreenState extends State<OrdersScreen> {
   }
 }
 
-// Reusable Order Card Widget
+// Order Card Widget
 class _OrderCard extends StatelessWidget {
+  const _OrderCard({required this.order, required this.onTap});
+
   final Order order;
   final VoidCallback onTap;
 
-  const _OrderCard({required this.order, required this.onTap});
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.only(bottom: 16),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      order.title,
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.indigo.shade800,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  _StatusChip(status: order.status),
+                ],
+              ),
+              const SizedBox(height: 8),
+              // Use a FutureBuilder to get the customer's name
+              FutureBuilder<Customer?>(
+                future: DatabaseHelper.instance.fetchCustomerById(
+                  order.customerId,
+                ),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Text(
+                      "Loading customer...",
+                      style: GoogleFonts.poppins(color: Colors.grey.shade600),
+                    );
+                  } else if (snapshot.hasData) {
+                    return Text(
+                      "Customer: ${snapshot.data!.name}",
+                      style: GoogleFonts.poppins(color: Colors.grey.shade600),
+                    );
+                  } else {
+                    return Text(
+                      "Customer: Unknown",
+                      style: GoogleFonts.poppins(color: Colors.grey.shade600),
+                    );
+                  }
+                },
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _PaymentStatusChip(status: order.paymentStatus),
+                  Text(
+                    order.dueDate != null
+                        ? "Due: ${DateFormat('MMM d, y').format(DateTime.parse(order.dueDate!))}"
+                        : "Due: N/A",
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: Colors.red.shade400,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Reusable Status Chip Widget
+class _StatusChip extends StatelessWidget {
+  final String status;
+  const _StatusChip({required this.status});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              // Order Icon
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: _getStatusColor(order.status).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(
-                  Icons.shopping_bag_outlined,
-                  color: _getStatusColor(order.status),
-                  size: 28,
-                ),
-              ),
-              const SizedBox(width: 16),
-              // Order Details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      order.title,
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      order
-                          .customer
-                          .name, // Display the customer's name from the model
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Status Chip
-              _StatusChip(status: order.status),
-            ],
-          ),
+    final Color statusColor = _getStatusColor(status);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: statusColor.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        status,
+        style: GoogleFonts.poppins(
+          color: statusColor,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
@@ -191,81 +238,49 @@ class _OrderCard extends StatelessWidget {
   }
 }
 
-class _StatusChip extends StatelessWidget {
+// Reusable Payment Status Chip Widget
+class _PaymentStatusChip extends StatelessWidget {
   final String status;
-
-  const _StatusChip({required this.status});
+  const _PaymentStatusChip({required this.status});
 
   @override
   Widget build(BuildContext context) {
-    final Color statusColor = _getStatusColor(status);
+    final Color statusColor = _getPaymentColor(status);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.1),
+        color: statusColor.withOpacity(0.15),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(
-        status,
-        style: GoogleFonts.poppins(
-          color: statusColor,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.payment, size: 16, color: statusColor),
+          const SizedBox(width: 4),
+          Text(
+            status,
+            style: GoogleFonts.poppins(
+              color: statusColor,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Color _getStatusColor(String status) {
+  Color _getPaymentColor(String status) {
     switch (status) {
-      case "Completed":
-        return Colors.green;
-      case "In Progress":
-        return Colors.blue;
+      case "Full":
+      case "Paid":
+        return Colors.green.shade600;
+      case "Partial":
+        return Colors.blue.shade600;
       case "Pending":
-        return Colors.orange;
+        return Colors.orange.shade600;
       default:
         return Colors.grey;
     }
   }
 }
-
-// Part of OrdersScreen widget
-// ...
-
-// late final List<Customer> customers = [
-//   Customer(
-//     id: 001,
-//     gender: "Male",
-//     name: "Emma Johnson",
-//     phone: "+1 (555) 123-4567",
-//     email: "emma.j@example.com",
-//   ),
-//   Customer(
-//     id: 002,
-//     gender: "Male",
-//     name: "Michael Chen",
-//     phone: "+1 (555) 987-6543",
-//     email: "michael.c@example.com",
-//   ),
-//   Customer(
-//     id: 003,
-//     gender: "Male",
-//     name: "Lisa Rodriguez",
-//     phone: "+1 (555) 555-1111",
-//     email: "lisa.r@example.com",
-//   ),
-// ];
-
-// ...
-
-// Update the `FloatingActionButton`'s onPressed callback
-// onPressed: () {
-//     Navigator.of(context).push(
-//         MaterialPageRoute(
-//             builder: (context) => CreateOrderScreen(customers: customers), // Pass the customers list
-//         ),
-//     );
-// }
-
-// ...

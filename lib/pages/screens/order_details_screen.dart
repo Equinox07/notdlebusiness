@@ -1,77 +1,55 @@
+// lib/screens/order_details_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:notdle/models/order_details.dart';
+import 'package:intl/intl.dart';
+import 'package:notdle/db/database_helper.dart';
+import 'package:notdle/models/customer.dart';
+import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
 
-class OrderDetailsScreen extends StatelessWidget {
-  static const String tag = "order_details";
+// Private data model to hold all fetched details
+class _OrderDetailsData {
   final Order order;
-  // This screen will need to fetch the detailed info based on the provided order.
-  // For this example, we'll use a dummy method.
+  final Customer? customer;
+  final Invoice? invoice;
+  _OrderDetailsData({required this.order, this.customer, this.invoice});
+}
 
-  const OrderDetailsScreen({super.key, required this.order});
+class OrderDetailsScreen extends StatefulWidget {
+  static const String tag = "order_details";
+  final String orderId;
 
-  // A dummy method to fetch detailed order information.
-  // In a real app, this would be an asynchronous call to a database or API.
-  OrderDetails _fetchDetailedOrder(String orderId) {
-    // This is a placeholder for a real data source.
-    // The details returned depend on the specific order ID.
-    if (orderId == "1") {
-      return OrderDetails(
-        order: order,
-        customerPhone: "+1 (555) 123-4567",
-        customerEmail: "emma.j@example.com",
-        paymentStatus: "Partial",
-        dueDate: "Sep 30, 2025",
-        timeline: [
-          OrderEvent(title: "Order Placed", date: "Aug 15, 2025"),
-          OrderEvent(title: "Measurements Taken", date: "Aug 18, 2025"),
-          OrderEvent(
-            title: "In Progress",
-            date: "Aug 20, 2025",
-            isCurrent: true,
-          ),
-        ],
-        notes:
-            "Client requested an extra-long train and a pearl-beaded bodice. Contacted vendor for materials.",
-      );
-    } else if (orderId == "2") {
-      return OrderDetails(
-        order: order,
-        customerPhone: "+1 (555) 987-6543",
-        customerEmail: "michael.c@example.com",
-        paymentStatus: "Full",
-        dueDate: "Aug 25, 2025",
-        timeline: [
-          OrderEvent(title: "Order Placed", date: "Aug 10, 2025"),
-          OrderEvent(title: "Measurements Taken", date: "Aug 12, 2025"),
-          OrderEvent(title: "Completed", date: "Aug 25, 2025", isCurrent: true),
-        ],
-        notes: null,
-      );
-    } else {
-      return OrderDetails(
-        order: order,
-        customerPhone: "+1 (555) 555-1111",
-        customerEmail: "lisa.r@example.com",
-        paymentStatus: "Pending",
-        dueDate: "Oct 15, 2025",
-        timeline: [
-          OrderEvent(
-            title: "Order Placed",
-            date: "Sep 1, 2025",
-            isCurrent: true,
-          ),
-        ],
-        notes: null,
+  const OrderDetailsScreen({super.key, required this.orderId});
+
+  @override
+  State<OrderDetailsScreen> createState() => _OrderDetailsScreenState();
+}
+
+class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
+  final dbHelper = DatabaseHelper.instance;
+  late Future<_OrderDetailsData?> _orderDetailsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _orderDetailsFuture = _fetchOrderDetails();
+  }
+
+  Future<_OrderDetailsData?> _fetchOrderDetails() async {
+    final data = await dbHelper.getOrderWithDetails(widget.orderId);
+    if (data != null) {
+      return _OrderDetailsData(
+        order: data['order'],
+        customer: data['customer'],
+        invoice: data['invoice'],
       );
     }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final orderDetails = _fetchDetailedOrder(order.id);
-
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
@@ -82,76 +60,65 @@ class OrderDetailsScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 1,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _OrderSummaryCard(
-                order: order,
-                paymentStatus: orderDetails.paymentStatus,
+      body: FutureBuilder<_OrderDetailsData?>(
+        future: _orderDetailsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                "Error: ${snapshot.error}",
+                style: GoogleFonts.poppins(),
               ),
-              const SizedBox(height: 16),
-              _TimeInfoCard(dueDate: orderDetails.dueDate),
-              const SizedBox(height: 16),
-              _CustomerInfoCard(
-                customerName: order.customer.name,
-                phone: orderDetails.customerPhone,
-                email: orderDetails.customerEmail,
-              ),
-              const SizedBox(height: 16),
-              if (orderDetails.notes != null) ...[
-                _NotesCard(notes: orderDetails.notes!),
-                const SizedBox(height: 16),
-              ],
-              _OrderTimelineCard(timeline: orderDetails.timeline),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+            );
+          } else if (!snapshot.hasData) {
+            return Center(
+              child: Text("Order not found.", style: GoogleFonts.poppins()),
+            );
+          }
 
-// 📄 Notes Card Widget
-class _NotesCard extends StatelessWidget {
-  final String notes;
+          final orderDetails = snapshot.data!;
+          final order = orderDetails.order;
+          final customer = orderDetails.customer;
+          final invoice = orderDetails.invoice;
 
-  const _NotesCard({required this.notes});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade300, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Notes",
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey.shade800,
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _OrderSummaryCard(
+                    order: order,
+                    paymentStatus: order.paymentStatus,
+                  ),
+                  const SizedBox(height: 16),
+                  if (order.dueDate != null) ...[
+                    _TimeInfoCard(dueDate: order.dueDate!),
+                    const SizedBox(height: 16),
+                  ],
+                  if (customer != null) ...[
+                    _CustomerInfoCard(
+                      customerName: customer.name,
+                      phone: customer.phone,
+                      email: customer.email ?? 'N/A',
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                  if (order.notes != null && order.notes!.isNotEmpty) ...[
+                    _NotesCard(notes: order.notes!),
+                    const SizedBox(height: 16),
+                  ],
+                  if (invoice != null) ...[
+                    _InvoiceCard(invoice: invoice),
+                    const SizedBox(height: 16),
+                  ],
+                ],
               ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              notes,
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: Colors.grey.shade600,
-                height: 1.5,
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -351,11 +318,11 @@ class _CustomerInfoCard extends StatelessWidget {
   }
 }
 
-// ⏳ Flat Order Timeline Card
-class _OrderTimelineCard extends StatelessWidget {
-  final List<OrderEvent> timeline;
+// 📄 Notes Card Widget
+class _NotesCard extends StatelessWidget {
+  final String notes;
 
-  const _OrderTimelineCard({required this.timeline});
+  const _NotesCard({required this.notes});
 
   @override
   Widget build(BuildContext context) {
@@ -370,26 +337,86 @@ class _OrderTimelineCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Order Timeline",
-              style: TextStyle(
+            Text(
+              "Notes",
+              style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.blueGrey,
+                color: Colors.grey.shade800,
               ),
             ),
+            const SizedBox(height: 12),
+            Text(
+              notes,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// 🧾 Invoice Card Widget
+class _InvoiceCard extends StatelessWidget {
+  final Invoice invoice;
+  const _InvoiceCard({required this.invoice});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Invoice Details",
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                Text(
+                  "Invoice ID: #${invoice.id.substring(0, 8)}",
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
-            ...timeline.map((event) {
-              final isFirst = timeline.indexOf(event) == 0;
-              final isLast = timeline.indexOf(event) == timeline.length - 1;
-              return _TimelineItem(
-                title: event.title,
-                subtitle: event.date,
-                isCurrent: event.isCurrent,
-                isFirst: isFirst,
-                isLast: isLast,
-              );
-            }).toList(),
+            _InfoRow(
+              icon: Icons.monetization_on_outlined,
+              label: "Amount: \$${invoice.totalAmount.toStringAsFixed(2)}",
+              iconColor: Colors.green,
+            ),
+            const SizedBox(height: 12),
+            _InfoRow(
+              icon: Icons.receipt_long,
+              label: "Status: ${invoice.status}",
+              iconColor: Colors.orange,
+            ),
+            const SizedBox(height: 12),
+            _InfoRow(
+              icon: Icons.calendar_today,
+              label: "Date: ${DateFormat('MMM d, y').format(invoice.date)}",
+              iconColor: Colors.blue,
+            ),
           ],
         ),
       ),
@@ -473,6 +500,7 @@ class _PaymentStatusChip extends StatelessWidget {
   Color _getPaymentColor(String status) {
     switch (status) {
       case "Full":
+      case "Paid":
         return Colors.green.shade600;
       case "Partial":
         return Colors.blue.shade600;
@@ -498,6 +526,7 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // <-- Added the build method
     return Row(
       children: [
         Icon(icon, color: iconColor, size: 20),
@@ -505,81 +534,6 @@ class _InfoRow extends StatelessWidget {
         Text(
           label,
           style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey.shade700),
-        ),
-      ],
-    );
-  }
-}
-
-// Reusable Timeline Item
-class _TimelineItem extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final bool isCurrent;
-  final bool isFirst;
-  final bool isLast;
-
-  const _TimelineItem({
-    required this.title,
-    required this.subtitle,
-    this.isCurrent = false,
-    this.isFirst = false,
-    this.isLast = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Column(
-          children: [
-            if (!isFirst)
-              Container(
-                height: 20,
-                width: 2,
-                color: isCurrent ? Colors.blue.shade600 : Colors.grey.shade300,
-              ),
-            Container(
-              height: 12,
-              width: 12,
-              decoration: BoxDecoration(
-                color: isCurrent ? Colors.blue.shade600 : Colors.grey.shade300,
-                shape: BoxShape.circle,
-              ),
-            ),
-            if (!isLast)
-              Container(
-                height: 20,
-                width: 2,
-                color: isCurrent ? Colors.blue.shade600 : Colors.grey.shade300,
-              ),
-          ],
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color:
-                      isCurrent ? Colors.blue.shade800 : Colors.grey.shade800,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-            ],
-          ),
         ),
       ],
     );

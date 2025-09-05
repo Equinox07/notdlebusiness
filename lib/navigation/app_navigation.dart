@@ -37,7 +37,7 @@ class AppNavigator {
           return MaterialPageRoute(
             builder:
                 (context) =>
-                    OrderDetailsScreen(order: settings.arguments as Order),
+                    OrderDetailsScreen(orderId: settings.arguments as String),
           );
         }
         return null;

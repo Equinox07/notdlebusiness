@@ -1,6 +1,7 @@
 // lib/models/order_details.dart
 
 import 'package:notdle/models/order.dart';
+import 'package:notdle/models/order_event.dart';
 
 class OrderDetails {
   final Order order;
@@ -9,7 +10,7 @@ class OrderDetails {
   final String paymentStatus;
   final String dueDate;
   final List<OrderEvent> timeline;
-  final String? notes; // Optional notes field
+  final String? notes;
 
   OrderDetails({
     required this.order,
@@ -18,14 +19,33 @@ class OrderDetails {
     required this.paymentStatus,
     required this.dueDate,
     required this.timeline,
-    this.notes, // Make the parameter optional
+    this.notes,
   });
-}
 
-class OrderEvent {
-  final String title;
-  final String date;
-  final bool isCurrent;
+  Map<String, dynamic> toMap() {
+    return {
+      'orderId': order.id,
+      'customerPhone': customerPhone,
+      'customerEmail': customerEmail,
+      'paymentStatus': paymentStatus,
+      'dueDate': dueDate,
+      'notes': notes,
+    };
+  }
 
-  OrderEvent({required this.title, required this.date, this.isCurrent = false});
+  static OrderDetails fromMap(
+    Map<String, dynamic> map,
+    Order order,
+    List<OrderEvent> timeline,
+  ) {
+    return OrderDetails(
+      order: order,
+      customerPhone: map['customerPhone'],
+      customerEmail: map['customerEmail'],
+      paymentStatus: map['paymentStatus'],
+      dueDate: map['dueDate'],
+      timeline: timeline,
+      notes: map['notes'],
+    );
+  }
 }

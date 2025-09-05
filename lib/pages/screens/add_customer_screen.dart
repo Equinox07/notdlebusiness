@@ -30,7 +30,6 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     final newCustomer = Customer(
       name: _nameController.text.trim(),
       gender: _selectedGender,
-      orders: 0,
       phone: _phoneController.text.trim(),
       email: _emailController.text.trim(),
       address: _addressController.text.trim(),

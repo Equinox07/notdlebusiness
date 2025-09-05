@@ -1,3 +1,5 @@
+import 'package:notdle/models/invoice.dart';
+import 'package:notdle/models/order.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/customer.dart';
@@ -34,17 +36,16 @@ class DatabaseHelper {
   Future _createDB(Database db, int version) async {
     await db.execute('''
       CREATE TABLE customers(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
+        id TEXT PRIMARY KEY,
+        name TEXT,
         phone TEXT,
         email TEXT,
-        orders INTEGER DEFAULT 0,
         lastVisit TEXT,
         gender TEXT,
         address TEXT,
         imagePath TEXT,
         imageUrl TEXT,
-        createdDate TEXT NOT NULL
+        createdDate TEXT
       )
     ''');
 
@@ -57,6 +58,37 @@ class DatabaseHelper {
       FOREIGN KEY(customerId) REFERENCES customers(id) ON DELETE CASCADE
       )
     ''');
+
+    // Create Orders table
+    await db.execute('''
+             CREATE TABLE orders(
+               id TEXT PRIMARY KEY,
+               title TEXT,
+               customerId TEXT,
+               status TEXT,
+               paymentStatus TEXT,
+               paymentAmount REAL,
+               dueDate TEXT,
+               notes TEXT,
+               invoiceId TEXT,
+               FOREIGN KEY (customerId) REFERENCES customers(id)
+             )
+           ''');
+
+    // Create Invoices table
+    await db.execute('''
+             CREATE TABLE invoices(
+               id TEXT PRIMARY KEY,
+               title TEXT,
+               customerId TEXT,
+               status TEXT,
+               totalAmount REAL,
+               date TEXT,
+               orderId TEXT,
+               FOREIGN KEY (customerId) REFERENCES customers(id),
+               FOREIGN KEY (orderId) REFERENCES orders(id)
+             )
+           ''');
   }
 
   Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
@@ -81,12 +113,11 @@ class DatabaseHelper {
 
     // Return a new Customer with id assigned
     return Customer(
-      id: id,
+      id: id.toString(),
       name: customer.name,
       gender: customer.gender,
       phone: customer.phone,
       email: customer.email,
-      orders: customer.orders,
       address: customer.address,
       imagePath: customer.imagePath,
       lastVisit: customer.lastVisit,
@@ -115,7 +146,7 @@ class DatabaseHelper {
     return result.map((map) => Customer.fromMap(map)).toList();
   }
 
-  Future<Customer?> fetchCustomerById(int id) async {
+  Future<Customer?> fetchCustomerById(String id) async {
     final db = await instance.database;
     final result = await db.query(
       "customers",
@@ -232,6 +263,75 @@ class DatabaseHelper {
     }
 
     return list;
+  }
+
+  // --- Order Operations ---
+  Future<void> insertOrder(Order order) async {
+    final db = await database;
+    await db.insert(
+      'orders',
+      order.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Order>> getOrders() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('orders');
+    return List.generate(maps.length, (i) => Order.fromMap(maps[i]));
+  }
+
+  // --- Invoice Operations ---
+  Future<void> insertInvoice(Invoice invoice) async {
+    final db = await database;
+    await db.insert(
+      'invoices',
+      invoice.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Invoice>> getInvoices() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query('invoices');
+    return List.generate(maps.length, (i) => Invoice.fromMap(maps[i]));
+  }
+
+  // New method to get a single order with its customer
+  Future<Map<String, dynamic>?> getOrderWithDetails(String orderId) async {
+    final db = await database;
+
+    final List<Map<String, dynamic>> orders = await db.query(
+      'orders',
+      where: 'id = ?',
+      whereArgs: [orderId],
+    );
+
+    if (orders.isNotEmpty) {
+      final orderMap = orders.first;
+      final customerMap = await db.query(
+        'customers',
+        where: 'id = ?',
+        whereArgs: [orderMap['customerId']],
+      );
+      final invoiceMap = await db.query(
+        'invoices',
+        where: 'orderId = ?',
+        whereArgs: [orderId],
+      );
+
+      final customer =
+          customerMap.isNotEmpty ? Customer.fromMap(customerMap.first) : null;
+      final invoice =
+          invoiceMap.isNotEmpty ? Invoice.fromMap(invoiceMap.first) : null;
+
+      return {
+        'order': Order.fromMap(orderMap),
+        'customer': customer,
+        'invoice': invoice,
+      };
+    }
+    return null;
   }
 }
 

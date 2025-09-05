@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/pages/screens/customers_screen.dart';
+import 'package:notdle/pages/screens/fabric_screen.dart';
+import 'package:notdle/pages/screens/invoices_screen.dart';
+import 'package:notdle/pages/screens/orders_screen.dart';
+import 'package:notdle/pages/screens/projects_screen.dart';
 import 'package:notdle/pages/screens/services_screen.dart';
 import 'package:notdle/pages/sections/appointment_card.dart';
 import 'package:notdle/pages/sections/dashboard_home.dart';
@@ -21,9 +25,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final List<Widget> _screens = const [
     DashboardHome(),
     CustomersScreen(),
-    ProjectsScreen(),
-    FabricsScreen(),
-    // InvoicesScreen(),
+    OrdersScreen(),
+    // FabricsScreen(),
+    InvoicesScreen(),
     // ServicesScreen(),
   ];
 
@@ -49,8 +53,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             label: "Dashboard",
           ),
           BottomNavigationBarItem(icon: Icon(Icons.people), label: "Clients"),
-          BottomNavigationBarItem(icon: Icon(Icons.folder), label: "Projects"),
-          BottomNavigationBarItem(icon: Icon(Icons.texture), label: "Fabrics"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: "Orders",
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.texture), label: "Invoices"),
           // BottomNavigationBarItem(icon: Icon(Icons.receipt), label: "Invoices"),
           // BottomNavigationBarItem(
           //     icon: Icon(Icons.design_services), label: "Services"),
@@ -78,42 +85,3 @@ class ClientsScreen extends StatelessWidget {
     );
   }
 }
-
-class ProjectsScreen extends StatelessWidget {
-  const ProjectsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Projects")),
-      body: const Center(child: Text("Projects overview here")),
-    );
-  }
-}
-
-class FabricsScreen extends StatelessWidget {
-  const FabricsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Fabrics")),
-      body: const Center(child: Text("Fabric catalog here")),
-    );
-  }
-}
-
-class InvoicesScreen extends StatelessWidget {
-  const InvoicesScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Invoices")),
-      body: const Center(child: Text("Invoices & billing here")),
-    );
-  }
-}
-
-//
-// ----------------- SERVICES DETAIL SCREENS -----------------

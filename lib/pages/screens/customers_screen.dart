@@ -286,7 +286,7 @@ class CustomerCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  "${customer.orders} orders",
+                  "${customer.getTotalOrders()} orders",
                   style: GoogleFonts.poppins(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,

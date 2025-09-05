@@ -65,6 +65,19 @@ class _CustomerMeasurementScreenState extends State<CustomerMeasurementScreen> {
   late final List<String> _fields;
 
   // Dropdown options
+  final List<String> _measurementType = [
+    "None",
+    "Shirt",
+    "Blouse",
+    "Long Sleeves",
+    "Short Sleeves"
+        "Short",
+    "Trousers",
+    "Skirt",
+    "Full Dress",
+  ];
+  String _selectedMeasureType = "None";
+
   final List<String> _sleeveOptions = ["None", "Short", "3 Quarters", "Full"];
   String _selectedSleeve = "None";
 
@@ -184,6 +197,12 @@ class _CustomerMeasurementScreenState extends State<CustomerMeasurementScreen> {
   }
 
   Widget _buildFieldWidget(String field) {
+    // return _MeasurementTypeDropdownField(
+    //   measurementTypeOptions: [],
+    //   selectedType: _selectedMeasureType,
+    //   onChanged: (val) => debugPrint("val"),
+    // );
+
     if (widget.customer.gender.toLowerCase() == "female") {
       switch (field) {
         case "Sleeve Length":
@@ -292,17 +311,29 @@ class _CustomerMeasurementScreenState extends State<CustomerMeasurementScreen> {
             ],
           ),
         ),
-        body: Form(
-          key: _formKey,
-          child: ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: _fields.length,
-            itemBuilder: (context, index) {
-              final field = _fields[index];
-              return _buildFieldWidget(field);
-            },
-            separatorBuilder: (_, __) => const SizedBox(height: 16),
-          ),
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            _MeasurementTypeDropdownField(
+              measurementTypeOptions: _measurementType,
+              selectedType: _selectedMeasureType,
+              onChanged: (val) => debugPrint(val),
+            ),
+            Expanded(
+              child: Form(
+                key: _formKey,
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _fields.length,
+                  itemBuilder: (context, index) {
+                    final field = _fields[index];
+                    return _buildFieldWidget(field);
+                  },
+                  separatorBuilder: (_, __) => const SizedBox(height: 16),
+                ),
+              ),
+            ),
+          ],
         ),
         bottomNavigationBar: Container(
           padding: const EdgeInsets.all(16),
@@ -339,6 +370,51 @@ class _CustomerMeasurementScreenState extends State<CustomerMeasurementScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _MeasurementTypeDropdownField extends StatelessWidget {
+  final String selectedType;
+  final List<String> measurementTypeOptions;
+  final ValueChanged<String?> onChanged;
+
+  const _MeasurementTypeDropdownField({
+    required this.selectedType,
+    required this.measurementTypeOptions,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        // borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: DropdownButtonFormField<String>(
+        value: selectedType,
+        decoration: InputDecoration(
+          labelText: "Measure For",
+          labelStyle: GoogleFonts.poppins(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.blue,
+          ),
+          border: InputBorder.none,
+        ),
+        items:
+            measurementTypeOptions.map((option) {
+              return DropdownMenuItem(
+                value: option,
+                child: Text(option, style: GoogleFonts.poppins(fontSize: 16)),
+              );
+            }).toList(),
+        onChanged: onChanged,
       ),
     );
   }

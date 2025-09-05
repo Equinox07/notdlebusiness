@@ -8,6 +8,8 @@ import 'package:notdle/pages/screens/add_customer_screen.dart';
 import 'package:notdle/pages/screens/add_measurement_screen.dart';
 import 'package:notdle/pages/screens/all_measurement_screen.dart';
 import 'package:notdle/pages/screens/customers_screen.dart';
+import 'package:notdle/pages/screens/order_details_screen.dart';
+import 'package:notdle/pages/screens/orders_screen.dart';
 import 'package:notdle/pages/signup_page.dart';
 
 class IndexPage extends StatelessWidget {
@@ -28,6 +30,8 @@ class IndexPage extends StatelessWidget {
         AllMeasurementScreen.tag: (context) => const AllMeasurementScreen(),
         AddCustomerScreen.tag: (context) => const AddCustomerScreen(),
         DashboardScreen.tag: (context) => const DashboardScreen(),
+        OrdersScreen.tag: (context) => const OrdersScreen(),
+        OrderDetailsScreen.tag: (context) => const OrderDetailsScreen(),
       },
     );
   }

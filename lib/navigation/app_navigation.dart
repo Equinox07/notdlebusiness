@@ -9,6 +9,7 @@ import 'package:notdle/pages/screens/all_measurement_screen.dart';
 import 'package:notdle/pages/screens/customer_detail_screen.dart';
 import 'package:notdle/pages/screens/customer_measurement.dart';
 import 'package:notdle/pages/screens/customers_screen.dart';
+import 'package:notdle/pages/screens/order_details_screen.dart';
 import 'package:notdle/pages/screens/orders_screen.dart';
 import 'package:notdle/pages/signup_page.dart';
 import 'package:notdle/pages/signup_success_screen.dart';
@@ -20,6 +21,11 @@ class AppNavigator {
 
   static Route<dynamic>? onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
+      // case OrderDetailsScreen.tag:
+      //   if (settings.arguments is Customer) {
+      //     return MaterialPageRoute(builder: (context) => OrderDetailsScreen());
+      //   }
+      //   return null;
       case CustomerDetailScreen.tag:
         if (settings.arguments is Customer) {
           return MaterialPageRoute(
@@ -125,6 +131,17 @@ class AppNavigator {
       );
     } else {
       navigatorKey.currentState?.pushNamed(AllMeasurementScreen.tag);
+    }
+  }
+
+  static void toOrderDetails({Measurement? measurement}) {
+    if (measurement != null) {
+      navigatorKey.currentState?.pushNamed(
+        OrderDetailsScreen.tag,
+        arguments: measurement,
+      );
+    } else {
+      navigatorKey.currentState?.pushNamed(OrderDetailsScreen.tag);
     }
   }
 

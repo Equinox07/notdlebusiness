@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/navigation/app_navigation.dart';
-import 'package:notdle/pages/sections/appointment_card.dart';
-import 'package:notdle/pages/sections/insight_card.dart';
-import 'package:notdle/widgets/home_menu_card.dart';
+
+// Assume this exists
 
 class DashboardHome extends StatelessWidget {
   const DashboardHome({super.key});
@@ -13,6 +12,7 @@ class DashboardHome extends StatelessWidget {
     final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
 
     return Scaffold(
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Column(
@@ -27,217 +27,201 @@ class DashboardHome extends StatelessWidget {
             ),
             Text(
               'Welcome back to your workspace',
-              style: GoogleFonts.poppins(fontSize: 12),
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+              ),
             ),
           ],
         ),
-        actions: const [Icon(Icons.more_vert)],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_none),
+            onPressed: () {},
+          ),
+        ],
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: Colors.black,
       ),
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final isTablet = constraints.maxWidth > 600;
-            final padding = isTablet ? 32.0 : 20.0;
-
-            return SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.all(padding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Welcome section
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(isTablet ? 32 : 24),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Colors.blue.shade600, Colors.blue.shade400],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Welcome Back!',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: isTablet ? 28 : 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: isTablet ? 12 : 8),
-                          Text(
-                            'Ready to create beautiful garments?',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.9),
-                              fontSize: isTablet ? 18 : 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: isTablet ? 40 : 32),
-
-                    // Quick stats
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            padding: EdgeInsets.all(isTablet ? 20 : 16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.05),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  '24',
-                                  style: TextStyle(
-                                    fontSize: isTablet ? 32 : 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.blue.shade600,
-                                  ),
-                                ),
-                                Text(
-                                  'Active Orders',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: isTablet ? 14 : 12,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: isTablet ? 20 : 16),
-                        Expanded(
-                          child: Container(
-                            padding: EdgeInsets.all(isTablet ? 20 : 16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.05),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  '156',
-                                  style: TextStyle(
-                                    fontSize: isTablet ? 32 : 28,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green.shade600,
-                                  ),
-                                ),
-                                Text(
-                                  'Total Customers',
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: isTablet ? 14 : 12,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: isTablet ? 40 : 32),
-
-                    // Menu options
-                    Text(
-                      'Services',
-                      style: TextStyle(
-                        fontSize: isTablet ? 24 : 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade800,
-                      ),
-                    ),
-                    SizedBox(height: isTablet ? 20 : 16),
-
-                    // Grid with responsive columns
-                    GridView.count(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      crossAxisCount: isTablet ? 3 : 2,
-                      childAspectRatio: isTablet ? 1.2 : 1.1,
-                      crossAxisSpacing: isTablet ? 20 : 16,
-                      mainAxisSpacing: isTablet ? 20 : 16,
-                      children: [
-                        HomeMenuCard(
-                          title: 'Customers',
-                          subtitle: 'Manage clients',
-                          icon: Icons.people_outline,
-                          color: Colors.blue.shade600,
-                          onTap: () => AppNavigator.toCustomers(),
-                        ),
-                        HomeMenuCard(
-                          title: 'Measurements',
-                          subtitle: 'Take & update',
-                          icon: Icons.straighten,
-                          color: Colors.orange.shade600,
-                          onTap: () => AppNavigator.toMeasurement(),
-                        ),
-                        HomeMenuCard(
-                          title: 'Orders',
-                          subtitle: 'Track progress',
-                          icon: Icons.shopping_bag_outlined,
-                          color: Colors.green.shade600,
-                          onTap: () => AppNavigator.toOrders(),
-                        ),
-                        HomeMenuCard(
-                          title: 'Designs',
-                          subtitle: 'Style catalog',
-                          icon: Icons.palette_outlined,
-                          color: Colors.purple.shade600,
-                          onTap: () => AppNavigator.toDesigns(),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(isTablet ? 24 : 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Next Appointment Section
+              _SectionTitle(text: "Your Next Appointment"),
+              const SizedBox(height: 12),
+              _AppointmentFocusCard(
+                title: "Fitting - Wedding Dress",
+                customerName: "Emma Johnson",
+                time: "2:30 PM",
               ),
-            );
-          },
+              const SizedBox(height: 32),
+
+              // Quick Stats Section
+              _SectionTitle(text: "Quick Stats"),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _QuickStatCard(
+                      value: '24',
+                      label: 'Active Orders',
+                      color: Colors.blue,
+                      isTablet: isTablet,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _QuickStatCard(
+                      value: '156',
+                      label: 'Total Customers',
+                      color: Colors.green,
+                      isTablet: isTablet,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+
+              // Menu Options Section
+              _SectionTitle(text: "Services"),
+              const SizedBox(height: 16),
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: isTablet ? 3 : 2,
+                crossAxisSpacing: isTablet ? 20 : 16,
+                mainAxisSpacing: isTablet ? 20 : 16,
+                childAspectRatio: isTablet ? 1.2 : 1.1,
+                children: [
+                  _HomeMenuCard(
+                    title: 'Customers',
+                    subtitle: 'Manage clients',
+                    icon: Icons.people_outline,
+                    color: Colors.blue.shade600,
+                    onTap: () => AppNavigator.toCustomers(),
+                  ),
+                  _HomeMenuCard(
+                    title: 'Measurements',
+                    subtitle: 'Take & update',
+                    icon: Icons.straighten,
+                    color: Colors.orange.shade600,
+                    onTap: () => AppNavigator.toMeasurement(),
+                  ),
+                  _HomeMenuCard(
+                    title: 'Orders',
+                    subtitle: 'Track progress',
+                    icon: Icons.shopping_bag_outlined,
+                    color: Colors.green.shade600,
+                    onTap: () => AppNavigator.toOrders(),
+                  ),
+                  _HomeMenuCard(
+                    title: 'Designs',
+                    subtitle: 'Style catalog',
+                    icon: Icons.palette_outlined,
+                    color: Colors.purple.shade600,
+                    onTap: () => AppNavigator.toDesigns(),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-//
-// ----------------- SHARED WIDGETS -----------------
-//
-class SectionTitle extends StatelessWidget {
+// The new, visually distinct card for appointments
+class _AppointmentFocusCard extends StatelessWidget {
+  final String title;
+  final String customerName;
+  final String time;
+
+  const _AppointmentFocusCard({
+    required this.title,
+    required this.customerName,
+    required this.time,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2C3E50), // A dark, professional blue
+        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF2C3E50), Color(0xFF4A607C)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.calendar_today, color: Colors.white, size: 28),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  time,
+                  style: GoogleFonts.poppins(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withOpacity(0.9),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  customerName,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
   final String text;
-  const SectionTitle(this.text, {super.key});
+  const _SectionTitle({super.key, required this.text});
 
   @override
   Widget build(BuildContext context) {
     return Text(
       text,
       style: GoogleFonts.poppins(
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: FontWeight.bold,
         color: Colors.grey.shade800,
       ),
@@ -245,24 +229,324 @@ class SectionTitle extends StatelessWidget {
   }
 }
 
-class ActionButton extends StatelessWidget {
-  final IconData icon;
+class _QuickStatCard extends StatelessWidget {
+  final String value;
   final String label;
+  final Color color;
+  final bool isTablet;
 
-  const ActionButton({required this.icon, required this.label, super.key});
+  const _QuickStatCard({
+    required this.value,
+    required this.label,
+    required this.color,
+    required this.isTablet,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        backgroundColor: Colors.grey[100],
-        foregroundColor: Colors.black,
-        elevation: 0,
+    return Container(
+      padding: EdgeInsets.all(isTablet ? 20 : 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      onPressed: () {},
-      icon: Icon(icon),
-      label: Text(label),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: GoogleFonts.poppins(
+              fontSize: isTablet ? 32 : 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue.shade600,
+            ),
+          ),
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              color: Colors.grey,
+              fontSize: isTablet ? 14 : 12,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }
+
+class _HomeMenuCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _HomeMenuCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 36, color: color),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// class DashboardHome extends StatelessWidget {
+//   const DashboardHome({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+
+//     return Scaffold(
+//       appBar: AppBar(
+//         automaticallyImplyLeading: false,
+//         title: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Text(
+//               'Good morning, Sarah!',
+//               style: GoogleFonts.poppins(
+//                 fontSize: 18,
+//                 fontWeight: FontWeight.bold,
+//               ),
+//             ),
+//             Text(
+//               'Welcome back to your workspace',
+//               style: GoogleFonts.poppins(fontSize: 12),
+//             ),
+//           ],
+//         ),
+//         actions: const [Icon(Icons.more_vert)],
+//         backgroundColor: Colors.white,
+//         elevation: 0,
+//         foregroundColor: Colors.black,
+//       ),
+//       body: SafeArea(
+//         child: LayoutBuilder(
+//           builder: (context, constraints) {
+//             final isTablet = constraints.maxWidth > 600;
+//             final padding = isTablet ? 32.0 : 20.0;
+
+//             return SingleChildScrollView(
+//               child: Padding(
+//                 padding: EdgeInsets.all(padding),
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     // Next Appointment
+//                     const SectionTitle("Your Next Appointment"),
+//                     const SizedBox(height: 12),
+//                     const AppointmentCard(
+//                       "Fitting - Wedding Dress",
+//                       "Emma Johnson",
+//                       "Today",
+//                       "2:30 PM",
+//                     ),
+//                     SizedBox(height: isTablet ? 40 : 32),
+
+//                     // Quick stats
+//                     Row(
+//                       children: [
+//                         Expanded(
+//                           child: Container(
+//                             padding: EdgeInsets.all(isTablet ? 20 : 16),
+//                             decoration: BoxDecoration(
+//                               color: Colors.white,
+//                               borderRadius: BorderRadius.circular(12),
+//                               boxShadow: [
+//                                 BoxShadow(
+//                                   color: Colors.black.withValues(alpha: 0.05),
+//                                   blurRadius: 10,
+//                                   offset: const Offset(0, 2),
+//                                 ),
+//                               ],
+//                             ),
+//                             child: Column(
+//                               children: [
+//                                 Text(
+//                                   '24',
+//                                   style: TextStyle(
+//                                     fontSize: isTablet ? 32 : 28,
+//                                     fontWeight: FontWeight.bold,
+//                                     color: Colors.blue.shade600,
+//                                   ),
+//                                 ),
+//                                 Text(
+//                                   'Active Orders',
+//                                   style: TextStyle(
+//                                     color: Colors.grey,
+//                                     fontSize: isTablet ? 14 : 12,
+//                                   ),
+//                                   textAlign: TextAlign.center,
+//                                 ),
+//                               ],
+//                             ),
+//                           ),
+//                         ),
+//                         SizedBox(width: isTablet ? 20 : 16),
+//                         Expanded(
+//                           child: Container(
+//                             padding: EdgeInsets.all(isTablet ? 20 : 16),
+//                             decoration: BoxDecoration(
+//                               color: Colors.white,
+//                               borderRadius: BorderRadius.circular(12),
+//                               boxShadow: [
+//                                 BoxShadow(
+//                                   color: Colors.black.withValues(alpha: 0.05),
+//                                   blurRadius: 10,
+//                                   offset: const Offset(0, 2),
+//                                 ),
+//                               ],
+//                             ),
+//                             child: Column(
+//                               children: [
+//                                 Text(
+//                                   '156',
+//                                   style: TextStyle(
+//                                     fontSize: isTablet ? 32 : 28,
+//                                     fontWeight: FontWeight.bold,
+//                                     color: Colors.green.shade600,
+//                                   ),
+//                                 ),
+//                                 Text(
+//                                   'Total Customers',
+//                                   style: TextStyle(
+//                                     color: Colors.grey,
+//                                     fontSize: isTablet ? 14 : 12,
+//                                   ),
+//                                   textAlign: TextAlign.center,
+//                                 ),
+//                               ],
+//                             ),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                     SizedBox(height: isTablet ? 40 : 32),
+
+//                     // Menu options
+//                     Text(
+//                       'Services',
+//                       style: TextStyle(
+//                         fontSize: isTablet ? 24 : 20,
+//                         fontWeight: FontWeight.bold,
+//                         color: Colors.grey.shade800,
+//                       ),
+//                     ),
+//                     SizedBox(height: isTablet ? 20 : 16),
+
+//                     // Grid with responsive columns
+//                     GridView.count(
+//                       shrinkWrap: true,
+//                       physics: const NeverScrollableScrollPhysics(),
+//                       crossAxisCount: isTablet ? 3 : 2,
+//                       childAspectRatio: isTablet ? 1.2 : 1.1,
+//                       crossAxisSpacing: isTablet ? 20 : 16,
+//                       mainAxisSpacing: isTablet ? 20 : 16,
+//                       children: [
+//                         HomeMenuCard(
+//                           title: 'Customers',
+//                           subtitle: 'Manage clients',
+//                           icon: Icons.people_outline,
+//                           color: Colors.blue.shade600,
+//                           onTap: () => AppNavigator.toCustomers(),
+//                         ),
+//                         HomeMenuCard(
+//                           title: 'Measurements',
+//                           subtitle: 'Take & update',
+//                           icon: Icons.straighten,
+//                           color: Colors.orange.shade600,
+//                           onTap: () => AppNavigator.toMeasurement(),
+//                         ),
+//                         HomeMenuCard(
+//                           title: 'Orders',
+//                           subtitle: 'Track progress',
+//                           icon: Icons.shopping_bag_outlined,
+//                           color: Colors.green.shade600,
+//                           onTap: () => AppNavigator.toOrders(),
+//                         ),
+//                         HomeMenuCard(
+//                           title: 'Designs',
+//                           subtitle: 'Style catalog',
+//                           icon: Icons.palette_outlined,
+//                           color: Colors.purple.shade600,
+//                           onTap: () => AppNavigator.toDesigns(),
+//                         ),
+//                       ],
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             );
+//           },
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// //
+// // ----------------- SHARED WIDGETS -----------------
+// //
+// class SectionTitle extends StatelessWidget {
+//   final String text;
+//   const SectionTitle(this.text, {super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Text(
+//       text,
+//       style: GoogleFonts.poppins(
+//         fontSize: 16,
+//         fontWeight: FontWeight.bold,
+//         color: Colors.grey.shade800,
+//       ),
+//     );
+//   }
+// }

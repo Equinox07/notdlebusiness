@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:notdle/models/customer.dart';
+import 'package:notdle/models/measurement.dart';
 import 'package:notdle/pages/dashboard_screen.dart';
 import 'package:notdle/pages/login_app.dart';
 import 'package:notdle/pages/screens/add_customer_screen.dart';
@@ -11,6 +12,7 @@ import 'package:notdle/pages/screens/customers_screen.dart';
 import 'package:notdle/pages/screens/orders_screen.dart';
 import 'package:notdle/pages/signup_page.dart';
 import 'package:notdle/pages/signup_success_screen.dart';
+import 'package:notdle/pages/screens/measurement_detail_page.dart';
 
 class AppNavigator {
   static final GlobalKey<NavigatorState> navigatorKey =
@@ -24,6 +26,16 @@ class AppNavigator {
             builder:
                 (context) => CustomerDetailScreen(
                   customer: settings.arguments as Customer,
+                ),
+          );
+        }
+        return null;
+      case MeasurementDetailPage.tag:
+        if (settings.arguments is Measurement) {
+          return MaterialPageRoute(
+            builder:
+                (context) => MeasurementDetailPage(
+                  measurement: settings.arguments as Measurement,
                 ),
           );
         }
@@ -99,6 +111,17 @@ class AppNavigator {
       navigatorKey.currentState?.pushNamed(
         CustomerMeasurementScreen.tag,
         arguments: customer,
+      );
+    } else {
+      navigatorKey.currentState?.pushNamed(AllMeasurementScreen.tag);
+    }
+  }
+
+  static void toMeasurementDetails({Measurement? measurement}) {
+    if (measurement != null) {
+      navigatorKey.currentState?.pushNamed(
+        MeasurementDetailPage.tag,
+        arguments: measurement,
       );
     } else {
       navigatorKey.currentState?.pushNamed(AllMeasurementScreen.tag);

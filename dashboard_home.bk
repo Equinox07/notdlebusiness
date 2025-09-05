@@ -1,0 +1,151 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:notdle/pages/sections/appointment_card.dart';
+import 'package:notdle/pages/sections/insight_card.dart';
+
+class DashboardHome extends StatelessWidget {
+  const DashboardHome({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
+
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Good morning, Sarah!',
+              style: GoogleFonts.poppins(fontSize: 18),
+            ),
+            Text(
+              'Welcome back to your workspace',
+              style: GoogleFonts.poppins(fontSize: 12),
+            ),
+          ],
+        ),
+        actions: const [Icon(Icons.more_vert)],
+        backgroundColor: Colors.white,
+        elevation: 0,
+        foregroundColor: Colors.black,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Quick Actions
+            Row(
+              children: const [
+                Expanded(
+                  child: ActionButton(
+                    icon: Icons.person_add,
+                    label: "Add Client",
+                  ),
+                ),
+                SizedBox(width: 12),
+                Expanded(
+                  child: ActionButton(
+                    icon: Icons.add_circle,
+                    label: "New Project",
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Next Appointment
+            const SectionTitle("Your Next Appointment"),
+            const SizedBox(height: 12),
+            const AppointmentCard(
+              "Fitting - Wedding Dress",
+              "Emma Johnson",
+              "Today",
+              "2:30 PM",
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => print("Go to Appointments"),
+                child: const Text("See All"),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Key Insights
+            const SectionTitle("Key Insights"),
+            const SizedBox(height: 12),
+            GridView.count(
+              crossAxisCount: isTablet ? 4 : 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              children: const [
+                InsightCard(
+                  title: "Total Revenue",
+                  value: "\$12,450",
+                  subtitle: "+8.2%",
+                  icon: Icons.attach_money,
+                  iconColor: Colors.green,
+                ),
+                InsightCard(
+                  title: "Active Projects",
+                  value: "18",
+                  subtitle: "3 due soon",
+                  icon: Icons.work_outline,
+                  iconColor: Colors.blue,
+                ),
+              ],
+            ),
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+//
+// ----------------- SHARED WIDGETS -----------------
+//
+class SectionTitle extends StatelessWidget {
+  final String text;
+  const SectionTitle(this.text, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: GoogleFonts.poppins(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        color: Colors.grey.shade800,
+      ),
+    );
+  }
+}
+
+class ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const ActionButton({required this.icon, required this.label, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        backgroundColor: Colors.grey[100],
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
+      onPressed: () {},
+      icon: Icon(icon),
+      label: Text(label),
+    );
+  }
+}

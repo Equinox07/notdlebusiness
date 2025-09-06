@@ -4,7 +4,7 @@ import 'package:uuid/uuid.dart';
 class Order {
   final String id;
   final String title;
-  final String customerId; // Foreign key
+  final int customerId; // Foreign key
   final String status;
   final String paymentStatus;
   final double? paymentAmount;
@@ -44,7 +44,7 @@ class Order {
     return Order(
       id: map['id'],
       title: map['title'],
-      customerId: map['customerId'],
+      customerId: map['customerId'] as int,
       status: map['status'],
       paymentStatus: map['paymentStatus'],
       paymentAmount: map['paymentAmount'],

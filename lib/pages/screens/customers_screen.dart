@@ -278,7 +278,7 @@ class CustomerCard extends StatelessWidget {
               // Orders count using FutureBuilder
               FutureBuilder<int>(
                 future: DatabaseHelper.instance.getCustomerOrderCount(
-                  customer.id,
+                  customer.id!,
                 ),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {

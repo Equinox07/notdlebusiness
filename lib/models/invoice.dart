@@ -4,7 +4,7 @@ import 'package:uuid/uuid.dart';
 class Invoice {
   final String id;
   final String title;
-  final String customerId; // Foreign key
+  final int customerId; // Foreign key
   final String status;
   final double totalAmount;
   final DateTime date;
@@ -38,7 +38,7 @@ class Invoice {
     return Invoice(
       id: map['id'],
       title: map['title'],
-      customerId: map['customerId'],
+      customerId: map['customerId'] as int,
       status: map['status'],
       totalAmount: map['totalAmount'],
       date: DateTime.parse(map['date']),

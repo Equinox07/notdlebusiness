@@ -24,7 +24,7 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
   void initState() {
     super.initState();
     _ordersFuture = DatabaseHelper.instance.getCustomerOrders(
-      widget.customer.id,
+      widget.customer.id!,
     );
   }
 

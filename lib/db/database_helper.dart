@@ -146,7 +146,7 @@ class DatabaseHelper {
     return result.map((map) => Customer.fromMap(map)).toList();
   }
 
-  Future<Customer?> fetchCustomerById(String id) async {
+  Future<Customer?> fetchCustomerById(int id) async {
     final db = await instance.database;
     final result = await db.query(
       "customers",
@@ -162,7 +162,7 @@ class DatabaseHelper {
 
   // ... (other code)
 
-  Future<List<Order>> getCustomerOrders(String customerId) async {
+  Future<List<Order>> getCustomerOrders(int customerId) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'orders',
@@ -354,7 +354,7 @@ class DatabaseHelper {
   }
 
   // Method to fetch the count of all orders for this customer from the database.
-  Future<int> getCustomerOrderCount(String id) async {
+  Future<int> getCustomerOrderCount(int id) async {
     final dbHelper = DatabaseHelper.instance;
     final Database db = await dbHelper.database;
     final count = Sqflite.firstIntValue(

@@ -81,7 +81,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
       final newOrder = Order(
         title: _orderTitle,
-        customerId: _selectedCustomer!.id,
+        customerId: _selectedCustomer!.id!,
         status: _status,
         paymentStatus: _paymentStatus,
         paymentAmount: double.tryParse(_paymentAmount ?? ''),
@@ -94,7 +94,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       if (_paymentStatus != 'Pending' && _paymentAmount != null) {
         final newInvoice = Invoice(
           title: 'Invoice for $_orderTitle',
-          customerId: _selectedCustomer!.id,
+          customerId: _selectedCustomer!.id!,
           status: _paymentStatus,
           totalAmount: double.tryParse(_paymentAmount!) ?? 0.0,
           date: DateTime.now(),

@@ -154,7 +154,7 @@ class _MeasurementsScreenState extends State<MeasurementsScreen> {
     }
 
     final measurement = Measurement(
-      customerId: widget.customer.id!,
+      customerId: widget.customer.id,
       measurementValues: values,
       createdDate: DateTime.now(),
     );

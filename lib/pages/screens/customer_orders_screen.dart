@@ -1,4 +1,4 @@
-// lib/screens/orders_screen.dart
+// lib/screens/customer_orders_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,37 +6,26 @@ import 'package:intl/intl.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/order.dart';
-import 'package:notdle/pages/screens/create_order_screen.dart';
 import 'package:notdle/pages/screens/order_details_screen.dart';
 
-class OrdersScreen extends StatefulWidget {
-  const OrdersScreen({super.key});
+class CustomerOrdersScreen extends StatefulWidget {
+  final Customer customer;
 
-  static const String tag = "orders";
+  const CustomerOrdersScreen({super.key, required this.customer});
 
   @override
-  State<OrdersScreen> createState() => _OrdersScreenState();
+  State<CustomerOrdersScreen> createState() => _CustomerOrdersScreenState();
 }
 
-class _OrdersScreenState extends State<OrdersScreen> {
-  final dbHelper = DatabaseHelper.instance;
+class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
   late Future<List<Order>> _ordersFuture;
 
   @override
   void initState() {
     super.initState();
-    _ordersFuture = _fetchOrders();
-  }
-
-  Future<List<Order>> _fetchOrders() async {
-    return await dbHelper.getOrders();
-  }
-
-  // Reloads the screen when a new order is added.
-  void _onOrderCreated() {
-    setState(() {
-      _ordersFuture = _fetchOrders();
-    });
+    _ordersFuture = DatabaseHelper.instance.getCustomerOrders(
+      widget.customer.id,
+    );
   }
 
   @override
@@ -45,7 +34,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: Text(
-          "Orders",
+          "${widget.customer.name}'s Orders",
           style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
         ),
         backgroundColor: Colors.white,
@@ -57,16 +46,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                "Error: ${snapshot.error}",
-                style: GoogleFonts.poppins(),
-              ),
-            );
+            return Center(child: Text("Error: ${snapshot.error}"));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
               child: Text(
-                "No orders found.",
+                "No orders found for this customer.",
                 style: GoogleFonts.poppins(fontSize: 16),
               ),
             );
@@ -77,10 +61,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
               itemCount: orders.length,
               itemBuilder: (context, index) {
                 final order = orders[index];
-                return _OrderCard(
+                return OrderCard(
                   order: order,
                   onTap: () {
-                    // Pass the orderId instead of the entire Order object
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder:
@@ -94,30 +77,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
           }
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          await Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const CreateOrderScreen()),
-          );
-          _onOrderCreated(); // Refresh the list after returning
-        },
-        label: Text(
-          "New Order",
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-        icon: const Icon(Icons.add, color: Colors.white),
-        backgroundColor: Colors.indigo,
-      ),
     );
   }
 }
 
-// Order Card Widget
-class _OrderCard extends StatelessWidget {
-  const _OrderCard({required this.order, required this.onTap});
+class OrderCard extends StatelessWidget {
+  const OrderCard({required this.order, required this.onTap, super.key});
 
   final Order order;
   final VoidCallback onTap;
@@ -196,7 +161,7 @@ class _OrderCard extends StatelessWidget {
                 children: [
                   _PaymentStatusChip(status: order.paymentStatus),
                   Text(
-                    // **CORRECTED:** Safely check for null before parsing the date
+                    // Safely check for null before parsing the date
                     getFormattedDueDate(order.dueDate),
                     style: GoogleFonts.poppins(
                       fontSize: 13,

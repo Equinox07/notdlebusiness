@@ -158,6 +158,23 @@ class DatabaseHelper {
     return null;
   }
 
+  // lib/helpers/database_helper.dart
+
+  // ... (other code)
+
+  Future<List<Order>> getCustomerOrders(String customerId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'orders',
+      where: 'customerId = ?',
+      whereArgs: [customerId],
+    );
+
+    return List.generate(maps.length, (i) {
+      return Order.fromMap(maps[i]);
+    });
+  }
+
   // -------------------- MEASUREMENT OPERATIONS --------------------
   // ------------------ Measurements CRUD ------------------
 
@@ -189,7 +206,9 @@ class DatabaseHelper {
     return null;
   }
 
-  Future<List<Measurement>> fetchMeasurementsByCustomer(int customerId) async {
+  Future<List<Measurement>> fetchMeasurementsByCustomer(
+    String customerId,
+  ) async {
     final db = await instance.database;
     final maps = await db.query(
       'measurements',
@@ -332,6 +351,18 @@ class DatabaseHelper {
       };
     }
     return null;
+  }
+
+  // Method to fetch the count of all orders for this customer from the database.
+  Future<int> getCustomerOrderCount(String id) async {
+    final dbHelper = DatabaseHelper.instance;
+    final Database db = await dbHelper.database;
+    final count = Sqflite.firstIntValue(
+      await db.rawQuery('SELECT COUNT(*) FROM orders WHERE customerId = ?', [
+        id,
+      ]),
+    );
+    return count ?? 0;
   }
 }
 

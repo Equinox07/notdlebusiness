@@ -7,6 +7,7 @@ import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
+import 'package:notdle/pages/screens/create_invoice_screen.dart';
 
 // Private data model to hold all fetched details
 class _OrderDetailsData {
@@ -117,6 +118,35 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 ],
               ),
             ),
+          );
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: FutureBuilder<_OrderDetailsData?>(
+        future: _orderDetailsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting ||
+              !snapshot.hasData) {
+            return const SizedBox.shrink(); // Hide the button while loading
+          }
+          final order = snapshot.data!.order;
+          return FloatingActionButton.extended(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => CreateInvoiceScreen(order: order),
+                ),
+              );
+            },
+            backgroundColor: Colors.indigo.shade600,
+            label: Text(
+              "Create Invoice",
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            icon: const Icon(Icons.receipt, color: Colors.white),
           );
         },
       ),

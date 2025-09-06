@@ -218,10 +218,10 @@ class CustomerCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16), // ✅ rounded corners
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05), // ✅ subtle shadow
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -231,7 +231,7 @@ class CustomerCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              // Avatar placeholder
+              // Avatar
               CircleAvatar(
                 radius: 24,
                 backgroundColor: Colors.indigo.shade100,
@@ -275,24 +275,55 @@ class CustomerCard extends StatelessWidget {
                 ),
               ),
 
-              // Orders count
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
+              // Orders count using FutureBuilder
+              FutureBuilder<int>(
+                future: DatabaseHelper.instance.getCustomerOrderCount(
+                  customer.id,
                 ),
-                decoration: BoxDecoration(
-                  color: Colors.indigo.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  "${customer.getTotalOrders()} orders",
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.indigo.shade700,
-                  ),
-                ),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.indigo.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        "...",
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.indigo.shade700,
+                        ),
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Container(); // Or display a small error indicator
+                  } else {
+                    final orderCount = snapshot.data ?? 0;
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.indigo.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        "$orderCount orders",
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.indigo.shade700,
+                        ),
+                      ),
+                    );
+                  }
+                },
               ),
             ],
           ),
@@ -301,3 +332,99 @@ class CustomerCard extends StatelessWidget {
     );
   }
 }
+// class CustomerCard extends StatelessWidget {
+//   final Customer customer;
+//   final VoidCallback onTap;
+
+//   const CustomerCard({super.key, required this.customer, required this.onTap});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTap: onTap,
+//       child: Container(
+//         decoration: BoxDecoration(
+//           color: Colors.white,
+//           borderRadius: BorderRadius.circular(16), // ✅ rounded corners
+//           boxShadow: [
+//             BoxShadow(
+//               color: Colors.black.withOpacity(0.05), // ✅ subtle shadow
+//               blurRadius: 10,
+//               offset: const Offset(0, 4),
+//             ),
+//           ],
+//         ),
+//         child: Padding(
+//           padding: const EdgeInsets.all(16),
+//           child: Row(
+//             children: [
+//               // Avatar placeholder
+//               CircleAvatar(
+//                 radius: 24,
+//                 backgroundColor: Colors.indigo.shade100,
+//                 child: Icon(
+//                   Icons.person,
+//                   color: Colors.indigo.shade600,
+//                   size: 24,
+//                 ),
+//               ),
+//               const SizedBox(width: 16),
+
+//               // Customer info
+//               Expanded(
+//                 child: Column(
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Text(
+//                       customer.name,
+//                       style: GoogleFonts.poppins(
+//                         fontSize: 16,
+//                         fontWeight: FontWeight.w600,
+//                         color: Colors.black87,
+//                       ),
+//                     ),
+//                     const SizedBox(height: 4),
+//                     Text(
+//                       customer.phone,
+//                       style: GoogleFonts.poppins(
+//                         fontSize: 13,
+//                         color: Colors.grey.shade600,
+//                       ),
+//                     ),
+//                     Text(
+//                       customer.email ?? "N/A",
+//                       style: GoogleFonts.poppins(
+//                         fontSize: 13,
+//                         color: Colors.grey.shade600,
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ),
+
+//               // Orders count
+//               Container(
+//                 padding: const EdgeInsets.symmetric(
+//                   horizontal: 12,
+//                   vertical: 6,
+//                 ),
+//                 decoration: BoxDecoration(
+//                   color: Colors.indigo.shade50,
+//                   borderRadius: BorderRadius.circular(12),
+//                 ),
+//                 child: Text(
+//                   "${customer.getTotalOrders()} orders",
+//                   style: GoogleFonts.poppins(
+//                     fontSize: 12,
+//                     fontWeight: FontWeight.w500,
+//                     color: Colors.indigo.shade700,
+//                   ),
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }

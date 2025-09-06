@@ -1,8 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/material.dart';
-
 
 class DashboardAppScreen extends StatelessWidget {
   const DashboardAppScreen({super.key});
@@ -15,12 +13,14 @@ class DashboardAppScreen extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
-        fontFamily: 'Roboto', // You might want to use GoogleFonts for more options
+        fontFamily:
+            'Poppins', // You might want to use GoogleFonts for more options
       ),
       home: DashboardScreen(),
     );
   }
 }
+
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
@@ -30,10 +30,7 @@ class DashboardScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Dashboard',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: Text('Dashboard', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
       drawer: const AppDrawer(),
       body: Padding(
@@ -55,7 +52,9 @@ class DashboardScreen extends StatelessWidget {
             // Appointment
             Card(
               elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
@@ -66,8 +65,14 @@ class DashboardScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Sarah Wilson', style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text('Project Review', style: TextStyle(color: Colors.grey)),
+                          Text(
+                            'Sarah Wilson',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            'Project Review',
+                            style: TextStyle(color: Colors.grey),
+                          ),
                         ],
                       ),
                     ),
@@ -75,15 +80,24 @@ class DashboardScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: isDark ? Colors.white12 : Colors.grey[200],
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Text("Today", style: TextStyle(fontSize: 12)),
+                          child: const Text(
+                            "Today",
+                            style: TextStyle(fontSize: 12),
+                          ),
                         ),
                         const SizedBox(height: 4),
-                        const Text("2:00 PM", style: TextStyle(fontWeight: FontWeight.bold)),
+                        const Text(
+                          "2:00 PM",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ],
                     ),
                   ],
@@ -97,8 +111,16 @@ class DashboardScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: const [
-                StatCard(title: 'Active Projects', value: '12', subtitle: 'Projects in progress'),
-                StatCard(title: 'Unpaid Invoices', value: '3', subtitle: 'Invoices awaiting payment'),
+                StatCard(
+                  title: 'Active Projects',
+                  value: '12',
+                  subtitle: 'Projects in progress',
+                ),
+                StatCard(
+                  title: 'Unpaid Invoices',
+                  value: '3',
+                  subtitle: 'Invoices awaiting payment',
+                ),
                 // StatCard(title: 'Outstanding Amount', value: '\$15,420', subtitle: 'Total unpaid amount'),
               ],
             ),
@@ -160,9 +182,18 @@ class StatCard extends StatelessWidget {
             children: [
               Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
-              Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+              Text(
+                subtitle,
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
             ],
           ),
         ),
@@ -188,7 +219,10 @@ class ActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.grey.shade300)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade300),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -196,15 +230,25 @@ class ActionCard extends StatelessWidget {
           children: [
             Icon(icon, size: 32, color: Colors.black),
             const SizedBox(height: 12),
-            Text(title, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
-            Text(subtitle, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            ),
             const Spacer(),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
               onPressed: () {},
               child: Text(buttonText),
@@ -215,7 +259,6 @@ class ActionCard extends StatelessWidget {
     );
   }
 }
-
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -228,19 +271,40 @@ class AppDrawer extends StatelessWidget {
       child: Column(
         children: [
           DrawerHeader(
-            decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+            ),
             child: Row(
               children: const [
                 CircleAvatar(radius: 30, child: Icon(Icons.person, size: 30)),
                 SizedBox(width: 12),
-                Text('Alex Johnson', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text(
+                  'Alex Johnson',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
               ],
             ),
           ),
-          ListTile(leading: Icon(Icons.dashboard), title: Text('Dashboard', style: textStyle), onTap: () {}),
-          ListTile(leading: Icon(Icons.folder), title: Text('Projects', style: textStyle), onTap: () {}),
-          ListTile(leading: Icon(Icons.people), title: Text('Clients', style: textStyle), onTap: () {}),
-          ListTile(leading: Icon(Icons.settings), title: Text('Settings', style: textStyle), onTap: () {}),
+          ListTile(
+            leading: Icon(Icons.dashboard),
+            title: Text('Dashboard', style: textStyle),
+            onTap: () {},
+          ),
+          ListTile(
+            leading: Icon(Icons.folder),
+            title: Text('Projects', style: textStyle),
+            onTap: () {},
+          ),
+          ListTile(
+            leading: Icon(Icons.people),
+            title: Text('Clients', style: textStyle),
+            onTap: () {},
+          ),
+          ListTile(
+            leading: Icon(Icons.settings),
+            title: Text('Settings', style: textStyle),
+            onTap: () {},
+          ),
           const Spacer(),
           const Divider(),
           ListTile(

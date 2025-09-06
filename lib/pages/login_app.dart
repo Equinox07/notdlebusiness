@@ -212,14 +212,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                   shadowColor: Colors.green.withOpacity(0.3),
                                 ),
                                 onPressed: () => AppNavigator.toHome(),
-                                // async {
-                                //   Navigator.push(
-                                //     context,
-                                //     MaterialPageRoute(
-                                //       builder: (_) => const DashboardScreen(),
-                                //     ),
-                                //   );
-                                // },
                                 child: Text(
                                   "LOGIN",
                                   style: GoogleFonts.poppins(

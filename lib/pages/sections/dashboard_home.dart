@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/navigation/app_navigation.dart';
+import 'package:notdle/widgets/deadline_card.dart';
 
 // Assume this exists
 
@@ -51,13 +53,21 @@ class DashboardHome extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Next Appointment Section
-              _SectionTitle(text: "Your Next Appointment"),
+              // _SectionTitle(text: "Your Next Appointment"),
+              // const SizedBox(height: 12),
+              // _AppointmentFocusCard(
+              //   title: "Fitting - Wedding Dress",
+              //   customerName: "Emma Johnson",
+              //   time: "2:30 PM",
+              // ),
+              // const SizedBox(height: 32),
+              _SectionTitle(text: "Deadlines"),
               const SizedBox(height: 12),
-              _AppointmentFocusCard(
-                title: "Fitting - Wedding Dress",
-                customerName: "Emma Johnson",
-                time: "2:30 PM",
+              DeadlineCard(
+                orderFuture: DatabaseHelper.instance.getSoonestDueOrder(),
+                onTap: () => debugPrint("Orders"),
               ),
+
               const SizedBox(height: 32),
 
               // Quick Stats Section
@@ -65,23 +75,64 @@ class DashboardHome extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Expanded(
-                    child: _QuickStatCard(
-                      value: '24',
-                      label: 'Active Orders',
-                      color: Colors.blue,
-                      isTablet: isTablet,
-                    ),
+                  FutureBuilder<int>(
+                    future: DatabaseHelper.instance.getActiveOrderCount(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      }
+                      return Expanded(
+                        child: _QuickStatCard(
+                          value: "${snapshot.data ?? 0}",
+                          label: 'Active Orders',
+                          color: Colors.blue,
+                          isTablet: isTablet,
+                        ),
+                      );
+                      // Text(
+                      //   'Total Orders: ${snapshot.data ?? 0}',
+                      //   style: Theme.of(context).textTheme.headlineMedium,
+                      // );
+                    },
                   ),
+
+                  // Expanded(
+                  //   child: _QuickStatCard(
+                  //     value: '24',
+                  //     label: 'Active Orders',
+                  //     color: Colors.blue,
+                  //     isTablet: isTablet,
+                  //   ),
+                  // ),
                   const SizedBox(width: 16),
-                  Expanded(
-                    child: _QuickStatCard(
-                      value: '156',
-                      label: 'Total Customers',
-                      color: Colors.green,
-                      isTablet: isTablet,
-                    ),
+                  FutureBuilder<int>(
+                    future: DatabaseHelper.instance.getCustomerCount(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      }
+                      return Expanded(
+                        child: _QuickStatCard(
+                          value: "${snapshot.data ?? 0}",
+                          label: 'Total Customers',
+                          color: Colors.green,
+                          isTablet: isTablet,
+                        ),
+                      );
+                      // Text(
+                      //   'Total Orders: ${snapshot.data ?? 0}',
+                      //   style: Theme.of(context).textTheme.headlineMedium,
+                      // );
+                    },
                   ),
+                  // Expanded(
+                  //   child: _QuickStatCard(
+                  //     value: '156',
+                  //     label: 'Total Customers',
+                  //     color: Colors.green,
+                  //     isTablet: isTablet,
+                  //   ),
+                  // ),
                 ],
               ),
               const SizedBox(height: 32),
@@ -123,7 +174,8 @@ class DashboardHome extends StatelessWidget {
                     subtitle: 'Style catalog',
                     icon: Icons.palette_outlined,
                     color: Colors.purple.shade600,
-                    onTap: () => AppNavigator.toDesigns(),
+                    onTap:
+                        () => debugPrint("Designs"), //AppNavigator.toDesigns(),
                   ),
                 ],
               ),

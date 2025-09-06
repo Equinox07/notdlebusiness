@@ -379,6 +379,46 @@ class DatabaseHelper {
     }
     return null;
   }
+
+  Future<Order?> getSoonestDueOrder() async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'orders',
+      where: "status IN ('In Progress', 'Pending') AND dueDate IS NOT NULL",
+      orderBy: 'dueDate ASC',
+      limit: 1,
+    );
+
+    if (maps.isNotEmpty) {
+      return Order.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  // Get the total number of orders
+  Future<int> getOrderCount() async {
+    final db = await database;
+    final countResult = await db.rawQuery('SELECT COUNT(*) FROM orders');
+    final int? count = Sqflite.firstIntValue(countResult);
+    return count ?? 0;
+  }
+
+  // Get the total number of customers
+  Future<int> getCustomerCount() async {
+    final db = await database;
+    final countResult = await db.rawQuery('SELECT COUNT(*) FROM customers');
+    final int? count = Sqflite.firstIntValue(countResult);
+    return count ?? 0;
+  }
+
+  Future<int> getActiveOrderCount() async {
+    final db = await database;
+    final countResult = await db.rawQuery(
+      "SELECT COUNT(*) FROM orders WHERE status IN ('In Progress', 'Pending')",
+    );
+    final int? count = Sqflite.firstIntValue(countResult);
+    return count ?? 0;
+  }
 }
 
 class MeasurementWithCustomer {

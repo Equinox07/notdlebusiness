@@ -4,7 +4,7 @@ import 'package:notdle/models/customer.dart';
 
 class Measurement {
   final int? id; // 🔹 Auto-generated primary key
-  final String customerId; // links to Customer.id
+  final int customerId; // links to Customer.id
   final Map<String, double> measurementValues; // all measurement fields
   final DateTime createdDate;
 
@@ -22,7 +22,7 @@ class Measurement {
   factory Measurement.fromMap(Map<String, dynamic> map) {
     return Measurement(
       id: map['id'] as int?,
-      customerId: map['customerId'].toString(),
+      customerId: map['customerId'] as int,
       measurementValues:
           map['measurementValues'] != null
               ? Map<String, double>.from(jsonDecode(map['measurementValues']))

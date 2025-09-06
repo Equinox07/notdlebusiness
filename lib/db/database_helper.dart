@@ -36,7 +36,7 @@ class DatabaseHelper {
   Future _createDB(Database db, int version) async {
     await db.execute('''
       CREATE TABLE customers(
-        id TEXT PRIMARY KEY,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
         phone TEXT,
         email TEXT,
@@ -113,7 +113,7 @@ class DatabaseHelper {
 
     // Return a new Customer with id assigned
     return Customer(
-      id: id.toString(),
+      id: id,
       name: customer.name,
       gender: customer.gender,
       phone: customer.phone,

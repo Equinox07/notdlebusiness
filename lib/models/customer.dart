@@ -5,7 +5,7 @@ import 'package:uuid/uuid.dart';
 import 'package:sqflite/sqflite.dart';
 
 class Customer {
-  final String id;
+  final int? id;
   final String name;
   final String phone;
   final String? email;
@@ -17,7 +17,7 @@ class Customer {
   final DateTime createdDate;
 
   Customer({
-    String? id,
+    this.id,
     required this.name,
     required this.phone,
     this.email,
@@ -27,7 +27,7 @@ class Customer {
     this.imagePath,
     this.imageUrl,
     required this.createdDate,
-  }) : id = id ?? const Uuid().v4();
+  });
 
   // Convert a Customer object into a Map for database storage.
   Map<String, dynamic> toMap() {

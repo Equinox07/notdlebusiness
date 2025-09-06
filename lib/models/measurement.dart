@@ -37,7 +37,7 @@ class Measurement {
       'measurementValues': jsonEncode(measurementValues),
       'createdDate': createdDate.toIso8601String(),
     };
-    if (id != null) map['id'] = id;
+    if (id != null) map['id'] = id!;
     return map;
   }
 

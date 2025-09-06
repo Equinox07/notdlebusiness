@@ -47,9 +47,9 @@ class CustomerDetailScreen extends StatelessWidget {
               const SizedBox(height: 16),
 
               // Recent Orders
-              _RecentOrdersCard(),
+              // _RecentOrdersCard(),
 
-              const SizedBox(height: 40),
+              // const SizedBox(height: 40),
             ],
           ),
         ),

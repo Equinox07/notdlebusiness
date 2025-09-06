@@ -6,6 +6,7 @@ import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
+import 'package:notdle/pages/screens/invoice_details_screen.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   const CreateOrderScreen({super.key});
@@ -91,19 +92,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
       await dbHelper.insertOrder(newOrder);
 
-      if (_paymentStatus != 'Pending' && _paymentAmount != null) {
-        final newInvoice = Invoice(
-          title: 'Invoice for $_orderTitle',
-          customerId: _selectedCustomer!.id!,
-          status: _paymentStatus,
-          totalAmount: double.tryParse(_paymentAmount!) ?? 0.0,
-          date: DateTime.now(),
-          orderId: newOrder.id,
-        );
-
-        await dbHelper.insertInvoice(newInvoice);
-      }
-
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -129,8 +117,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop();
+                  _generateInvoice(newOrder);
+                  // Navigator.of(context).pop();
+                  // Navigator.of(context).pop();
                   // In a real app, you would navigate to the invoice screen
                   // Navigator.of(context).push(
                   //   MaterialPageRoute(
@@ -155,6 +144,33 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             ),
           );
         },
+      );
+    }
+  }
+
+  void _generateInvoice(Order newOrder) async {
+    if (_paymentStatus != 'Pending' && _paymentAmount != null) {
+      final newInvoice = Invoice(
+        title: 'Invoice for $_orderTitle',
+        customerId: _selectedCustomer!.id!,
+        status: _paymentStatus,
+        totalAmount: double.tryParse(_paymentAmount!) ?? 0.0,
+        date: DateTime.now(),
+        orderId: newOrder.id,
+      );
+
+      await dbHelper.insertInvoice(newInvoice);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Order and Invoice created successfully!'),
+        ),
+      );
+
+      // Navigate to the InvoiceDetailsScreen, passing the new invoice object
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => InvoiceDetailsScreen(invoice: newInvoice),
+        ),
       );
     }
   }

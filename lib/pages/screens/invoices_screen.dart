@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/invoice.dart';
+import 'package:notdle/pages/screens/invoice_details_screen.dart';
 
 class InvoicesScreen extends StatefulWidget {
   const InvoicesScreen({super.key});
@@ -56,7 +57,18 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
               itemCount: invoices.length,
               itemBuilder: (context, index) {
                 final invoice = invoices[index];
-                return InvoiceCard(invoice: invoice);
+                return InvoiceCard(
+                  invoice: invoice,
+                  onTap: () {
+                    // Navigate to InvoiceDetailsScreen on tap
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder:
+                            (context) => InvoiceDetailsScreen(invoice: invoice),
+                      ),
+                    );
+                  },
+                );
               },
             );
           }
@@ -67,78 +79,82 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
 }
 
 class InvoiceCard extends StatelessWidget {
-  const InvoiceCard({super.key, required this.invoice});
+  const InvoiceCard({super.key, required this.invoice, required this.onTap});
 
   final Invoice invoice;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     // This widget needs to be updated to use customer information from the database
     // For now, it will only display hardcoded customer data or a simple placeholder
     // A complete solution would involve fetching the customer from the database using invoice.customerId
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    invoice.title,
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.indigo.shade800,
+    return InkWell(
+      onTap: onTap,
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        margin: const EdgeInsets.only(bottom: 16),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      invoice.title,
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.indigo.shade800,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                Text(
-                  "\$${invoice.totalAmount.toStringAsFixed(2)}",
-                  style: GoogleFonts.poppins(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green.shade700,
+                  Text(
+                    "\$${invoice.totalAmount.toStringAsFixed(2)}",
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade700,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "Invoice #${invoice.id.substring(0, 8)}",
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: Colors.grey.shade600,
+                ],
               ),
-            ),
-            const SizedBox(height: 4),
-            // This is a placeholder; you'll need to fetch the customer from the DB
-            Text(
-              "For: Customer",
-              style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                _buildStatusChip(invoice.status),
-                const Spacer(),
-                Text(
-                  "Due: ${DateFormat('MMM d, y').format(invoice.date.add(const Duration(days: 30)))}",
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    color: Colors.red.shade400,
-                    fontStyle: FontStyle.italic,
-                  ),
+              const SizedBox(height: 8),
+              Text(
+                "Invoice #${invoice.id.substring(0, 8)}",
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
                 ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(height: 4),
+              // This is a placeholder; you'll need to fetch the customer from the DB
+              Text(
+                "For: Customer",
+                style: GoogleFonts.poppins(fontSize: 14, color: Colors.black87),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  _buildStatusChip(invoice.status),
+                  const Spacer(),
+                  Text(
+                    "Due: ${DateFormat('MMM d, y').format(invoice.date.add(const Duration(days: 30)))}",
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: Colors.red.shade400,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

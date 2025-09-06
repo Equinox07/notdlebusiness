@@ -84,6 +84,12 @@ class AppNavigator {
     );
   }
 
+  static void toHome2() {
+    navigatorKey.currentState?.pushReplacement(
+      MaterialPageRoute(builder: (context) => DashboardScreen()),
+    );
+  }
+
   static void toLogin() {
     navigatorKey.currentState?.pushNamedAndRemoveUntil(
       LoginApp.tag,

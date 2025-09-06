@@ -52,7 +52,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE measurements(
        id INTEGER PRIMARY KEY AUTOINCREMENT,
-      customerId TEXT NOT NULL,
+      customerId INTEGER NOT NULL,
       measurementValues TEXT,
       createdDate TEXT NOT NULL,
       FOREIGN KEY(customerId) REFERENCES customers(id) ON DELETE CASCADE
@@ -64,7 +64,7 @@ class DatabaseHelper {
              CREATE TABLE orders(
                id TEXT PRIMARY KEY,
                title TEXT,
-               customerId TEXT,
+               customerId INTEGER NOT NULL,
                status TEXT,
                paymentStatus TEXT,
                paymentAmount REAL,
@@ -80,7 +80,7 @@ class DatabaseHelper {
              CREATE TABLE invoices(
                id TEXT PRIMARY KEY,
                title TEXT,
-               customerId TEXT,
+               customerId INTEGER NOT NULL,
                status TEXT,
                totalAmount REAL,
                date TEXT,
@@ -363,6 +363,21 @@ class DatabaseHelper {
       ]),
     );
     return count ?? 0;
+  }
+
+  // Method to fetch a single order by its ID
+  Future<Order?> getOrderById(String orderId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'orders',
+      where: 'id = ?',
+      whereArgs: [orderId],
+    );
+
+    if (maps.isNotEmpty) {
+      return Order.fromMap(maps.first);
+    }
+    return null;
   }
 }
 

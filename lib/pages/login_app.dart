@@ -211,14 +211,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                   elevation: 4,
                                   shadowColor: Colors.green.withOpacity(0.3),
                                 ),
-                                onPressed: () async {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const DashboardScreen(),
-                                    ),
-                                  );
-                                },
+                                onPressed: () => AppNavigator.toHome(),
+                                // async {
+                                //   Navigator.push(
+                                //     context,
+                                //     MaterialPageRoute(
+                                //       builder: (_) => const DashboardScreen(),
+                                //     ),
+                                //   );
+                                // },
                                 child: Text(
                                   "LOGIN",
                                   style: GoogleFonts.poppins(

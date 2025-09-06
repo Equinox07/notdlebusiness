@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/measurement.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/pages/screens/add_measurement_screen.dart';
+import 'package:notdle/pages/screens/customer_measurement.dart';
 
 // Assuming your Customer and Measurement models are correctly defined.
 
@@ -130,7 +131,7 @@ class MeasurementDetailPage extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => AddMeasurementScreen(customer: customer),
+              builder: (_) => CustomerMeasurementScreen(customer: customer),
             ),
           );
         },

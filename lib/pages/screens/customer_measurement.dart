@@ -314,11 +314,11 @@ class _CustomerMeasurementScreenState extends State<CustomerMeasurementScreen> {
         body: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            _MeasurementTypeDropdownField(
-              measurementTypeOptions: _measurementType,
-              selectedType: _selectedMeasureType,
-              onChanged: (val) => debugPrint(val),
-            ),
+            // _MeasurementTypeDropdownField(
+            //   measurementTypeOptions: _measurementType,
+            //   selectedType: _selectedMeasureType,
+            //   onChanged: (val) => debugPrint(val),
+            // ),
             Expanded(
               child: Form(
                 key: _formKey,

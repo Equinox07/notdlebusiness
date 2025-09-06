@@ -1,198 +1,196 @@
+// DashboardAppScreen
+// lib/screens/dashboard_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter/material.dart';
 
 class DashboardAppScreen extends StatelessWidget {
   const DashboardAppScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Business Dashboard',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        fontFamily:
-            'Poppins', // You might want to use GoogleFonts for more options
-      ),
-      home: DashboardScreen(),
-    );
-  }
-}
-
-class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Dashboard', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Text(
+          'Dashboard',
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_none, color: Colors.black87),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.account_circle, color: Colors.black87),
+            onPressed: () {},
+          ),
+        ],
       ),
-      drawer: const AppDrawer(),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Good morning, Alex Johnson',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Here’s what’s happening with your business today.',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-            const SizedBox(height: 20),
-
-            // Appointment
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+            // Welcome Section
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.indigo.shade600, Colors.indigo.shade800],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(24),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    const Icon(Icons.calendar_today_outlined),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Sarah Wilson',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'Project Review',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isDark ? Colors.white12 : Colors.grey[200],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            "Today",
-                            style: TextStyle(fontSize: 12),
+                        Text(
+                          'Good morning, Alex 👋',
+                          style: GoogleFonts.poppins(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          "2:00 PM",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Here's what's happening with your business.",
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.white70,
+                          ),
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Stats
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                StatCard(
-                  title: 'Active Projects',
-                  value: '12',
-                  subtitle: 'Projects in progress',
-                ),
-                StatCard(
-                  title: 'Unpaid Invoices',
-                  value: '3',
-                  subtitle: 'Invoices awaiting payment',
-                ),
-                // StatCard(title: 'Outstanding Amount', value: '\$15,420', subtitle: 'Total unpaid amount'),
-              ],
-            ),
-
-            const SizedBox(height: 30),
-
-            // Actions
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                childAspectRatio: 1.2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                children: const [
-                  ActionCard(
-                    icon: Icons.add_circle_outline,
-                    title: 'Create New Project',
-                    subtitle: 'Start a new project and track your progress',
-                    buttonText: 'New Project',
                   ),
-                  ActionCard(
-                    icon: Icons.person_add_alt,
-                    title: 'Add New Client',
-                    subtitle: 'Expand your client base and grow your business',
-                    buttonText: 'Add Client',
+                  const CircleAvatar(
+                    backgroundColor: Colors.white30,
+                    radius: 30,
+                    child: Icon(Icons.person, size: 30, color: Colors.white),
                   ),
                 ],
               ),
             ),
+            const SizedBox(height: 24),
+
+            // Summary Stats Section
+            _buildSectionTitle(context, 'Summary'),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _StatCard(
+                  title: 'Orders',
+                  value: '12',
+                  icon: Icons.shopping_cart_rounded,
+                  color: Colors.indigo,
+                ),
+                _StatCard(
+                  title: 'Customers',
+                  value: '25',
+                  icon: Icons.group,
+                  color: Colors.green,
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Quick Actions Section
+            _buildSectionTitle(context, 'Quick Actions'),
+            const SizedBox(height: 12),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _ActionCard(
+                  title: 'Add New Order',
+                  icon: Icons.add_circle_outline,
+                ),
+                _ActionCard(
+                  title: 'Add New Customer',
+                  icon: Icons.person_add_alt,
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Recent Deadlines Section
+            _buildSectionTitle(context, 'Recent Deadlines'),
+            const SizedBox(height: 12),
+            const _DeadlineCard(),
+            const SizedBox(height: 16),
+            const _DeadlineCard(),
+            const SizedBox(height: 24),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildSectionTitle(BuildContext context, String title) {
+    return Text(
+      title,
+      style: GoogleFonts.poppins(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        color: Colors.black87,
+      ),
+    );
+  }
 }
 
-class StatCard extends StatelessWidget {
+// Private helper widgets for the dashboard
+class _StatCard extends StatelessWidget {
   final String title;
   final String value;
-  final String subtitle;
+  final IconData icon;
+  final Color color;
 
-  const StatCard({
-    super.key,
+  const _StatCard({
     required this.title,
     required this.value,
-    required this.subtitle,
+    required this.icon,
+    required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 1,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-              const SizedBox(height: 8),
+              Icon(icon, color: color, size: 28),
+              const SizedBox(height: 12),
               Text(
                 value,
-                style: const TextStyle(
-                  fontSize: 20,
+                style: GoogleFonts.poppins(
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
+                  color: color,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
-                subtitle,
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                title,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey.shade600,
+                ),
               ),
             ],
           ),
@@ -202,115 +200,97 @@ class StatCard extends StatelessWidget {
   }
 }
 
-class ActionCard extends StatelessWidget {
-  final IconData icon;
+class _ActionCard extends StatelessWidget {
   final String title;
-  final String subtitle;
-  final String buttonText;
+  final IconData icon;
 
-  const ActionCard({
-    super.key,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.buttonText,
-  });
+  const _ActionCard({required this.title, required this.icon});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade300),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(icon, size: 32, color: Colors.black),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-            ),
-            const Spacer(),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          // TODO: Implement navigation to relevant screen
+        },
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade300, width: 1),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 36, color: Colors.indigo.shade600),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
                 ),
               ),
-              onPressed: () {},
-              child: Text(buttonText),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class AppDrawer extends StatelessWidget {
-  const AppDrawer({super.key});
+class _DeadlineCard extends StatelessWidget {
+  const _DeadlineCard();
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = TextStyle(fontWeight: FontWeight.w500, fontSize: 14);
-
-    return Drawer(
-      child: Column(
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red.shade200),
+      ),
+      child: Row(
         children: [
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            child: Row(
-              children: const [
-                CircleAvatar(radius: 30, child: Icon(Icons.person, size: 30)),
-                SizedBox(width: 12),
+          Icon(
+            Icons.watch_later_outlined,
+            color: Colors.red.shade600,
+            size: 28,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text(
-                  'Alex Johnson',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  "Website Redesign",
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "Due in 2 days",
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.red.shade600,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
           ),
-          ListTile(
-            leading: Icon(Icons.dashboard),
-            title: Text('Dashboard', style: textStyle),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: Icon(Icons.folder),
-            title: Text('Projects', style: textStyle),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: Icon(Icons.people),
-            title: Text('Clients', style: textStyle),
-            onTap: () {},
-          ),
-          ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Settings', style: textStyle),
-            onTap: () {},
-          ),
-          const Spacer(),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Logout', style: TextStyle(color: Colors.red)),
-            onTap: () {},
+          Text(
+            "June 10",
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade700,
+            ),
           ),
         ],
       ),

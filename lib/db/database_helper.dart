@@ -1,3 +1,4 @@
+import 'package:notdle/models/company.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
 import 'package:sqflite/sqflite.dart';
@@ -7,7 +8,7 @@ import '../models/measurement.dart';
 
 class DatabaseHelper {
   static const _dbName = "tailor_app.db";
-  static const _dbVersion = 2;
+  static const _dbVersion = 1;
 
   static final DatabaseHelper instance = DatabaseHelper._init();
 
@@ -34,6 +35,21 @@ class DatabaseHelper {
   }
 
   Future _createDB(Database db, int version) async {
+    // Create the companies table
+    await db.execute('''
+      CREATE TABLE companies(
+        id TEXT PRIMARY KEY,
+        fullName TEXT NOT NULL,
+        email TEXT NOT NULL,
+        mobile TEXT NOT NULL,
+        businessName TEXT NOT NULL,
+        countryCode TEXT NOT NULL,
+        yearsOfExperience INTEGER NOT NULL,
+        registrationNumber TEXT NOT NULL,
+        address TEXT NOT NULL
+      )
+    ''');
+
     await db.execute('''
       CREATE TABLE customers(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -418,6 +434,44 @@ class DatabaseHelper {
     );
     final int? count = Sqflite.firstIntValue(countResult);
     return count ?? 0;
+  }
+
+  Future<void> insertCompany(Company company) async {
+    final db = await database;
+    await db.insert(
+      'companies',
+      company.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<Company?> getCompanyByEmailAndPassword(
+    String email,
+    String password,
+  ) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'companies',
+      where: 'email = ? AND password = ?', // Assumes a 'password' column exists
+      whereArgs: [email, password],
+    );
+
+    if (maps.isNotEmpty) {
+      return Company.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  // lib/db/database_helper.dart
+  Future<bool> companyExists(String email, String mobile) async {
+    final db = await database;
+    final count = Sqflite.firstIntValue(
+      await db.rawQuery(
+        "SELECT COUNT(*) FROM companies WHERE email = ? OR mobile = ?",
+        [email, mobile],
+      ),
+    );
+    return (count ?? 0) > 0;
   }
 }
 

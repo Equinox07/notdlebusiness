@@ -4,9 +4,11 @@ import 'package:notdle/pages/dashboard_screen.dart';
 import 'package:notdle/pages/landing_page.dart';
 import 'package:notdle/pages/login_app.dart';
 import 'package:notdle/pages/login_screen.dart';
+import 'package:notdle/pages/screens/Login_page_screen.dart';
 import 'package:notdle/pages/screens/add_customer_screen.dart';
 import 'package:notdle/pages/screens/add_measurement_screen.dart';
 import 'package:notdle/pages/screens/all_measurement_screen.dart';
+import 'package:notdle/pages/screens/company_registration_screen.dart';
 import 'package:notdle/pages/screens/create_order_screen.dart';
 import 'package:notdle/pages/screens/customers_screen.dart';
 import 'package:notdle/pages/screens/order_details_screen.dart';
@@ -20,12 +22,14 @@ class IndexPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(fontFamily: ''),
-      home: LoginApp(),
+      home: LoginPageScreen(),
       navigatorKey: AppNavigator.navigatorKey,
       initialRoute: LoginApp.tag,
       onGenerateRoute: AppNavigator.onGenerateRoute,
       routes: {
-        LoginApp.tag: (context) => const LoginApp(),
+        LoginPageScreen.tag: (context) => const LoginPageScreen(),
+        CompanyRegistrationScreen.tag:
+            (context) => const CompanyRegistrationScreen(),
         SignupApp.tag: (context) => const SignupApp(),
         CustomersScreen.tag: (context) => const CustomersScreen(),
         AllMeasurementScreen.tag: (context) => const AllMeasurementScreen(),

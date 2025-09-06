@@ -7,6 +7,7 @@ import 'package:notdle/pages/login_app.dart';
 import 'package:notdle/pages/screens/add_customer_screen.dart';
 import 'package:notdle/pages/screens/add_measurement_screen.dart';
 import 'package:notdle/pages/screens/all_measurement_screen.dart';
+import 'package:notdle/pages/screens/company_registration_screen.dart';
 import 'package:notdle/pages/screens/create_order_screen.dart';
 import 'package:notdle/pages/screens/customer_detail_screen.dart';
 import 'package:notdle/pages/screens/customer_measurement.dart';
@@ -100,6 +101,13 @@ class AppNavigator {
   static void toSignUp() {
     navigatorKey.currentState?.pushNamedAndRemoveUntil(
       SignupApp.tag,
+      (route) => false,
+    );
+  }
+
+  static void toSignUp2() {
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      CompanyRegistrationScreen.tag,
       (route) => false,
     );
   }

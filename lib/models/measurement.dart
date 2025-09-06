@@ -22,7 +22,7 @@ class Measurement {
   factory Measurement.fromMap(Map<String, dynamic> map) {
     return Measurement(
       id: map['id'] as int?,
-      customerId: map['customerId'],
+      customerId: map['customerId'].toString(),
       measurementValues:
           map['measurementValues'] != null
               ? Map<String, double>.from(jsonDecode(map['measurementValues']))
@@ -37,7 +37,7 @@ class Measurement {
       'measurementValues': jsonEncode(measurementValues),
       'createdDate': createdDate.toIso8601String(),
     };
-    if (id != null) map['id'] = id! as String;
+    if (id != null) map['id'] = id;
     return map;
   }
 

@@ -107,12 +107,6 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
       throw Exception("Customer must be saved before adding measurement.");
     }
 
-    // final measurement = Measurement(
-    //   customerId: widget.customer.id!,
-    //   values: values,
-    //   createdDate: DateTime.now(),
-    // );
-
     if (widget.customer.gender.toLowerCase() == "female") {
       values["SleeveLength"] =
           sleeveOptions.indexOf(_selectedSleeve).toDouble();

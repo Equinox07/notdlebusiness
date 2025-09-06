@@ -52,7 +52,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE measurements(
        id INTEGER PRIMARY KEY AUTOINCREMENT,
-      customerId INTEGER NOT NULL,
+      customerId TEXT NOT NULL,
       measurementValues TEXT,
       createdDate TEXT NOT NULL,
       FOREIGN KEY(customerId) REFERENCES customers(id) ON DELETE CASCADE
@@ -241,7 +241,7 @@ class DatabaseHelper {
     List<MeasurementWithCustomer> list = [];
 
     for (var m in measurementMaps) {
-      final customerId = m['customerId'] as int;
+      final customerId = m['customerId'];
       final customerMap =
           (await db.query(
             'customers',

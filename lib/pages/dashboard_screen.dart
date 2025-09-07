@@ -57,7 +57,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             icon: Icon(Icons.shopping_cart),
             label: "Orders",
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.texture), label: "Invoices"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.attach_money),
+            label: "Invoices",
+          ),
+          // BottomNavigationBarItem(icon: Icon(Icons.texture), label: "Invoices"),
           // BottomNavigationBarItem(icon: Icon(Icons.receipt), label: "Invoices"),
           // BottomNavigationBarItem(
           //     icon: Icon(Icons.design_services), label: "Services"),

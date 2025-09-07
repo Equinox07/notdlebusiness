@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
+import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/pages/screens/add_measurement_screen.dart';
 import 'package:notdle/pages/screens/orders_screen.dart';
 
@@ -26,6 +27,18 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
 
   Future<Customer?> _saveCustomer() async {
     if (!_formKey.currentState!.validate()) return null;
+
+    if (_selectedGender == "Other") {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Gender Cannot be Other",
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
 
     final newCustomer = Customer(
       name: _nameController.text.trim(),
@@ -169,24 +182,33 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               const SizedBox(height: 16),
 
               // Gender Dropdown
-              DropdownButtonFormField<String>(
-                value: _selectedGender,
-                hint: const Text("Select Gender"),
-                items:
-                    ["Male", "Female", "Other"].map((gender) {
-                      return DropdownMenuItem(
-                        value: gender,
-                        child: Text(gender),
-                      );
-                    }).toList(),
-                onChanged: (value) {
+              _GenderDropdownField(
+                genderOptions: ["Male", "Female", "Other"],
+                selectedGender: _selectedGender,
+                onChanged: (val) {
                   setState(() {
-                    _selectedGender = value!;
+                    _selectedGender = val!;
                   });
                 },
-                validator:
-                    (value) => value == null ? "Please select a gender" : null,
               ),
+              // DropdownButtonFormField<String>(
+              //   value: _selectedGender,
+              //   hint: const Text("Select Gender"),
+              //   items:
+              //       ["Male", "Female", "Other"].map((gender) {
+              //         return DropdownMenuItem(
+              //           value: gender,
+              //           child: Text(gender),
+              //         );
+              //       }).toList(),
+              //   onChanged: (value) {
+              //     setState(() {
+              //       _selectedGender = value!;
+              //     });
+              //   },
+              //   validator:
+              //       (value) => value == null ? "Please select a gender" : null,
+              // ),
               const SizedBox(height: 16),
 
               // Address
@@ -227,12 +249,13 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 onPressed: () async {
                   final saved = await _saveCustomer();
                   if (saved != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => AddMeasurementScreen(customer: saved),
-                      ),
-                    );
+                    AppNavigator.toMeasurement2(customer: saved);
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (_) => AddMeasurementScreen(customer: saved),
+                    //   ),
+                    // );
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -289,6 +312,51 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _GenderDropdownField extends StatelessWidget {
+  final String selectedGender;
+  final List<String> genderOptions;
+  final ValueChanged<String?> onChanged;
+
+  const _GenderDropdownField({
+    required this.selectedGender,
+    required this.genderOptions,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        // borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: DropdownButtonFormField<String>(
+        value: selectedGender,
+        decoration: InputDecoration(
+          labelText: "Gender",
+          labelStyle: GoogleFonts.poppins(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.blue,
+          ),
+          border: InputBorder.none,
+        ),
+        items:
+            genderOptions.map((option) {
+              return DropdownMenuItem(
+                value: option,
+                child: Text(option, style: GoogleFonts.poppins(fontSize: 16)),
+              );
+            }).toList(),
+        onChanged: onChanged,
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:notdle/models/measurement.dart';
 import 'package:notdle/models/order.dart';
 import 'package:notdle/pages/dashboard_screen.dart';
 import 'package:notdle/pages/login_app.dart';
+import 'package:notdle/pages/screens/add_customer_measurement.dart';
 import 'package:notdle/pages/screens/add_customer_screen.dart';
 import 'package:notdle/pages/screens/add_measurement_screen.dart';
 import 'package:notdle/pages/screens/all_measurement_screen.dart';
@@ -156,6 +157,17 @@ class AppNavigator {
     if (customer != null) {
       navigatorKey.currentState?.pushNamed(
         CustomerMeasurementScreen.tag,
+        arguments: customer,
+      );
+    } else {
+      navigatorKey.currentState?.pushNamed(AllMeasurementScreen.tag);
+    }
+  }
+
+  static void toMeasurement3({Customer? customer}) {
+    if (customer != null) {
+      navigatorKey.currentState?.pushNamed(
+        AddCustomerMeasurementScreen.tag,
         arguments: customer,
       );
     } else {

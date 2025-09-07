@@ -7,7 +7,7 @@ import 'package:notdle/models/company.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/pages/dashboard_app.dart';
-import 'package:notdle/pages/screens/Login_page_screen.dart';
+import 'package:notdle/pages/screens/login_page_screen.dart';
 
 class CompanyRegistrationScreen extends StatefulWidget {
   const CompanyRegistrationScreen({super.key});

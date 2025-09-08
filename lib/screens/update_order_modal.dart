@@ -32,6 +32,7 @@ class _UpdateOrderModalState extends State<UpdateOrderModal> {
   ];
   final List<String> _paymentStatuses = [
     'Unpaid',
+    'Pending',
     'Paid',
     'Refunded',
     'Partial',

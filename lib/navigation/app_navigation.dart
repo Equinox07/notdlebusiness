@@ -13,12 +13,14 @@ import 'package:notdle/screens/create_order_screen.dart';
 import 'package:notdle/screens/customer_detail_screen.dart';
 import 'package:notdle/screens/customer_measurement.dart';
 import 'package:notdle/screens/customers_screen.dart';
+import 'package:notdle/screens/invoices_screen.dart';
 import 'package:notdle/screens/main.dart';
 import 'package:notdle/screens/order_details_screen.dart';
 import 'package:notdle/screens/orders_screen.dart';
 import 'package:notdle/pages/signup_page.dart';
 import 'package:notdle/pages/signup_success_screen.dart';
 import 'package:notdle/screens/measurement_detail_page.dart';
+import 'package:notdle/screens/profile_screen.dart';
 
 class AppNavigator {
   static final GlobalKey<NavigatorState> navigatorKey =
@@ -162,6 +164,7 @@ class AppNavigator {
     }
   }
 
+
   static void toMeasurement2({Customer? customer}) {
     if (customer != null) {
       navigatorKey.currentState?.pushNamed(
@@ -208,6 +211,18 @@ class AppNavigator {
 
   static void toAddCustomer() {
     navigatorKey.currentState?.pushNamed(AddCustomerScreen.tag);
+  }
+  static void toCreateNewOrder() {
+    navigatorKey.currentState?.pushNamed(CreateOrderScreen.tag);
+  }
+
+
+  static void toInvoice() {
+    navigatorKey.currentState?.pushNamed(InvoicesScreen.tag);
+  }
+
+  static void toProfile() {
+    navigatorKey.currentState?.pushNamed(ProfileScreen.tag);
   }
 
   static void toOrders() {

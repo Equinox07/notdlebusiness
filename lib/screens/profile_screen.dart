@@ -12,6 +12,8 @@ import 'package:notdle/services/session_manager.dart';
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
+  static const String tag = "profile_screen";
+
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }

@@ -3,8 +3,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/navigation/app_navigation.dart';
+import 'package:notdle/providers/dashboard_provider.dart';
 import 'package:notdle/screens/add_measurement_screen.dart';
 import 'package:notdle/screens/orders_screen.dart';
+import 'package:provider/provider.dart';
 
 class AddCustomerScreen extends StatefulWidget {
   const AddCustomerScreen({super.key});
@@ -38,6 +40,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           backgroundColor: Colors.red,
         ),
       );
+      return null;
     }
 
     final newCustomer = Customer(
@@ -53,7 +56,12 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     final savedCustomer = await DatabaseHelper.instance.insertCustomer(
       newCustomer,
     );
+
+
+    Provider.of<DashBoardProvider>(context, listen: false).fetchCounts();
     return savedCustomer;
+
+
 
 
   }

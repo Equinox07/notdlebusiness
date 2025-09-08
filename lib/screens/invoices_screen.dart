@@ -10,6 +10,8 @@ import 'package:notdle/screens/invoice_details_screen.dart';
 class InvoicesScreen extends StatefulWidget {
   const InvoicesScreen({super.key});
 
+  static const String tag = "invoices_list";
+
   @override
   State<InvoicesScreen> createState() => _InvoicesScreenState();
 }

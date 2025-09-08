@@ -6,7 +6,9 @@ import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
+import 'package:notdle/providers/dashboard_provider.dart';
 import 'package:notdle/screens/invoice_details_screen.dart';
+import 'package:provider/provider.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   const CreateOrderScreen({super.key});
@@ -95,6 +97,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       );
 
       await dbHelper.insertOrder(newOrder);
+
+
+      Provider.of<DashBoardProvider>(context, listen: false).fetchCounts();
 
       showDialog(
         context: context,

@@ -2,10 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:notdle/pages/dashboard_app.dart';
-import 'package:notdle/pages/screens/placeholder_screen.dart';
+import 'package:notdle/screens/placeholder_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
+
+  static const String tag = "main_screen";
 
   @override
   State<MainScreen> createState() => _MainScreenState();

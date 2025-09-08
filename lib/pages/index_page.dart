@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/pages/dashboard_screen.dart';
-import 'package:notdle/pages/landing_page.dart';
 import 'package:notdle/pages/login_app.dart';
-import 'package:notdle/pages/login_screen.dart';
-import 'package:notdle/pages/screens/login_page_screen.dart';
-import 'package:notdle/pages/screens/add_customer_screen.dart';
-import 'package:notdle/pages/screens/add_measurement_screen.dart';
-import 'package:notdle/pages/screens/all_measurement_screen.dart';
-import 'package:notdle/pages/screens/company_registration_screen.dart';
-import 'package:notdle/pages/screens/create_order_screen.dart';
-import 'package:notdle/pages/screens/customers_screen.dart';
-import 'package:notdle/pages/screens/order_details_screen.dart';
-import 'package:notdle/pages/screens/orders_screen.dart';
+import 'package:notdle/screens/add_customer_screen.dart';
+import 'package:notdle/screens/all_measurement_screen.dart';
+import 'package:notdle/screens/company_registration_screen.dart';
+import 'package:notdle/screens/customers_screen.dart';
+import 'package:notdle/screens/login_page_screen.dart';
+import 'package:notdle/screens/main.dart';
+import 'package:notdle/screens/orders_screen.dart';
 import 'package:notdle/pages/signup_page.dart';
+import 'package:notdle/services/session_manager.dart';
 
 class IndexPage extends StatelessWidget {
   const IndexPage({super.key});
@@ -22,7 +19,7 @@ class IndexPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(fontFamily: ''),
-      home: LoginPageScreen(),
+      home: _StartupScreen(),
       navigatorKey: AppNavigator.navigatorKey,
       initialRoute: LoginApp.tag,
       onGenerateRoute: AppNavigator.onGenerateRoute,
@@ -36,8 +33,35 @@ class IndexPage extends StatelessWidget {
         AddCustomerScreen.tag: (context) => const AddCustomerScreen(),
         DashboardScreen.tag: (context) => const DashboardScreen(),
         OrdersScreen.tag: (context) => const OrdersScreen(),
+        MainScreen.tag: (context) => const MainScreen(),
         // CreateOrderScreen.tag: (context) => const CreateOrderScreen(),
         // OrderDetailsScreen.tag: (context) => const OrderDetailsScreen(),
+      },
+    );
+  }
+}
+
+
+class _StartupScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: SessionManager.getCompany(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // Show a loading screen while checking shared preferences
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        } else if (snapshot.hasData) {
+          // If company data exists, navigate to the main screen
+          return const DashboardScreen();
+        } else {
+          // If no company data, navigate to the login screen
+          return const LoginPageScreen();
+        }
       },
     );
   }

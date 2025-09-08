@@ -9,6 +9,7 @@ class Invoice {
   final double totalAmount;
   final DateTime date;
   final String orderId; // Foreign key to the related order
+  // final String createdDate;
 
   Invoice({
     required this.title,
@@ -17,6 +18,7 @@ class Invoice {
     required this.totalAmount,
     required this.date,
     required this.orderId,
+    // required this.createdDate,
     String? id,
   }) : id = id ?? const Uuid().v4();
 
@@ -29,7 +31,8 @@ class Invoice {
       'status': status,
       'totalAmount': totalAmount,
       'date': date.toIso8601String(), // Store date as a string
-      'orderId': orderId,
+      'orderId': orderId
+      // 'createdDate': createdDate
     };
   }
 
@@ -42,7 +45,8 @@ class Invoice {
       status: map['status'],
       totalAmount: map['totalAmount'],
       date: DateTime.parse(map['date']),
-      orderId: map['orderId'],
+      orderId: map['orderId']
+        // createdDate: map['createdDate'] as String
     );
   }
 }

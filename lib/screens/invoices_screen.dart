@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/invoice.dart';
-import 'package:notdle/pages/screens/invoice_details_screen.dart';
+import 'package:notdle/screens/invoice_details_screen.dart';
 
 class InvoicesScreen extends StatefulWidget {
   const InvoicesScreen({super.key});

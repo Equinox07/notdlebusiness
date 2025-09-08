@@ -7,7 +7,8 @@ import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
-import 'package:notdle/pages/screens/create_invoice_screen.dart';
+import 'package:notdle/screens/create_invoice_screen.dart';
+import 'package:notdle/screens/update_order_modal.dart';
 
 // Private data model to hold all fetched details
 class _OrderDetailsData {
@@ -19,9 +20,10 @@ class _OrderDetailsData {
 
 class OrderDetailsScreen extends StatefulWidget {
   static const String tag = "order_details";
-  final String orderId;
+  // final String orderId;
+  final Order order;
 
-  const OrderDetailsScreen({super.key, required this.orderId});
+  const OrderDetailsScreen({super.key, required this.order});
 
   @override
   State<OrderDetailsScreen> createState() => _OrderDetailsScreenState();
@@ -30,15 +32,62 @@ class OrderDetailsScreen extends StatefulWidget {
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   final dbHelper = DatabaseHelper.instance;
   late Future<_OrderDetailsData?> _orderDetailsFuture;
+  late String _selectedStatus;
+  late String _selectedPaymentStatus;
+
+  final List<String> _orderStatuses = [
+    'Pending',
+    'In Progress',
+    'Completed',
+    'Cancelled'
+  ];
+  final List<String> _paymentStatuses = [
+    'Unpaid',
+    'Paid',
+    'Refunded',
+    'Partial'
+  ];
+
+
+
+
 
   @override
   void initState() {
     super.initState();
     _orderDetailsFuture = _fetchOrderDetails();
+    _selectedStatus = widget.order.status;
+    _selectedPaymentStatus = widget.order.paymentStatus;
+  }
+
+  // Helper method to update the order status
+  Future<void> _updateOrderStatus(String? newStatus) async {
+    if (newStatus != null && newStatus != _selectedStatus) {
+      await dbHelper.updateOrderStatus(widget.order.id, newStatus);
+      setState(() {
+        _selectedStatus = newStatus;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Order status updated to $newStatus')),
+      );
+    }
+  }
+
+  // Helper method to update the payment status
+  Future<void> _updatePaymentStatus(String? newPaymentStatus) async {
+    if (newPaymentStatus != null && newPaymentStatus != _selectedPaymentStatus) {
+      await dbHelper.updateOrderPaymentStatus(widget.order.id, newPaymentStatus);
+      setState(() {
+        _selectedPaymentStatus = newPaymentStatus;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Payment status updated to $newPaymentStatus')),
+      );
+    }
   }
 
   Future<_OrderDetailsData?> _fetchOrderDetails() async {
-    final data = await dbHelper.getOrderWithDetails(widget.orderId);
+    final data = await dbHelper.getOrderWithDetails(widget.order.id);
     if (data != null) {
       return _OrderDetailsData(
         order: data['order'],
@@ -47,6 +96,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       );
     }
     return null;
+  }
+
+  // Method to refresh the screen after modal is closed
+  void _refreshOrderData() {
+    setState(() {
+      _orderDetailsFuture = _fetchOrderDetails();
+    });
   }
 
   @override
@@ -60,6 +116,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         ),
         backgroundColor: Colors.white,
         elevation: 1,
+        actions: [
+          IconButton(icon: Icon(Icons.edit), onPressed: () {
+            showDialog(context: context, builder: (BuildContext context) {
+              return UpdateOrderModal(order: widget.order, onOrderUpdated: _refreshOrderData);
+            });
+          })
+        ],
       ),
       body: FutureBuilder<_OrderDetailsData?>(
         future: _orderDetailsFuture,
@@ -90,6 +153,33 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // _buildSectionTitle('Status & Payment'),
+                  // const SizedBox(height: 8),
+                  // Card(
+                  //   elevation: 1,
+                  //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  //   child: Padding(
+                  //     padding: const EdgeInsets.all(16.0),
+                  //     child: Column(
+                  //       crossAxisAlignment: CrossAxisAlignment.start,
+                  //       children: [
+                  //         _buildDropdown(
+                  //           'Order Status',
+                  //           _selectedStatus,
+                  //           _orderStatuses,
+                  //               (newValue) => _updateOrderStatus(newValue),
+                  //         ),
+                  //         const SizedBox(height: 16),
+                  //         _buildDropdown(
+                  //           'Payment Status',
+                  //           _selectedPaymentStatus,
+                  //           _paymentStatuses,
+                  //               (newValue) => _updatePaymentStatus(newValue),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
                   _OrderSummaryCard(
                     order: order,
                     paymentStatus: order.paymentStatus,
@@ -152,6 +242,55 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       ),
     );
   }
+}
+
+// Helper widget to build section titles
+Widget _buildSectionTitle(String title) {
+  return Text(
+    title,
+    style: GoogleFonts.poppins(
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      color: Colors.black87,
+    ),
+  );
+}
+
+// Helper widget to build the dropdowns
+Widget _buildDropdown(
+    String label,
+    String value,
+    List<String> items,
+    void Function(String?) onChanged,
+    ) {
+  return DropdownButtonFormField<String>(
+    decoration: InputDecoration(
+      labelText: label,
+      labelStyle: GoogleFonts.poppins(color: Colors.grey.shade600),
+      filled: true,
+      fillColor: Colors.grey.shade200,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.indigo.shade600, width: 2),
+      ),
+    ),
+    value: value,
+    items: items.map((item) {
+      return DropdownMenuItem<String>(
+        value: item,
+        child: Text(item),
+      );
+    }).toList(),
+    onChanged: onChanged,
+  );
 }
 
 // 📦 Flat Order Summary Card
@@ -569,3 +708,5 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
+
+

@@ -11,6 +11,8 @@ class Order {
   final String? dueDate;
   final String? notes;
   final String? invoiceId; // Link to the invoice
+  final String createdDate; // New field
+
 
   Order({
     required this.title,
@@ -21,6 +23,7 @@ class Order {
     this.dueDate,
     this.notes,
     this.invoiceId,
+    required this.createdDate, // Add to constructor
     String? id,
   }) : id = id ?? const Uuid().v4();
 
@@ -36,6 +39,7 @@ class Order {
       'dueDate': dueDate,
       'notes': notes,
       'invoiceId': invoiceId,
+      'createdDate': createdDate,
     };
   }
 
@@ -51,6 +55,7 @@ class Order {
       dueDate: map['dueDate'],
       notes: map['notes'],
       invoiceId: map['invoiceId'],
+      createdDate: map['createdDate'] as String,
     );
   }
 }

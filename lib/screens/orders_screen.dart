@@ -1,4 +1,4 @@
-// lib/screens/customer_orders_screen.dart
+// lib/screens/orders_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,26 +6,37 @@ import 'package:intl/intl.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/order.dart';
-import 'package:notdle/pages/screens/order_details_screen.dart';
+import 'package:notdle/screens/create_order_screen.dart';
+import 'package:notdle/screens/order_details_screen.dart';
 
-class CustomerOrdersScreen extends StatefulWidget {
-  final Customer customer;
+class OrdersScreen extends StatefulWidget {
+  const OrdersScreen({super.key});
 
-  const CustomerOrdersScreen({super.key, required this.customer});
+  static const String tag = "orders";
 
   @override
-  State<CustomerOrdersScreen> createState() => _CustomerOrdersScreenState();
+  State<OrdersScreen> createState() => _OrdersScreenState();
 }
 
-class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
+class _OrdersScreenState extends State<OrdersScreen> {
+  final dbHelper = DatabaseHelper.instance;
   late Future<List<Order>> _ordersFuture;
 
   @override
   void initState() {
     super.initState();
-    _ordersFuture = DatabaseHelper.instance.getCustomerOrders(
-      widget.customer.id!,
-    );
+    _ordersFuture = _fetchOrders();
+  }
+
+  Future<List<Order>> _fetchOrders() async {
+    return await dbHelper.getOrders();
+  }
+
+  // Reloads the screen when a new order is added.
+  void _onOrderCreated() {
+    setState(() {
+      _ordersFuture = _fetchOrders();
+    });
   }
 
   @override
@@ -34,7 +45,7 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: Text(
-          "${widget.customer.name}'s Orders",
+          "Orders",
           style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
         ),
         backgroundColor: Colors.white,
@@ -46,11 +57,16 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
+            return Center(
+              child: Text(
+                "Error: ${snapshot.error}",
+                style: GoogleFonts.poppins(),
+              ),
+            );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
               child: Text(
-                "No orders found for this customer.",
+                "No orders found.",
                 style: GoogleFonts.poppins(fontSize: 16),
               ),
             );
@@ -61,13 +77,14 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
               itemCount: orders.length,
               itemBuilder: (context, index) {
                 final order = orders[index];
-                return OrderCard(
+                return _OrderCard(
                   order: order,
                   onTap: () {
+                    // Pass the orderId instead of the entire Order object
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder:
-                            (context) => OrderDetailsScreen(orderId: order.id),
+                            (context) => OrderDetailsScreen(order: order),
                       ),
                     );
                   },
@@ -77,12 +94,30 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
           }
         },
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          await Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const CreateOrderScreen()),
+          );
+          _onOrderCreated(); // Refresh the list after returning
+        },
+        label: Text(
+          "New Order",
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        icon: const Icon(Icons.add, color: Colors.white),
+        backgroundColor: Colors.indigo,
+      ),
     );
   }
 }
 
-class OrderCard extends StatelessWidget {
-  const OrderCard({required this.order, required this.onTap, super.key});
+// Order Card Widget
+class _OrderCard extends StatelessWidget {
+  const _OrderCard({required this.order, required this.onTap});
 
   final Order order;
   final VoidCallback onTap;
@@ -161,7 +196,7 @@ class OrderCard extends StatelessWidget {
                 children: [
                   _PaymentStatusChip(status: order.paymentStatus),
                   Text(
-                    // Safely check for null before parsing the date
+                    // **CORRECTED:** Safely check for null before parsing the date
                     getFormattedDueDate(order.dueDate),
                     style: GoogleFonts.poppins(
                       fontSize: 13,

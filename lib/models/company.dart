@@ -14,6 +14,8 @@ class Company {
   final String registrationNumber;
   final String address;
   final String countryCode; // New field for the country code
+  final String? imagePath; // New: Local path to the company's logo
+  final String? imageUrl;  // New: Remote URL for the company's logo
 
   Company({
     String? id,
@@ -25,6 +27,8 @@ class Company {
     required this.registrationNumber,
     required this.address,
     required this.countryCode, // Add to the constructor
+    this.imagePath,
+    this.imageUrl,
   }) : id = id ?? uuid.v4();
 
   // Factory constructor to create a Company from a Map
@@ -39,6 +43,8 @@ class Company {
       registrationNumber: map['registrationNumber'] as String,
       address: map['address'] as String,
       countryCode: map['countryCode'] as String, // Add to fromMap
+      imagePath: map['imagePath'] as String?,
+      imageUrl: map['imageUrl'] as String?,
     );
   }
 
@@ -54,6 +60,37 @@ class Company {
       'registrationNumber': registrationNumber,
       'address': address,
       'countryCode': countryCode, // Add to toMap
+      'imagePath': imagePath,
+      'imageUrl': imageUrl,
     };
+  }
+
+
+  Company copyWith({
+    String? id,
+    String? fullName,
+    String? email,
+    String? mobile,
+    String? businessName,
+    int? yearsOfExperience,
+    String? registrationNumber,
+    String? address,
+    String? countryCode,
+    String? imagePath,
+    String? imageUrl,
+  }) {
+    return Company(
+      id: id ?? this.id,
+      fullName: fullName ?? this.fullName,
+      email: email ?? this.email,
+      mobile: mobile ?? this.mobile,
+      businessName: businessName ?? this.businessName,
+      yearsOfExperience: yearsOfExperience ?? this.yearsOfExperience,
+      registrationNumber: registrationNumber ?? this.registrationNumber,
+      address: address ?? this.address,
+      countryCode: countryCode ?? this.countryCode,
+      imagePath: imagePath ?? this.imagePath,
+      imageUrl: imageUrl ?? this.imageUrl,
+    );
   }
 }

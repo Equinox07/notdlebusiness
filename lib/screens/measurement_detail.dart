@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/measurement.dart';
-import 'package:notdle/pages/screens/add_measurement_screen.dart';
+import 'package:notdle/screens/add_measurement_screen.dart';
 
 class MeasurementDetailScreen extends StatelessWidget {
   final Measurement measurement;

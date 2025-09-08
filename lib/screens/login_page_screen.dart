@@ -6,8 +6,9 @@ import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/pages/dashboard_app.dart';
 import 'package:notdle/pages/dashboard_screen.dart';
-import 'package:notdle/pages/screens/company_registration_screen.dart';
-import 'package:notdle/pages/screens/main.dart';
+import 'package:notdle/screens/company_registration_screen.dart';
+import 'package:notdle/screens/main.dart';
+import 'package:notdle/services/session_manager.dart';
 
 class LoginPageScreen extends StatefulWidget {
   const LoginPageScreen({super.key});
@@ -33,35 +34,39 @@ class _LoginScreenState extends State<LoginPageScreen> {
   }
 
   Future<void> _login() async {
-    // if (_formKey.currentState!.validate()) {
+    if (_formKey.currentState!.validate()) {
     // You'll need to implement a getCompanyByEmailAndPassword method in your DatabaseHelper
-    //   final company = await _dbHelper.getCompanyByEmailAndPassword(
-    //     _emailController.text,
-    //     _passwordController.text,
-    //   );
+      final company = await _dbHelper.getCompanyByEmailAndMobile(
+        _emailController.text,
+        _passwordController.text,
+      );
 
-    //   if (company != null) {
-    //     ScaffoldMessenger.of(
-    //       context,
-    //     ).showSnackBar(const SnackBar(content: Text('Login successful!')));
-    //     Navigator.of(context).pushReplacement(
-    //       MaterialPageRoute(
-    //         builder: (context) => const MainScreen(),
-    //       ), //DashboardScreen
-    //     );
-    //   } else {
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(
-    //         content: Text('Invalid email or password.'),
-    //         backgroundColor: Colors.red,
-    //       ),
-    //     );
-    //   }
-    // }
+      if (company != null) {
+        // On successful login
+        await SessionManager.saveCompany(company);
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Login successful!')));
+        AppNavigator.toHome();
+        // Navigator.of(context).pushReplacement(
+        //   MaterialPageRoute(
+        //     builder: (context) => const MainScreen(),
+        //   ), //DashboardScreen
+        // );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Invalid email or password.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
     // Navigator.of(context).pushReplacement(
     //   MaterialPageRoute(builder: (context) => const MainScreen()),
     // ); //DashboardScreen
-    AppNavigator.toHome();
+    // AppNavigator.toHome();
   }
 
   Widget _buildInputField({

@@ -47,6 +47,8 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
+      // Get the current date and format it as an ISO 8601 string
+      final String currentDateTime = DateTime.now().toIso8601String();
       // Create and save the new Invoice object to the database
       final newInvoice = Invoice(
         title: _invoiceTitle,
@@ -54,7 +56,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         status: _paymentStatus,
         totalAmount: _totalAmount,
         date: DateTime.now(),
-        orderId: widget.order.id,
+        orderId: widget.order.id
       );
 
       await dbHelper.insertInvoice(newInvoice);

@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:notdle/db/database_helper.dart';
+import 'package:notdle/models/company.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
+import 'package:notdle/services/session_manager.dart';
 import 'package:notdle/widgets/status_chip.dart';
 // import 'package:notdle/widgets/status_chip.dart';
 
@@ -32,11 +34,15 @@ class InvoiceDetailsScreen extends StatefulWidget {
 
 class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
   late Future<_InvoiceDetailsData> _invoiceDetailsFuture;
+  late Future<Company?> _companyFuture;
+  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+
 
   @override
   void initState() {
     super.initState();
     _invoiceDetailsFuture = _fetchInvoiceDetails();
+    _companyFuture = SessionManager.getCompany();
   }
 
   Future<_InvoiceDetailsData> _fetchInvoiceDetails() async {
@@ -84,6 +90,22 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Company Info Section
+                  FutureBuilder<Company?>(
+                    future: _companyFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return const Text('Error loading company data.');
+                      } else if (snapshot.hasData) {
+                        final company = snapshot.data!;
+                        return _buildCompanyInfoCard(company);
+                      } else {
+                        return const Text('Company data not found.');
+                      }
+                    },
+                  ),
                   _InvoiceHeaderCard(invoice: data.invoice),
                   const SizedBox(height: 16),
                   if (data.customer != null)
@@ -97,6 +119,54 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  // A helper method to build the Company Info Card
+  Widget _buildCompanyInfoCard(Company company) {
+    return SizedBox(
+      width: double.infinity, // Makes the card stretch end-to-end
+      child: Card(
+        elevation: 4, // Increased elevation for a standout effect
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Company Logo Placeholder
+              const CircleAvatar(
+                radius: 30,
+                backgroundColor: Colors.indigo,
+                child: Icon(Icons.business, color: Colors.white, size: 30),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      company.businessName,
+                      style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.bold, fontSize: 20),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      company.email,
+                      style: GoogleFonts.poppins(color: Colors.grey.shade600),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      company.mobile,
+                      style: GoogleFonts.poppins(color: Colors.grey.shade600),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -4,20 +4,21 @@ import 'package:notdle/models/measurement.dart';
 import 'package:notdle/models/order.dart';
 import 'package:notdle/pages/dashboard_screen.dart';
 import 'package:notdle/pages/login_app.dart';
-import 'package:notdle/pages/screens/add_customer_measurement.dart';
-import 'package:notdle/pages/screens/add_customer_screen.dart';
-import 'package:notdle/pages/screens/add_measurement_screen.dart';
-import 'package:notdle/pages/screens/all_measurement_screen.dart';
-import 'package:notdle/pages/screens/company_registration_screen.dart';
-import 'package:notdle/pages/screens/create_order_screen.dart';
-import 'package:notdle/pages/screens/customer_detail_screen.dart';
-import 'package:notdle/pages/screens/customer_measurement.dart';
-import 'package:notdle/pages/screens/customers_screen.dart';
-import 'package:notdle/pages/screens/order_details_screen.dart';
-import 'package:notdle/pages/screens/orders_screen.dart';
+import 'package:notdle/screens/add_customer_measurement.dart';
+import 'package:notdle/screens/add_customer_screen.dart';
+import 'package:notdle/screens/add_measurement_screen.dart';
+import 'package:notdle/screens/all_measurement_screen.dart';
+import 'package:notdle/screens/company_registration_screen.dart';
+import 'package:notdle/screens/create_order_screen.dart';
+import 'package:notdle/screens/customer_detail_screen.dart';
+import 'package:notdle/screens/customer_measurement.dart';
+import 'package:notdle/screens/customers_screen.dart';
+import 'package:notdle/screens/main.dart';
+import 'package:notdle/screens/order_details_screen.dart';
+import 'package:notdle/screens/orders_screen.dart';
 import 'package:notdle/pages/signup_page.dart';
 import 'package:notdle/pages/signup_success_screen.dart';
-import 'package:notdle/pages/screens/measurement_detail_page.dart';
+import 'package:notdle/screens/measurement_detail_page.dart';
 
 class AppNavigator {
   static final GlobalKey<NavigatorState> navigatorKey =
@@ -35,11 +36,11 @@ class AppNavigator {
       //   }
       //   return null;
       case OrderDetailsScreen.tag:
-        if (settings.arguments is String) {
+        if (settings.arguments is Order) {
           return MaterialPageRoute(
             builder:
                 (context) =>
-                    OrderDetailsScreen(orderId: settings.arguments as String),
+                    OrderDetailsScreen(order: settings.arguments as Order),
           );
         }
         return null;
@@ -83,6 +84,14 @@ class AppNavigator {
     navigatorKey.currentState?.pushNamedAndRemoveUntil(
       DashboardScreen.tag,
       (route) => false,
+    );
+  }
+
+  // Navigation helper methods
+  static void toMainScreen() {
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      MainScreen.tag,
+          (route) => false,
     );
   }
 

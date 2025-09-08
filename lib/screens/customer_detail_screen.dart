@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/navigation/app_navigation.dart';
-import 'package:notdle/pages/screens/customer_orders_screen.dart';
+import 'package:notdle/screens/customer_orders_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CustomerDetailScreen extends StatelessWidget {

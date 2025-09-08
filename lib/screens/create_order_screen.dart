@@ -6,7 +6,7 @@ import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
-import 'package:notdle/pages/screens/invoice_details_screen.dart';
+import 'package:notdle/screens/invoice_details_screen.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   const CreateOrderScreen({super.key});
@@ -80,6 +80,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         return;
       }
 
+      // Get the current date and format it as an ISO 8601 string
+      final String currentDateTime = DateTime.now().toIso8601String();
+
       final newOrder = Order(
         title: _orderTitle,
         customerId: _selectedCustomer!.id!,
@@ -88,6 +91,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         paymentAmount: double.tryParse(_paymentAmount ?? ''),
         dueDate: _dueDate,
         notes: _notes,
+        createdDate: currentDateTime
       );
 
       await dbHelper.insertOrder(newOrder);
@@ -217,9 +221,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
           final customers = snapshot.data!;
           // Set the first customer as the default if none is selected
-          if (_selectedCustomer == null) {
-            _selectedCustomer = customers.first;
-          }
+          _selectedCustomer ??= customers.first;
 
           return SingleChildScrollView(
             child: Padding(

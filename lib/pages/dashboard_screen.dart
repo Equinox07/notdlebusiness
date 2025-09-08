@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:notdle/pages/screens/customers_screen.dart';
-import 'package:notdle/pages/screens/fabric_screen.dart';
-import 'package:notdle/pages/screens/invoices_screen.dart';
-import 'package:notdle/pages/screens/orders_screen.dart';
-import 'package:notdle/pages/screens/projects_screen.dart';
-import 'package:notdle/pages/screens/services_screen.dart';
+import 'package:notdle/screens/customers_screen.dart';
+import 'package:notdle/screens/fabric_screen.dart';
+import 'package:notdle/screens/invoices_screen.dart';
+import 'package:notdle/screens/orders_screen.dart';
+import 'package:notdle/screens/profile_screen.dart';
+import 'package:notdle/screens/projects_screen.dart';
+import 'package:notdle/screens/services_screen.dart';
 import 'package:notdle/pages/sections/appointment_card.dart';
 import 'package:notdle/pages/sections/dashboard_home.dart';
 import 'package:notdle/pages/sections/insight_card.dart';
@@ -29,6 +30,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     // FabricsScreen(),
     InvoicesScreen(),
     // ServicesScreen(),
+    ProfileScreen()
   ];
 
   void _onNavTapped(int index) {
@@ -65,6 +67,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           // BottomNavigationBarItem(icon: Icon(Icons.receipt), label: "Invoices"),
           // BottomNavigationBarItem(
           //     icon: Icon(Icons.design_services), label: "Services"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person), // Use a person icon for the profile
+            label: 'Profile',
+          ),
         ],
       ),
     );

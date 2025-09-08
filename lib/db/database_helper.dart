@@ -46,7 +46,9 @@ class DatabaseHelper {
         countryCode TEXT NOT NULL,
         yearsOfExperience INTEGER NOT NULL,
         registrationNumber TEXT NOT NULL,
-        address TEXT NOT NULL
+        address TEXT NOT NULL,
+        imagePath TEXT,
+        imageUrl TEXT
       )
     ''');
 
@@ -67,51 +69,55 @@ class DatabaseHelper {
 
     await db.execute('''
       CREATE TABLE measurements(
-       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      customerId INTEGER NOT NULL,
-      measurementValues TEXT,
-      createdDate TEXT NOT NULL,
-      FOREIGN KEY(customerId) REFERENCES customers(id) ON DELETE CASCADE
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        customerId INTEGER NOT NULL,
+        measurementValues TEXT,
+        createdDate TEXT NOT NULL,
+        FOREIGN KEY(customerId) REFERENCES customers(id) ON DELETE CASCADE
       )
     ''');
 
     // Create Orders table
     await db.execute('''
-             CREATE TABLE orders(
-               id TEXT PRIMARY KEY,
-               title TEXT,
-               customerId INTEGER NOT NULL,
-               status TEXT,
-               paymentStatus TEXT,
-               paymentAmount REAL,
-               dueDate TEXT,
-               notes TEXT,
-               invoiceId TEXT,
-               FOREIGN KEY (customerId) REFERENCES customers(id)
-             )
+          CREATE TABLE orders(
+            id TEXT PRIMARY KEY,
+            title TEXT,
+            customerId INTEGER NOT NULL,
+            status TEXT,
+            paymentStatus TEXT,
+            paymentAmount REAL,
+            dueDate TEXT,
+            notes TEXT,
+            invoiceId TEXT,
+            createdDate TEXT,
+            FOREIGN KEY (customerId) REFERENCES customers(id)
+          )
            ''');
 
     // Create Invoices table
     await db.execute('''
-             CREATE TABLE invoices(
-               id TEXT PRIMARY KEY,
-               title TEXT,
-               customerId INTEGER NOT NULL,
-               status TEXT,
-               totalAmount REAL,
-               date TEXT,
-               orderId TEXT,
-               FOREIGN KEY (customerId) REFERENCES customers(id),
-               FOREIGN KEY (orderId) REFERENCES orders(id)
-             )
+            CREATE TABLE invoices(
+              id TEXT PRIMARY KEY,
+              title TEXT,
+              customerId INTEGER NOT NULL,
+              status TEXT,
+              totalAmount REAL,
+              date TEXT,
+              orderId TEXT,
+              createdDate TEXT,
+              FOREIGN KEY (customerId) REFERENCES customers(id),
+              FOREIGN KEY (orderId) REFERENCES orders(id)
+            )
            ''');
   }
 
   Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       // Example migration
-      await db.execute("ALTER TABLE customers ADD COLUMN createdDate TEXT");
-      await db.execute("ALTER TABLE measurements ADD COLUMN createdDate TEXT");
+      // await db.execute("ALTER TABLE customers ADD COLUMN createdDate TEXT");
+      // await db.execute("ALTER TABLE measurements ADD COLUMN createdDate TEXT");
+      // await db.execute('ALTER TABLE companies ADD COLUMN imagePath TEXT');
+      // await db.execute('ALTER TABLE companies ADD COLUMN imageUrl TEXT');
     }
   }
 
@@ -445,6 +451,17 @@ class DatabaseHelper {
     );
   }
 
+  Future<Company> registerCompany(Company company) async {
+    final db = await database;
+    await db.insert(
+      'companies',
+      company.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    // Return the same company object that was passed
+    return company;
+  }
+
   Future<Company?> getCompanyByEmailAndPassword(
     String email,
     String password,
@@ -453,6 +470,24 @@ class DatabaseHelper {
     final List<Map<String, dynamic>> maps = await db.query(
       'companies',
       where: 'email = ? AND password = ?', // Assumes a 'password' column exists
+      whereArgs: [email, password],
+    );
+
+    if (maps.isNotEmpty) {
+      return Company.fromMap(maps.first);
+    }
+    return null;
+  }
+
+
+  Future<Company?> getCompanyByEmailAndMobile(
+      String email,
+      String password,
+      ) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'companies',
+      where: 'email = ? AND mobile = ?', // Assumes a 'password' column exists
       whereArgs: [email, password],
     );
 
@@ -472,6 +507,36 @@ class DatabaseHelper {
       ),
     );
     return (count ?? 0) > 0;
+  }
+
+  Future<void> updateOrderStatus(String orderId, String newStatus) async {
+    final db = await database;
+    await db.update(
+      'orders',
+      {'status': newStatus},
+      where: 'id = ?',
+      whereArgs: [orderId],
+    );
+  }
+
+  Future<void> updateOrderPaymentStatus(String orderId, String newPaymentStatus) async {
+    final db = await database;
+    await db.update(
+      'orders',
+      {'paymentStatus': newPaymentStatus},
+      where: 'id = ?',
+      whereArgs: [orderId],
+    );
+  }
+
+  Future<void> updateCompanyImagePath(String companyId, String? imagePath) async {
+    final db = await database;
+    await db.update(
+      'companies',
+      {'imagePath': imagePath},
+      where: 'id = ?',
+      whereArgs: [companyId],
+    );
   }
 }
 

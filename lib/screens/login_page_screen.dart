@@ -26,6 +26,8 @@ class _LoginScreenState extends State<LoginPageScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -108,15 +110,21 @@ class _LoginScreenState extends State<LoginPageScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth >= 600;
+    final maxFormWidth = isTablet ? 500.0 : double.infinity;
+    final horizontalPadding = isTablet ? 32.0 : 24.0;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: Text(
-          "Login",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-        ),
+        // title: Text(
+        //   "Login",
+        //   style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+        // ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -125,6 +133,13 @@ class _LoginScreenState extends State<LoginPageScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Image.asset(
+                'assets/images/app_icon.png',
+                width:
+                isTablet
+                    ? screenWidth * 0.08
+                    : screenWidth * 0.12,
+              ),
               Text(
                 "Welcome back!",
                 style: GoogleFonts.poppins(

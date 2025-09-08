@@ -85,9 +85,11 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
         context,
       ).showSnackBar(const SnackBar(content: Text('Registration successful!')));
 
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const DashboardAppScreen()),
-      );
+      // Navigator.of(context).pushReplacement(
+      //   MaterialPageRoute(builder: (context) => const DashboardAppScreen()),
+      // );
+
+      AppNavigator.toHome2();
     }
   }
 

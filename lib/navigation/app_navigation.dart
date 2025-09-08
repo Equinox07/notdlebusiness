@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/measurement.dart';
 import 'package:notdle/models/order.dart';
+import 'package:notdle/pages/dashboard_app.dart';
 import 'package:notdle/pages/dashboard_screen.dart';
 import 'package:notdle/pages/login_app.dart';
 import 'package:notdle/screens/add_customer_measurement.dart';
@@ -97,9 +98,16 @@ class AppNavigator {
     );
   }
 
+  // static void toHome2() {
+  //   navigatorKey.currentState?.pushReplacement(
+  //     MaterialPageRoute(builder: (context) => DashboardScreen()),
+  //   );
+  // }
+
   static void toHome2() {
-    navigatorKey.currentState?.pushReplacement(
-      MaterialPageRoute(builder: (context) => DashboardScreen()),
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      DashboardAppScreen.tag,
+          (route) => false,
     );
   }
 

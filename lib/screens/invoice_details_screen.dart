@@ -1,5 +1,7 @@
 // lib/screens/invoice_details_screen.dart
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -136,10 +138,16 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Company Logo Placeholder
-              const CircleAvatar(
+              CircleAvatar(
                 radius: 30,
                 backgroundColor: Colors.indigo,
-                child: Icon(Icons.business, color: Colors.white, size: 30),
+                // Conditionally load the image
+                backgroundImage: company.imagePath != null
+                    ? FileImage(File(company.imagePath!)) as ImageProvider
+                    : null,
+                child: company.imagePath == null
+                    ? const Icon(Icons.business, color: Colors.white, size: 30)
+                    : null,
               ),
               const SizedBox(width: 16),
               Expanded(

@@ -54,6 +54,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       newCustomer,
     );
     return savedCustomer;
+
+
   }
 
   // void _saveCustomer({String? action}) {
@@ -276,40 +278,40 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  final saved = await _saveCustomer();
-                  if (saved != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => OrdersScreen()),
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.indigo,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                icon: const Icon(
-                  Icons.shopping_bag_outlined,
-                  color: Colors.white,
-                ),
-                label: Text(
-                  "Save & Create Order",
-                  style: GoogleFonts.poppins(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
+            // const SizedBox(height: 12),
+            // SizedBox(
+            //   width: double.infinity,
+            //   child: ElevatedButton.icon(
+            //     onPressed: () async {
+            //       final saved = await _saveCustomer();
+            //       if (saved != null) {
+            //         Navigator.push(
+            //           context,
+            //           MaterialPageRoute(builder: (_) => OrdersScreen()),
+            //         );
+            //       }
+            //     },
+            //     style: ElevatedButton.styleFrom(
+            //       backgroundColor: Colors.indigo,
+            //       shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(12),
+            //       ),
+            //       padding: const EdgeInsets.symmetric(vertical: 16),
+            //     ),
+            //     icon: const Icon(
+            //       Icons.shopping_bag_outlined,
+            //       color: Colors.white,
+            //     ),
+            //     label: Text(
+            //       "Save & Create Order",
+            //       style: GoogleFonts.poppins(
+            //         fontSize: 15,
+            //         fontWeight: FontWeight.w600,
+            //         color: Colors.white,
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),

@@ -27,12 +27,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final List<Widget> _screens = [
     const DashboardHome(),
     const CustomersScreen(),
+    const ServicesScreen(),
     const OrdersScreen(),
-    // FabricsScreen(),
     const InvoicesScreen(),
-    const ServicesScreen()
-    // CompanyServicesScreen(),
-    // ProfileScreen()
   ];
 
   void _onNavTapped(int index) {
@@ -45,44 +42,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onNavTapped,
-        type: BottomNavigationBarType.fixed, // ✅ allows 6 tabs
-        selectedItemColor: Colors.indigo,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: "Dashboard",
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: "Clients"),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: "Orders",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.attach_money),
-            label: "Invoices",
-          ),
-          // BottomNavigationBarItem(icon: Icon(Icons.texture), label: "Invoices"),
-          // BottomNavigationBarItem(icon: Icon(Icons.receipt), label: "Invoices"),
-          // BottomNavigationBarItem(
-          //     icon: Icon(Icons.design_services), label: "Services"),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person), // Use a person icon for the profile
-            label: 'Profile',
-          ),
-        ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _onNavTapped(2), // 2 is the index for Services
+        backgroundColor: Colors.indigo.shade600,
+        child: const Icon(Icons.design_services, color: Colors.white, size: 30),
+        shape: const CircleBorder(),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
+        elevation: 8.0,
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 6.0,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            IconButton(
+              onPressed: () => _onNavTapped(0),
+              icon: Icon(
+                Icons.dashboard,
+                color: _selectedIndex == 0 ? Colors.indigo.shade600 : Colors.grey.shade600,
+              ),
+              tooltip: 'Dashboard',
+            ),
+            IconButton(
+              onPressed: () => _onNavTapped(1),
+              icon: Icon(
+                Icons.people,
+                color: _selectedIndex == 1 ? Colors.indigo.shade600 : Colors.grey.shade600,
+              ),
+              tooltip: 'Clients',
+            ),
+            const SizedBox(width: 48), // Spacer for the FAB
+            IconButton(
+              onPressed: () => _onNavTapped(3),
+              icon: Icon(
+                Icons.shopping_cart,
+                color: _selectedIndex == 3 ? Colors.indigo.shade600 : Colors.grey.shade600,
+              ),
+              tooltip: 'Orders',
+            ),
+            IconButton(
+              onPressed: () => _onNavTapped(4),
+              icon: Icon(
+                Icons.attach_money,
+                color: _selectedIndex == 4 ? Colors.indigo.shade600 : Colors.grey.shade600,
+              ),
+              tooltip: 'Invoices',
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-
-//
-// ----------------- DASHBOARD HOME -----------------
-//
-
-//
-// ----------------- OTHER MAIN SCREENS -----------------
-//

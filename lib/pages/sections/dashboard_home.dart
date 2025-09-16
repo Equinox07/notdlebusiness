@@ -1,20 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/db/database_helper.dart';
+import 'package:notdle/models/company.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
+import 'package:notdle/services/session_manager.dart';
 import 'package:notdle/widgets/action_card.dart';
 import 'package:notdle/widgets/deadline_card.dart';
 import 'package:provider/provider.dart';
 
 // Assume this exists
 
-class DashboardHome extends StatelessWidget {
+class DashboardHome extends StatefulWidget {
   const DashboardHome({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  State<DashboardHome> createState() => _DashboardHomeState();
+}
 
+class _DashboardHomeState extends State<DashboardHome> {
+  late Future<Company?> _companyFuture;
+  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _companyFuture = SessionManager.getCompany();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<DashBoardProvider>(context, listen: false).fetchCounts();
+    } );
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
     //Listen for latest updates
     final dashboardProvider = Provider.of<DashBoardProvider>(context);
 
@@ -76,7 +95,6 @@ class DashboardHome extends StatelessWidget {
                     icon: Icons.add_circle_outline,
                     onTap: () => AppNavigator.toCreateNewOrder(),
                   ),
-
                 ],
               ),
               const SizedBox(height: 12),
@@ -104,27 +122,20 @@ class DashboardHome extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  FutureBuilder<int>(
-                    future: DatabaseHelper.instance.getActiveOrderCount(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const CircularProgressIndicator();
-                      }
-                      return Expanded(
-                        child: _QuickStatCard(
-                          value: "${snapshot.data ?? 0}",
-                          label: 'Active Orders',
-                          color: Colors.blue,
-                          isTablet: isTablet,
-                        ),
-                      );
-                      // Text(
-                      //   'Total Orders: ${snapshot.data ?? 0}',
-                      //   style: Theme.of(context).textTheme.headlineMedium,
-                      // );
-                    },
+                  Expanded(
+                    child: _QuickStatCard(
+                      value: dashboardProvider.orderCount.toString(),
+                      label: 'Active Orders',
+                      color: Colors.blue,
+                      isTablet: isTablet,
+                    ),
                   ),
+                  // Text(
+                  //   'Total Orders: ${snapshot.data ?? 0}',
+                  //   style: Theme.of(context).textTheme.headlineMedium,
+                  // );
                   const SizedBox(width: 30),
+
                   // Expanded(
                   //   child: _QuickStatCard(
                   //     value: '24',
@@ -134,26 +145,13 @@ class DashboardHome extends StatelessWidget {
                   //   ),
                   // ),
                   // Quick Stats Section
-
-                  FutureBuilder<int>(
-                    future: DatabaseHelper.instance.getCustomerCount(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const CircularProgressIndicator();
-                      }
-                      return Expanded(
-                        child: _QuickStatCard(
-                          value: "${snapshot.data ?? 0}",
-                          label: 'Total Customers',
-                          color: Colors.green,
-                          isTablet: isTablet,
-                        ),
-                      );
-                      // Text(
-                      //   'Total Orders: ${snapshot.data ?? 0}',
-                      //   style: Theme.of(context).textTheme.headlineMedium,
-                      // );
-                    },
+                  Expanded(
+                    child: _QuickStatCard(
+                      value: dashboardProvider.customerCount.toString(),
+                      label: 'Total Customers',
+                      color: Colors.green,
+                      isTablet: isTablet,
+                    ),
                   ),
                   // Expanded(
                   //   child: _QuickStatCard(

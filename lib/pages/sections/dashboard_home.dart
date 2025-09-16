@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/navigation/app_navigation.dart';
+import 'package:notdle/providers/dashboard_provider.dart';
+import 'package:notdle/widgets/action_card.dart';
 import 'package:notdle/widgets/deadline_card.dart';
+import 'package:provider/provider.dart';
 
 // Assume this exists
 
@@ -11,6 +14,10 @@ class DashboardHome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    //Listen for latest updates
+    final dashboardProvider = Provider.of<DashBoardProvider>(context);
+
     final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
 
     return Scaffold(
@@ -52,6 +59,28 @@ class DashboardHome extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _SectionTitle(text: "Quick Actions"),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ActionCard(
+                    title: 'New Client',
+                    icon: Icons.person_add_alt,
+                    onTap: () => AppNavigator.toAddCustomer(),
+                  ),
+
+                  const SizedBox(width: 10),
+                  ActionCard(
+                    title: 'New Order',
+                    icon: Icons.add_circle_outline,
+                    onTap: () => AppNavigator.toCreateNewOrder(),
+                  ),
+
+                ],
+              ),
+              const SizedBox(height: 12),
+              // ActionCard(title: "New Client", icon: Icons.person, onTap: () => {}),
               // Next Appointment Section
               // _SectionTitle(text: "Your Next Appointment"),
               // const SizedBox(height: 12),
@@ -95,7 +124,7 @@ class DashboardHome extends StatelessWidget {
                       // );
                     },
                   ),
-
+                  const SizedBox(width: 30),
                   // Expanded(
                   //   child: _QuickStatCard(
                   //     value: '24',
@@ -104,7 +133,8 @@ class DashboardHome extends StatelessWidget {
                   //     isTablet: isTablet,
                   //   ),
                   // ),
-                  const SizedBox(width: 16),
+                  // Quick Stats Section
+
                   FutureBuilder<int>(
                     future: DatabaseHelper.instance.getCustomerCount(),
                     builder: (context, snapshot) {
@@ -136,7 +166,6 @@ class DashboardHome extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 32),
-
               // Menu Options Section
               _SectionTitle(text: "Services"),
               const SizedBox(height: 16),

@@ -42,57 +42,68 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _screens[_selectedIndex],
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _onNavTapped(2), // 2 is the index for Services
-        backgroundColor: Colors.indigo.shade600,
-        child: const Icon(Icons.design_services, color: Colors.white, size: 30),
-        shape: const CircleBorder(),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onNavTapped,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.indigo.shade600,
+        unselectedItemColor: Colors.grey.shade600,
+        backgroundColor: Colors.white,
+        elevation: 8,
+        items: [
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard),
+            label: "Dashboard",
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.people),
+            label: "Clients",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.design_services), // _ServiceBottomNavItem(isSelected: _selectedIndex == 2),
+            label: "Services",
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: "Orders",
+          ),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.attach_money),
+            label: "Invoices",
+          ),
+        ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        elevation: 8.0,
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 6.0,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-              onPressed: () => _onNavTapped(0),
-              icon: Icon(
-                Icons.dashboard,
-                color: _selectedIndex == 0 ? Colors.indigo.shade600 : Colors.grey.shade600,
-              ),
-              tooltip: 'Dashboard',
-            ),
-            IconButton(
-              onPressed: () => _onNavTapped(1),
-              icon: Icon(
-                Icons.people,
-                color: _selectedIndex == 1 ? Colors.indigo.shade600 : Colors.grey.shade600,
-              ),
-              tooltip: 'Clients',
-            ),
-            const SizedBox(width: 48), // Spacer for the FAB
-            IconButton(
-              onPressed: () => _onNavTapped(3),
-              icon: Icon(
-                Icons.shopping_cart,
-                color: _selectedIndex == 3 ? Colors.indigo.shade600 : Colors.grey.shade600,
-              ),
-              tooltip: 'Orders',
-            ),
-            IconButton(
-              onPressed: () => _onNavTapped(4),
-              icon: Icon(
-                Icons.attach_money,
-                color: _selectedIndex == 4 ? Colors.indigo.shade600 : Colors.grey.shade600,
-              ),
-              tooltip: 'Invoices',
-            ),
-          ],
+    );
+  }
+}
+
+
+class _ServiceBottomNavItem extends StatelessWidget {
+  final bool isSelected;
+  const _ServiceBottomNavItem({
+    required this.isSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.design_services,
+          color: isSelected ? Colors.indigo.shade600 : Colors.grey.shade600,
+          size: isSelected ? 30 : 24, // ✅ Larger icon for emphasis
         ),
-      ),
+        Text(
+          "Services",
+          style: TextStyle(
+            fontSize: isSelected ? 12 : 10,
+            color: isSelected ? Colors.indigo.shade600 : Colors.grey.shade600,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ],
     );
   }
 }

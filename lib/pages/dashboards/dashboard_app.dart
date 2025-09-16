@@ -11,12 +11,10 @@ import 'package:notdle/services/session_manager.dart';
 import 'package:notdle/widgets/deadline_card.dart';
 import 'package:provider/provider.dart';
 
-
 class DashboardAppScreen extends StatefulWidget {
   const DashboardAppScreen({super.key});
 
-  static const String tag  = "dashboard_screen_app";
-
+  static const String tag = "dashboard_screen_app";
 
   @override
   State<DashboardAppScreen> createState() => _DashboardScreenState();
@@ -26,30 +24,23 @@ class _DashboardScreenState extends State<DashboardAppScreen> {
   late Future<Company?> _companyFuture;
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
-
   @override
   void initState() {
     super.initState();
     _companyFuture = SessionManager.getCompany();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<DashBoardProvider>(context, listen: false).fetchCounts();
-    } );
-
+    });
   }
 
   Future<Map<String, int>> _fetchCounts() async {
     final orderCount = await _dbHelper.getActiveOrderCount();
     final customerCount = await _dbHelper.getCustomerCount();
-    return {
-      'orders': orderCount,
-      'customers': customerCount,
-    };
+    return {'orders': orderCount, 'customers': customerCount};
   }
-
 
   @override
   Widget build(BuildContext context) {
-
     //Listen for latest updates
     final dashboardProvider = Provider.of<DashBoardProvider>(context);
 
@@ -78,8 +69,7 @@ class _DashboardScreenState extends State<DashboardAppScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        child:
-        Column(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Welcome Section
@@ -93,8 +83,7 @@ class _DashboardScreenState extends State<DashboardAppScreen> {
                 ),
                 borderRadius: BorderRadius.circular(24),
               ),
-              child:
-              FutureBuilder<Company?>(
+              child: FutureBuilder<Company?>(
                 future: _companyFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -150,7 +139,11 @@ class _DashboardScreenState extends State<DashboardAppScreen> {
                               const CircleAvatar(
                                 backgroundColor: Colors.white30,
                                 radius: 30,
-                                child: Icon(Icons.person, size: 30, color: Colors.white),
+                                child: Icon(
+                                  Icons.person,
+                                  size: 30,
+                                  color: Colors.white,
+                                ),
                               ),
                             ],
                           ),
@@ -183,20 +176,20 @@ class _DashboardScreenState extends State<DashboardAppScreen> {
                 //     );
                 //   },
                 // ),
-              _StatCard(
-              title: 'Customers',
-              value: dashboardProvider.customerCount.toString(),
-              icon: Icons.group,
-              color: Colors.green,
-              onTap: () => AppNavigator.toCustomers(),
-            ),
-      _StatCard(
-        title: 'Orders',
-        value:  dashboardProvider.orderCount.toString(),
-        icon: Icons.shopping_cart_rounded,
-        color: Colors.indigo,
-        onTap: () => AppNavigator.toOrders(),
-      ),
+                _StatCard(
+                  title: 'Customers',
+                  value: dashboardProvider.customerCount.toString(),
+                  icon: Icons.group,
+                  color: Colors.green,
+                  onTap: () => AppNavigator.toCustomers(),
+                ),
+                _StatCard(
+                  title: 'Orders',
+                  value: dashboardProvider.orderCount.toString(),
+                  icon: Icons.shopping_cart_rounded,
+                  color: Colors.indigo,
+                  onTap: () => AppNavigator.toOrders(),
+                ),
                 // FutureBuilder<int>(
                 //   future: DatabaseHelper.instance.getActiveOrderCount(),
                 //   builder: (context, snapshot) {
@@ -217,22 +210,20 @@ class _DashboardScreenState extends State<DashboardAppScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-
-                 _StatCard(
-                      title: 'Measurements',
-                      value: "0",
-                      icon: Icons.straighten,
-                      color: Colors.deepOrange,
-                      onTap: () => AppNavigator.toMeasurement(),
-                    ),
+                _StatCard(
+                  title: 'Measurements',
+                  value: "0",
+                  icon: Icons.straighten,
+                  color: Colors.deepOrange,
+                  onTap: () => AppNavigator.toMeasurement(),
+                ),
                 _StatCard(
                   title: 'Invoices',
                   value: "0",
                   icon: Icons.attach_money,
                   color: Colors.deepOrange,
                   onTap: () => AppNavigator.toInvoice(),
-                )
-
+                ),
 
                 // FutureBuilder<int>(
                 //   future: DatabaseHelper.instance.getActiveOrderCount(),
@@ -249,8 +240,6 @@ class _DashboardScreenState extends State<DashboardAppScreen> {
                 //     );
                 //   },
                 // ),
-
-
               ],
             ),
 
@@ -290,7 +279,6 @@ class _DashboardScreenState extends State<DashboardAppScreen> {
               orderFuture: DatabaseHelper.instance.getSoonestDueOrder(),
               onTap: () => debugPrint("Orders"),
             ),
-
           ],
         ),
       ),
@@ -322,7 +310,7 @@ class _StatCard extends StatelessWidget {
     required this.value,
     required this.icon,
     required this.color,
-    required this.onTap
+    required this.onTap,
   });
 
   @override
@@ -334,33 +322,33 @@ class _StatCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: color, size: 28),
-              const SizedBox(height: 12),
-              Text(
-                value,
-                style: GoogleFonts.poppins(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: color,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(icon, color: color, size: 28),
+                const SizedBox(height: 12),
+                Text(
+                  value,
+                  style: GoogleFonts.poppins(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                title,
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey.shade600,
+                const SizedBox(height: 4),
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey.shade600,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-        )
       ),
     );
   }
@@ -374,7 +362,8 @@ class _ActionCard extends StatelessWidget {
   const _ActionCard({
     required this.title,
     required this.icon,
-    required this.onTap});
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {

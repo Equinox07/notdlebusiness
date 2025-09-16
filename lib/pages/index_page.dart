@@ -72,6 +72,7 @@ class _StartupScreen extends StatelessWidget {
           // If company data exists, navigate to the main screen
           return const DashboardScreen();
           //DashboardAppScreen
+          //DashboardScreen
         } else {
           // If no company data, navigate to the login screen
           return const LoginPageScreen();

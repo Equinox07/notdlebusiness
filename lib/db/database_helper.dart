@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:notdle/models/company.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
@@ -15,6 +17,12 @@ class DatabaseHelper {
   static Database? _database;
 
   DatabaseHelper._init();
+
+  // StreamController to manage the stream of the soonest due order
+  final _soonestDueOrderController = StreamController<Order?>.broadcast();
+
+  // Public getter for the stream
+  Stream<Order?> getSoonestDueOrdersStream() => _soonestDueOrderController.stream;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -537,6 +545,29 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [companyId],
     );
+  }
+
+
+  // Method to get the soonest due order from the database
+  Future<Order?> getSoonestDueOrders() async {
+    final db = await instance.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'orders',
+      orderBy: 'deliveryDate ASC',
+      limit: 1,
+    );
+
+    if (maps.isNotEmpty) {
+      return Order.fromMap(maps.first);
+    } else {
+      return null;
+    }
+  }
+
+  // Method to notify the stream whenever the data changes
+  void notifyOrderChanges() async {
+    final order = await getSoonestDueOrder();
+    _soonestDueOrderController.sink.add(order);
   }
 }
 

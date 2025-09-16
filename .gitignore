@@ -49,3 +49,6 @@ app.*.map.json
 screen_snippet*
 
 /lookups
+
+dashboard.txt
+dshbrd.txt

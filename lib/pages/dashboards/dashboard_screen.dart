@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:notdle/pages/sections/company_services_screen.dart';
 import 'package:notdle/screens/customers_screen.dart';
 import 'package:notdle/screens/fabric_screen.dart';
 import 'package:notdle/screens/invoices_screen.dart';
@@ -23,14 +24,15 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = const [
-    DashboardHome(),
-    CustomersScreen(),
-    OrdersScreen(),
+  final List<Widget> _screens = [
+    const DashboardHome(),
+    const CustomersScreen(),
+    const OrdersScreen(),
     // FabricsScreen(),
-    InvoicesScreen(),
-    // ServicesScreen(),
-    ProfileScreen()
+    const InvoicesScreen(),
+    const ServicesScreen()
+    // CompanyServicesScreen(),
+    // ProfileScreen()
   ];
 
   void _onNavTapped(int index) {

@@ -4,6 +4,7 @@ import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/company.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
+import 'package:notdle/providers/notification_provider.dart';
 import 'package:notdle/services/session_manager.dart';
 import 'package:notdle/widgets/action_card.dart';
 import 'package:notdle/widgets/deadline_card.dart';
@@ -36,6 +37,7 @@ class _DashboardHomeState extends State<DashboardHome> {
   Widget build(BuildContext context) {
     //Listen for latest updates
     final dashboardProvider = Provider.of<DashBoardProvider>(context);
+    final notificationProvider = Provider.of<NotificationProvider>(context);
 
     final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
 

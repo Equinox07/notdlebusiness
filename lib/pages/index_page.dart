@@ -3,6 +3,7 @@ import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/pages/dashboards/dashboard_app.dart';
 import 'package:notdle/pages/dashboards/dashboard_screen.dart';
 import 'package:notdle/pages/login_app.dart';
+import 'package:notdle/pages/sections/company_services_screen.dart';
 import 'package:notdle/screens/add_customer_screen.dart';
 import 'package:notdle/screens/all_measurement_screen.dart';
 import 'package:notdle/screens/company_registration_screen.dart';
@@ -45,6 +46,7 @@ class IndexPage extends StatelessWidget {
         CreateOrderScreen.tag: (context) => const CreateOrderScreen(),
         InvoicesScreen.tag: (context) => const InvoicesScreen(),
         NotificationScreen.tag: (context) => const NotificationScreen(),
+        CompanyServicesScreen.tag: (context) => CompanyServicesScreen(),
         // CreateOrderScreen.tag: (context) => const CreateOrderScreen(),
         // OrderDetailsScreen.tag: (context) => const OrderDetailsScreen(),
       },

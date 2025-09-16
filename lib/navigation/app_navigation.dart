@@ -5,6 +5,7 @@ import 'package:notdle/models/order.dart';
 import 'package:notdle/pages/dashboards/dashboard_app.dart';
 import 'package:notdle/pages/dashboards/dashboard_screen.dart';
 import 'package:notdle/pages/login_app.dart';
+import 'package:notdle/pages/sections/company_services_screen.dart';
 import 'package:notdle/screens/add_customer_measurement.dart';
 import 'package:notdle/screens/add_customer_screen.dart';
 import 'package:notdle/screens/add_measurement_screen.dart';
@@ -147,6 +148,13 @@ class AppNavigator {
   static void toNotifications() {
     navigatorKey.currentState?.pushNamed(NotificationScreen.tag);
   }
+
+  static void toCompanyServices() {
+    navigatorKey.currentState?.pushNamed(CompanyServicesScreen.tag);
+  }
+
+
+
 
   static void toCustomerDetails(Customer customer) {
     navigatorKey.currentState?.pushNamed(

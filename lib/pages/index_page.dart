@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:notdle/navigation/app_navigation.dart';
-import 'package:notdle/pages/dashboard_app.dart';
-import 'package:notdle/pages/dashboard_screen.dart';
+import 'package:notdle/pages/dashboards/dashboard_app.dart';
+import 'package:notdle/pages/dashboards/dashboard_screen.dart';
 import 'package:notdle/pages/login_app.dart';
 import 'package:notdle/screens/add_customer_screen.dart';
 import 'package:notdle/screens/all_measurement_screen.dart';
@@ -11,6 +11,7 @@ import 'package:notdle/screens/customers_screen.dart';
 import 'package:notdle/screens/invoices_screen.dart';
 import 'package:notdle/screens/login_page_screen.dart';
 import 'package:notdle/screens/main.dart';
+import 'package:notdle/screens/notification_screen.dart';
 import 'package:notdle/screens/orders_screen.dart';
 import 'package:notdle/pages/signup_page.dart';
 import 'package:notdle/screens/profile_screen.dart';
@@ -43,6 +44,7 @@ class IndexPage extends StatelessWidget {
         ProfileScreen.tag: (context) => const ProfileScreen(),
         CreateOrderScreen.tag: (context) => const CreateOrderScreen(),
         InvoicesScreen.tag: (context) => const InvoicesScreen(),
+        NotificationScreen.tag: (context) => const NotificationScreen(),
         // CreateOrderScreen.tag: (context) => const CreateOrderScreen(),
         // OrderDetailsScreen.tag: (context) => const OrderDetailsScreen(),
       },

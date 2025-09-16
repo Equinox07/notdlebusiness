@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/navigation/app_navigation.dart';
-import 'package:notdle/pages/dashboard_screen.dart';
+import 'package:notdle/pages/dashboards/dashboard_screen.dart';
 
 class SignupSuccessScreen extends StatelessWidget {
   const SignupSuccessScreen({super.key});

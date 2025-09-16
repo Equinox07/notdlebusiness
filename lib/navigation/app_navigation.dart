@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/measurement.dart';
 import 'package:notdle/models/order.dart';
-import 'package:notdle/pages/dashboard_app.dart';
-import 'package:notdle/pages/dashboard_screen.dart';
+import 'package:notdle/pages/dashboards/dashboard_app.dart';
+import 'package:notdle/pages/dashboards/dashboard_screen.dart';
 import 'package:notdle/pages/login_app.dart';
 import 'package:notdle/screens/add_customer_measurement.dart';
 import 'package:notdle/screens/add_customer_screen.dart';
@@ -16,6 +16,7 @@ import 'package:notdle/screens/customer_measurement.dart';
 import 'package:notdle/screens/customers_screen.dart';
 import 'package:notdle/screens/invoices_screen.dart';
 import 'package:notdle/screens/main.dart';
+import 'package:notdle/screens/notification_screen.dart';
 import 'package:notdle/screens/order_details_screen.dart';
 import 'package:notdle/screens/orders_screen.dart';
 import 'package:notdle/pages/signup_page.dart';
@@ -141,6 +142,10 @@ class AppNavigator {
 
   static void toCustomers() {
     navigatorKey.currentState?.pushNamed(CustomersScreen.tag);
+  }
+
+  static void toNotifications() {
+    navigatorKey.currentState?.pushNamed(NotificationScreen.tag);
   }
 
   static void toCustomerDetails(Customer customer) {

@@ -8,7 +8,7 @@ import 'package:notdle/screens/profile_screen.dart';
 import 'package:notdle/screens/projects_screen.dart';
 import 'package:notdle/screens/services_screen.dart';
 import 'package:notdle/pages/sections/appointment_card.dart';
-import 'package:notdle/pages/sections/dashboard_home.dart';
+import 'package:notdle/pages/dashboards/dashboard_home.dart';
 import 'package:notdle/pages/sections/insight_card.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -84,14 +84,3 @@ class _DashboardScreenState extends State<DashboardScreen> {
 //
 // ----------------- OTHER MAIN SCREENS -----------------
 //
-class ClientsScreen extends StatelessWidget {
-  const ClientsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Clients")),
-      body: const Center(child: Text("Clients list & appointments here")),
-    );
-  }
-}

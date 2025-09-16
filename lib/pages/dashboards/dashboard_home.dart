@@ -63,9 +63,43 @@ class _DashboardHomeState extends State<DashboardHome> {
           ],
         ),
         actions: [
+          // ➡️ Wrap the notification icon and its count in a Stack
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_none),
+                onPressed: () => AppNavigator.toNotifications(),
+              ),
+              Positioned(
+                right: 8,
+                top: 8,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: const Text(
+                    '3', // Dynamic count
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          // The account icon remains separate
           IconButton(
-            icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
+            icon: const Icon(Icons.account_circle, color: Colors.black87),
+            onPressed: () =>  AppNavigator.toProfile() ,
           ),
         ],
         backgroundColor: Colors.white,

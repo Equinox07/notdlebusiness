@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:notdle/pages/dashboard_screen.dart';
+import 'package:notdle/pages/dashboards/dashboard_screen.dart';
 import 'package:notdle/screens/all_measurement_screen.dart';
 import 'package:notdle/screens/customers_screen.dart';
 import 'package:notdle/screens/designs_screen.dart';
@@ -14,17 +14,6 @@ class ServicesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
-
-    //  Customer newCustomer = Customer(
-    //   name: "John Doe",
-    //   phone: "+123456789",
-    //   email: "john@email.com",
-    //   orders: 0,
-    //   lastVisit: DateTime.now(),
-    //   gender: "Male",
-    //   address: "Accra",
-    //   createdDate: DateTime.now(), // 🔹 auto
-    // );
 
     return Scaffold(
       appBar: AppBar(title: const Text("Services")),

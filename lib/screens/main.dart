@@ -1,7 +1,7 @@
 // lib/screens/main_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:notdle/pages/dashboard_app.dart';
+import 'package:notdle/pages/dashboards/dashboard_app.dart';
 import 'package:notdle/screens/placeholder_screen.dart';
 
 class MainScreen extends StatefulWidget {

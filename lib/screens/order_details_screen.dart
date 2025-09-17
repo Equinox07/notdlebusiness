@@ -7,8 +7,10 @@ import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
+import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/screens/create_invoice_screen.dart';
 import 'package:notdle/screens/update_order_modal.dart';
+import 'package:provider/provider.dart';
 
 // Private data model to hold all fetched details
 class _OrderDetailsData {
@@ -30,7 +32,7 @@ class OrderDetailsScreen extends StatefulWidget {
 }
 
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
-  final dbHelper = DatabaseHelper.instance;
+  // final dbHelper = DatabaseHelper.instance;
   late Future<_OrderDetailsData?> _orderDetailsFuture;
   late String _selectedStatus;
   late String _selectedPaymentStatus;
@@ -63,7 +65,16 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   // Helper method to update the order status
   Future<void> _updateOrderStatus(String? newStatus) async {
     if (newStatus != null && newStatus != _selectedStatus) {
-      await dbHelper.updateOrderStatus(widget.order.id, newStatus);
+
+      final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+
+      final updateOrder = widget.order.copyWith(
+        status: newStatus
+      );
+
+      // await dbHelper.updateOrderStatus(widget.order.id, newStatus);
+      await orderProvider.updateOrder(updateOrder);
+
       setState(() {
         _selectedStatus = newStatus;
       });
@@ -76,7 +87,15 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   // Helper method to update the payment status
   Future<void> _updatePaymentStatus(String? newPaymentStatus) async {
     if (newPaymentStatus != null && newPaymentStatus != _selectedPaymentStatus) {
-      await dbHelper.updateOrderPaymentStatus(widget.order.id, newPaymentStatus);
+
+      final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+
+      final updateOrder = widget.order.copyWith(
+          paymentStatus: newPaymentStatus
+      );
+      await orderProvider.updateOrder(updateOrder);
+
+      // await dbHelper.updateOrderPaymentStatus(widget.order.id, newPaymentStatus);
       setState(() {
         _selectedPaymentStatus = newPaymentStatus;
       });

@@ -29,6 +29,16 @@ abstract class CompanyDao{
   @Query('SELECT * FROM company WHERE mobile = :mobile AND email= :password LIMIT 1')
   Future<Company?> getCompanyByEmailAndMobile(String mobile, String password);
 
+//   Future<void> updateCompanyImagePath(String companyId, String? imagePath) async {
+//     final db = await database;
+//     await db.update(
+//       'companies',
+//       {'imagePath': imagePath},
+//       where: 'id = ?',
+//       whereArgs: [companyId],
+//     );
+//   }
+
   // @Query('SELECT * FROM company WHERE id = :id')
   // Future<Company?> getCompanyById(String id);
 

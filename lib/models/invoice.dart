@@ -38,6 +38,29 @@ class Invoice {
     this.updatedDate,
   });
 
+  Invoice copyWith({
+    String? title,
+    String? customerId,
+    String? status,
+    double? totalAmount,
+    DateTime? date,
+    String? orderId,
+    String? createdDate,
+    String? updatedDate,
+  }) {
+    return Invoice(
+      id: id,
+      title: title ?? this.title,
+      customerId: customerId ?? this.customerId,
+      status: status ?? this.status,
+      totalAmount: totalAmount ?? this.totalAmount,
+      date: date ?? this.date,
+      orderId: orderId ?? this.orderId,
+      createdDate: createdDate ?? this.createdDate,
+      updatedDate: updatedDate ?? this.updatedDate,
+    );
+  }
+
 
   // // Convert an Invoice object into a Map.
   // Map<String, dynamic> toMap() {

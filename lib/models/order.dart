@@ -33,6 +33,30 @@ class Order {
     required this.createdDate, // Add to constructor
     String? id,
   }) : id = id ?? const Uuid().v4();
+
+
+  Order copyWith({
+    String? title,
+    String? customerId,
+    String? status,
+    String? paymentStatus,
+    double? paymentAmount,
+    String? dueDate,
+    String? notes,
+    String? createdDate,
+  }) {
+    return Order(
+      id: id,
+      title: title ?? this.title,
+      customerId: customerId ?? this.customerId,
+      status: status ?? this.status,
+      paymentStatus: paymentStatus ?? this.paymentStatus,
+      paymentAmount: paymentAmount ?? this.paymentAmount,
+      dueDate: dueDate ?? this.dueDate,
+      notes: notes ?? this.notes,
+      createdDate: createdDate ?? this.createdDate,
+    );
+  }
   //
   // // Convert an Order object into a Map.
   // Map<String, dynamic> toMap() {

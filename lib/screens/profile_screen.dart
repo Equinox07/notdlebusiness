@@ -7,7 +7,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/company.dart';
+import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/services/session_manager.dart';
+import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -21,7 +23,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late Future<Company?> _companyFuture;
   final ImagePicker _picker = ImagePicker();
-  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  // final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   @override
   void initState() {
@@ -29,15 +31,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _companyFuture = SessionManager.getCompany();
   }
 
+
   // Method to handle picking an image from the gallery
   Future<void> _pickImage(Company company) async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       // Save the new image path to the database
-      await _dbHelper.updateCompanyImagePath(company.id!, pickedFile.path);
+      // await _dbHelper.updateCompanyImagePath(company.id!, pickedFile.path);
+      final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
+
+      final updatedCompany = company.copyWith(
+          imagePath: pickedFile.path
+      );
+
+      await companyProvider.update(updatedCompany);
+
 
       // Update shared preferences with the new path
-      final updatedCompany = company.copyWith(imagePath: pickedFile.path);
+      // final updatedCompany = company.copyWith(imagePath: pickedFile.path);
       await SessionManager.saveCompany(updatedCompany);
 
       // Refresh the UI to display the new image
@@ -49,6 +60,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+
+
+
+
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(

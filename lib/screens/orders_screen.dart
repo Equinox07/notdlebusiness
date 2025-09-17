@@ -22,7 +22,7 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
-  final dbHelper = DatabaseHelper.instance;
+  // final dbHelper = DatabaseHelper.instance;
   late Future<List<Order>> _ordersFuture;
 
   @override

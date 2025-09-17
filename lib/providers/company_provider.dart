@@ -26,6 +26,9 @@ class CompanyProvider with ChangeNotifier {
       return companyDao.getCompanyByEmailAndMobile(mobile, password);
   }
 
+  Future<void> update(Company company) async {
+    return companyDao.updateCompany(company);
+  }
 
   Future<Company?> registerCompany(Company newCompany) async {
     // final registered = await repository.registerCompany(newCompany);

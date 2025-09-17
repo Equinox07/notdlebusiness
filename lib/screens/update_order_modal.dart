@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/order.dart';
+import 'package:notdle/providers/order_provider.dart';
+import 'package:provider/provider.dart';
 
 class UpdateOrderModal extends StatefulWidget {
   final Order order;
@@ -20,7 +22,7 @@ class UpdateOrderModal extends StatefulWidget {
 }
 
 class _UpdateOrderModalState extends State<UpdateOrderModal> {
-  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  // final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   late String _selectedStatus;
   late String _selectedPaymentStatus;
 
@@ -48,13 +50,26 @@ class _UpdateOrderModalState extends State<UpdateOrderModal> {
 
   Future<void> _updateOrder() async {
     // Update order status if it has changed
+
+    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+
+
+
     if (_selectedStatus != widget.order.status) {
-      await _dbHelper.updateOrderStatus(widget.order.id, _selectedStatus);
+      final existingOrder = widget.order.copyWith(
+          status: _selectedStatus
+      );
+      await orderProvider.updateOrder(existingOrder);
+      // await _dbHelper.updateOrderStatus(widget.order.id, _selectedStatus);
     }
 
     // Update payment status if it has changed
     if (_selectedPaymentStatus != widget.order.paymentStatus) {
-      await _dbHelper.updateOrderPaymentStatus(widget.order.id, _selectedPaymentStatus);
+      final existingOrder = widget.order.copyWith(
+          paymentStatus: _selectedPaymentStatus
+      );
+      await orderProvider.updateOrder(existingOrder);
+      // await _dbHelper.updateOrderPaymentStatus(widget.order.id, _selectedPaymentStatus);
     }
 
     // Call the callback to refresh the parent screen

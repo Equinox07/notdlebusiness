@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/invoice.dart';
+import 'package:notdle/providers/invoice_provider.dart';
+import 'package:provider/provider.dart';
 
 class UpdateInvoiceModal extends StatefulWidget {
   final Invoice invoice;
@@ -20,7 +22,7 @@ class UpdateInvoiceModal extends StatefulWidget {
 }
 
 class _UpdateInvoiceModalState extends State<UpdateInvoiceModal> {
-  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  // final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   late String _selectedStatus;
   late String _selectedPaymentStatus;
 
@@ -46,8 +48,15 @@ class _UpdateInvoiceModalState extends State<UpdateInvoiceModal> {
 
   Future<void> _updateInvoice() async {
     // Update invoice status
+    final invoiceProvider = Provider.of<InvoiceProvider>(context, listen: false);
+
     if (_selectedStatus != widget.invoice.status) {
-      await _dbHelper.updateOrderStatus(widget.invoice.id, _selectedStatus);
+
+      final existingInvoice = widget.invoice.copyWith(
+          status: _selectedStatus
+      );
+      await invoiceProvider.updateInvoice(existingInvoice);
+      // await _dbHelper.updateOrderStatus(widget.invoice.id, _selectedStatus);
     }
 
     // Update payment status

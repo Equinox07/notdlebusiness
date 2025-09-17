@@ -6,7 +6,10 @@ import 'package:intl/intl.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/order.dart';
+import 'package:notdle/providers/customer_provider.dart';
+import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/screens/order_details_screen.dart';
+import 'package:provider/provider.dart';
 
 class CustomerOrdersScreen extends StatefulWidget {
   final Customer customer;
@@ -23,9 +26,11 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
   @override
   void initState() {
     super.initState();
-    _ordersFuture = DatabaseHelper.instance.getCustomerOrders(
-      widget.customer.id!,
-    );
+    // _ordersFuture = DatabaseHelper.instance.getCustomerOrders(
+    //   widget.customer.id!,
+    // );
+    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+    orderProvider.fetchOrdersForCustomer(widget.customer.id!);
   }
 
   @override
@@ -133,9 +138,8 @@ class OrderCard extends StatelessWidget {
               const SizedBox(height: 8),
               // Use a FutureBuilder to get the customer's name
               FutureBuilder<Customer?>(
-                future: DatabaseHelper.instance.fetchCustomerById(
-                  order.customerId,
-                ),
+                future: Provider.of<CustomerProvider>(context, listen: false)
+                    .getCustomerById(order.customerId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Text(

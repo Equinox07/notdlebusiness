@@ -22,7 +22,7 @@ class DashboardAppScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardAppScreen> {
   late Future<Company?> _companyFuture;
-  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  // final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   @override
   void initState() {
@@ -33,11 +33,11 @@ class _DashboardScreenState extends State<DashboardAppScreen> {
     });
   }
 
-  Future<Map<String, int>> _fetchCounts() async {
-    final orderCount = await _dbHelper.getActiveOrderCount();
-    final customerCount = await _dbHelper.getCustomerCount();
-    return {'orders': orderCount, 'customers': customerCount};
-  }
+  // Future<Map<String, int>> _fetchCounts() async {
+  //   final orderCount = await Future.value(dashboardProvider.orderCount);
+  //   final customerCount = await Future.value(dashboardProvider.customerCount);
+  //   return {'orders': orderCount, 'customers': customerCount};
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -276,7 +276,7 @@ class _DashboardScreenState extends State<DashboardAppScreen> {
             _buildSectionTitle(context, 'Recent Deadlines'),
             const SizedBox(height: 12),
             DeadlineCard(
-              orderFuture: DatabaseHelper.instance.getSoonestDueOrder(),
+              orderFuture: Future.value(dashboardProvider.soonestDueOrder),
               onTap: () => debugPrint("Orders"),
             ),
           ],

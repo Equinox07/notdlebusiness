@@ -4,6 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/order.dart';
 import 'package:notdle/models/invoice.dart';
+import 'package:notdle/providers/customer_provider.dart';
+import 'package:notdle/providers/invoice_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class CreateInvoiceScreen extends StatefulWidget {
   final Order order;
@@ -15,7 +19,7 @@ class CreateInvoiceScreen extends StatefulWidget {
 
 class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
   final _formKey = GlobalKey<FormState>();
-  final dbHelper = DatabaseHelper.instance;
+  // final dbHelper = DatabaseHelper.instance;
 
   late String _invoiceTitle;
   late String _customerName;
@@ -35,12 +39,15 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
   }
 
   Future<void> _fetchCustomerName() async {
-    final customer = await dbHelper.fetchCustomerById(widget.order.customerId);
-    if (customer != null) {
-      setState(() {
-        _customerName = customer.name;
-      });
-    }
+    final customer = await Provider.of<CustomerProvider>(
+      context,
+      listen: false,
+    ).getCustomerById(
+      widget.order.customerId,
+    ); //await dbHelper.fetchCustomerById(widget.order.customerId);
+    setState(() {
+      _customerName = customer!.name;
+    });
   }
 
   void _submitForm() async {
@@ -51,27 +58,34 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
       final String currentDateTime = DateTime.now().toIso8601String();
       // Create and save the new Invoice object to the database
       final newInvoice = Invoice(
+        id: Uuid().v4(),
         title: _invoiceTitle,
         customerId: widget.order.customerId,
         status: _paymentStatus,
         totalAmount: _totalAmount,
         date: DateTime.now(),
-        orderId: widget.order.id
+        orderId: widget.order.id,
       );
 
-      await dbHelper.insertInvoice(newInvoice);
+      // await dbHelper.insertInvoice(newInvoice);
+      await Provider.of<InvoiceProvider>(
+        context,
+        listen: false,
+      ).addInvoice(newInvoice);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "Invoice Created Successfully!",
-            style: GoogleFonts.poppins(),
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Invoice Created Successfully!",
+              style: GoogleFonts.poppins(),
+            ),
+            backgroundColor: Colors.green,
           ),
-          backgroundColor: Colors.green,
-        ),
-      );
+        );
 
-      Navigator.of(context).pop();
+        Navigator.of(context).pop();
+      }
     }
   }
 

@@ -5,6 +5,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/measurement.dart';
+import 'package:notdle/providers/customer_provider.dart';
+import 'package:notdle/providers/measurement_provider.dart';
+import 'package:provider/provider.dart';
 
 class AddMeasurementScreen extends StatefulWidget {
   final Customer customer;
@@ -33,7 +36,10 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
       });
 
       // ✅ Save update to SQLite
-      await DatabaseHelper.instance.updateCustomer(widget.customer);
+      // await DatabaseHelper.instance.updateCustomer(widget.customer);
+      if(mounted){
+        await Provider.of<CustomerProvider>(context, listen: false).updateCustomer(widget.customer);
+      }
     }
   }
 
@@ -119,7 +125,8 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
       createdDate: DateTime.now(),
     );
 
-    final saved = await DatabaseHelper.instance.insertMeasurement(measurement);
+    // final saved = await DatabaseHelper.instance.insertMeasurement(measurement);
+    final saved = await Provider.of<MeasurementProvider>(context, listen: false).addMeasurement(measurement);
 
     if (!mounted) return;
     ScaffoldMessenger.of(

@@ -1,10 +1,13 @@
 // lib/models/company.dart
 
+import 'package:floor/floor.dart';
 import 'package:uuid/uuid.dart';
 
 const uuid = Uuid();
 
+@entity
 class Company {
+  @PrimaryKey()
   final String id;
   final String fullName;
   final String email;

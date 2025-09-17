@@ -21,7 +21,7 @@ class DashboardHome extends StatefulWidget {
 }
 
 class _DashboardHomeState extends State<DashboardHome> {
-  final _dbHelper = DatabaseHelper.instance;
+  // final _dbHelper = DatabaseHelper.instance;
 
   @override
   void initState() {
@@ -251,7 +251,7 @@ class _DashboardHomeState extends State<DashboardHome> {
               const SizedBox(height: 12),
               // Use a StreamBuilder to get real-time order data
               if (order != null)
-                DeadlineCard(orderFuture: DatabaseHelper.instance.getSoonestDueOrder(), onTap: () {  },)
+                DeadlineCard(orderFuture: Future.value(order), onTap: () {  },)
               else
                 Center(
                   child: Text(

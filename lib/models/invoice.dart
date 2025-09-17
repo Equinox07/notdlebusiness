@@ -1,52 +1,69 @@
 // lib/models/invoice.dart
+import 'package:floor/floor.dart';
 import 'package:uuid/uuid.dart';
+import 'customer.dart';
+import 'order.dart';
 
+@Entity(
+    tableName: 'invoices',
+    foreignKeys: [
+      ForeignKey(childColumns: ['customerId'], parentColumns: ['id'],
+          entity: Customer,
+      onDelete: ForeignKeyAction.cascade),
+      ForeignKey(childColumns: ['orderId'], parentColumns: ['id'], entity: Order,
+          onDelete: ForeignKeyAction.setNull)
+    ]
+)
 class Invoice {
+  @PrimaryKey()
   final String id;
   final String title;
-  final int customerId; // Foreign key
+  final String customerId; // Foreign key to Customer
   final String status;
   final double totalAmount;
-  final DateTime date;
-  final String orderId; // Foreign key to the related order
-  // final String createdDate;
+  final DateTime date; // Requires DateTimeConverter
+  final String orderId; // Foreign key to Order
+  final String? createdDate;
+  final String? updatedDate;
 
   Invoice({
+    required this.id,
     required this.title,
     required this.customerId,
     required this.status,
     required this.totalAmount,
     required this.date,
     required this.orderId,
-    // required this.createdDate,
-    String? id,
-  }) : id = id ?? const Uuid().v4();
+    this.createdDate,
+    this.updatedDate,
+  });
 
-  // Convert an Invoice object into a Map.
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'title': title,
-      'customerId': customerId,
-      'status': status,
-      'totalAmount': totalAmount,
-      'date': date.toIso8601String(), // Store date as a string
-      'orderId': orderId
-      // 'createdDate': createdDate
-    };
-  }
 
-  // Create an Invoice object from a Map.
-  factory Invoice.fromMap(Map<String, dynamic> map) {
-    return Invoice(
-      id: map['id'],
-      title: map['title'],
-      customerId: map['customerId'] as int,
-      status: map['status'],
-      totalAmount: map['totalAmount'],
-      date: DateTime.parse(map['date']),
-      orderId: map['orderId']
-        // createdDate: map['createdDate'] as String
-    );
-  }
+  // // Convert an Invoice object into a Map.
+  // Map<String, dynamic> toMap() {
+  //   return {
+  //     'id': id,
+  //     'title': title,
+  //     'customerId': customerId,
+  //     'status': status,
+  //     'totalAmount': totalAmount,
+  //     'date': date.toIso8601String(), // Store date as a string
+  //     'orderId': orderId
+  //     // 'createdDate': createdDate
+  //   };
+  // }
+  //
+  // // Create an Invoice object from a Map.
+  // factory Invoice.fromMap(Map<String, dynamic> map) {
+  //   return Invoice(
+  //     id: map['id'],
+  //     title: map['title'],
+  //     customerId: map['customerId'] as int,
+  //     status: map['status'],
+  //     totalAmount: map['totalAmount'],
+  //     date: DateTime.parse(map['date']),
+  //     orderId: map['orderId']
+  //       // createdDate: map['createdDate'] as String
+  //   );
+  // }
 }

@@ -6,8 +6,11 @@ import 'package:intl/intl.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/order.dart';
+import 'package:notdle/providers/customer_provider.dart';
+import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/screens/create_order_screen.dart';
 import 'package:notdle/screens/order_details_screen.dart';
+import 'package:provider/provider.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -29,7 +32,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
   }
 
   Future<List<Order>> _fetchOrders() async {
-    return await dbHelper.getOrders();
+    final orderProvider = Provider.of<OrderProvider>(
+      context,
+      listen: false,
+    );
+    await orderProvider.fetchOrders();
+    return orderProvider.orders;
   }
 
   // Reloads the screen when a new order is added.
@@ -168,10 +176,10 @@ class _OrderCard extends StatelessWidget {
               const SizedBox(height: 8),
               // Use a FutureBuilder to get the customer's name
               FutureBuilder<Customer?>(
-                future: DatabaseHelper.instance.fetchCustomerById(
-                  order.customerId,
-                ),
+                future: Provider.of<CustomerProvider>(context, listen: false)
+                    .getCustomerById(order.customerId),
                 builder: (context, snapshot) {
+                // final customer = snapshot.data ?? null;
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Text(
                       "Loading customer...",

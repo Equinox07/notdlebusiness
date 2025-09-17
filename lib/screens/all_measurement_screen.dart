@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/measurement.dart';
 import 'package:notdle/navigation/app_navigation.dart';
+import 'package:notdle/providers/measurement_provider.dart';
+import 'package:provider/provider.dart';
 // Assume this exists
 
 class AllMeasurementScreen extends StatefulWidget {
@@ -32,14 +34,30 @@ class _AllMeasurementScreenState extends State<AllMeasurementScreen> {
     setState(() {
       _isLoading = true;
     });
-    final list =
-        await DatabaseHelper.instance.fetchAllMeasurementsWithCustomer();
+    // final list =
+    //     await DatabaseHelper.instance.fetchAllMeasurementsWithCustomer();
+    // final measurementProvider = Provider.of<MeasurementProvider>(context, listen: false);
+    final allMeasurements = context.watch<MeasurementProvider>().measurements;
     setState(() {
-      measurements = list;
-      filteredMeasurements = list;
+      measurements = allMeasurements;
+      filteredMeasurements = allMeasurements;
       _isLoading = false;
     });
   }
+
+  // Future<void> _loadCustomers() async {
+  //   // final data = context.read<CustomerProvider>().fetchCustomers(); //await DatabaseHelper.instance.fetchCustomers();
+  //   final customerProvider = Provider.of<CustomerProvider>(
+  //     context,
+  //     listen: false,
+  //   );
+  //   await customerProvider.fetchCustomers();
+  //   setState(() {
+  //     customers = customerProvider.customers;
+  //     filteredCustomers = customerProvider.customers;
+  //     _isLoading = false;
+  //   });
+  // }
 
   void _filterMeasurements() {
     final query = _searchController.text.toLowerCase();

@@ -5,7 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/invoice.dart';
+import 'package:notdle/providers/invoice_provider.dart';
 import 'package:notdle/screens/invoice_details_screen.dart';
+import 'package:provider/provider.dart';
 
 class InvoicesScreen extends StatefulWidget {
   const InvoicesScreen({super.key});
@@ -17,10 +19,20 @@ class InvoicesScreen extends StatefulWidget {
 }
 
 class _InvoicesScreenState extends State<InvoicesScreen> {
-  final dbHelper = DatabaseHelper.instance; // Instantiate the helper
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      Provider.of<InvoiceProvider>(context, listen: false).fetchInvoices();
+    });
+  }
+  // final dbHelper = DatabaseHelper.instance; // Instantiate the helper
 
   @override
   Widget build(BuildContext context) {
+    final invoiceProvider = Provider.of<InvoiceProvider>(context);
+
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
@@ -31,51 +43,70 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      body: FutureBuilder<List<Invoice>>(
-        // Call the getInvoices method from the database helper
-        future: dbHelper.getInvoices(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                "Error: ${snapshot.error}",
-                style: GoogleFonts.poppins(),
-              ),
-            );
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Text(
-                "No invoices found.",
-                style: GoogleFonts.poppins(fontSize: 16),
-              ),
-            );
-          } else {
-            // Display the fetched invoices
-            final invoices = snapshot.data!;
-            return ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: invoices.length,
-              itemBuilder: (context, index) {
-                final invoice = invoices[index];
-                return InvoiceCard(
-                  invoice: invoice,
-                  onTap: () {
-                    // Navigate to InvoiceDetailsScreen on tap
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder:
-                            (context) => InvoiceDetailsScreen(invoice: invoice),
-                      ),
-                    );
-                  },
-                );
-              },
-            );
-          }
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16.0),
+        itemCount: invoiceProvider.invoices.length,
+        itemBuilder: (context, index) {
+          final invoice = invoiceProvider.invoices[index];
+          return InvoiceCard(
+            invoice: invoice,
+            onTap: () {
+              // Navigate to InvoiceDetailsScreen on tap
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder:
+                      (context) => InvoiceDetailsScreen(invoice: invoice),
+                ),
+              );
+            },
+          );
         },
-      ),
+      )
+      // FutureBuilder<List<Invoice>>(
+      //   // Call the getInvoices method from the database helper
+      //   future: invoiceProvider.invoices,
+      //   builder: (context, snapshot) {
+      //     if (snapshot.connectionState == ConnectionState.waiting) {
+      //       return const Center(child: CircularProgressIndicator());
+      //     } else if (snapshot.hasError) {
+      //       return Center(
+      //         child: Text(
+      //           "Error: ${snapshot.error}",
+      //           style: GoogleFonts.poppins(),
+      //         ),
+      //       );
+      //     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+      //       return Center(
+      //         child: Text(
+      //           "No invoices found.",
+      //           style: GoogleFonts.poppins(fontSize: 16),
+      //         ),
+      //       );
+      //     } else {
+      //       // Display the fetched invoices
+      //       final invoices = snapshot.data!;
+      //       return ListView.builder(
+      //         padding: const EdgeInsets.all(16.0),
+      //         itemCount: invoices.length,
+      //         itemBuilder: (context, index) {
+      //           final invoice = invoices[index];
+      //           return InvoiceCard(
+      //             invoice: invoice,
+      //             onTap: () {
+      //               // Navigate to InvoiceDetailsScreen on tap
+      //               Navigator.of(context).push(
+      //                 MaterialPageRoute(
+      //                   builder:
+      //                       (context) => InvoiceDetailsScreen(invoice: invoice),
+      //                 ),
+      //               );
+      //             },
+      //           );
+      //         },
+      //       );
+      //     }
+      //   },
+      // ),
     );
   }
 }

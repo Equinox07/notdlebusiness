@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
+import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/screens/add_customer_screen.dart';
 import 'package:notdle/screens/customer_detail_screen.dart';
+import 'package:provider/provider.dart';
 
 class CustomersScreen extends StatefulWidget {
   const CustomersScreen({super.key});
@@ -22,19 +24,31 @@ class _CustomersScreenState extends State<CustomersScreen> {
 
   List<Customer> filteredCustomers = [];
 
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   Provider.of<CustomerProvider>(context, listen: false).fetchCustomers();
+    //   // Provider.of<CompanyProvider>(context, listen: false).fetchCompany();
+    // });
     filteredCustomers = customers;
     _searchController.addListener(_filterCustomers);
     _loadCustomers();
   }
 
   Future<void> _loadCustomers() async {
-    final data = await DatabaseHelper.instance.fetchCustomers();
+    // final data = context.read<CustomerProvider>().fetchCustomers(); //await DatabaseHelper.instance.fetchCustomers();
+    final customerProvider = Provider.of<CustomerProvider>(
+      context,
+      listen: false,
+    );
+    await customerProvider.fetchCustomers();
     setState(() {
-      customers = data;
-      filteredCustomers = data;
+      customers = customerProvider.customers;
+      filteredCustomers = customerProvider.customers;
+      _isLoading = false;
     });
   }
 
@@ -52,10 +66,13 @@ class _CustomersScreenState extends State<CustomersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final customerProvider = Provider.of<CustomerProvider>(context);
+
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 600;
     final maxFormWidth = isTablet ? 500.0 : double.infinity;
     final horizontalPadding = isTablet ? 32.0 : 24.0;
+    // final order = customerProvider.customerOrderCount(customerId);
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
@@ -277,52 +294,30 @@ class CustomerCard extends StatelessWidget {
 
               // Orders count using FutureBuilder
               FutureBuilder<int>(
-                future: DatabaseHelper.instance.getCustomerOrderCount(
-                  customer.id!,
-                ),
+                future: Provider.of<CustomerProvider>(
+                  context,
+                  listen: false,
+                ).getOrderCountForCustomer(customer.id!),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                  final orderCount = snapshot.data ?? 0;
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.indigo.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      "$orderCount orders",
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.indigo.shade700,
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.indigo.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        "...",
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.indigo.shade700,
-                        ),
-                      ),
-                    );
-                  } else if (snapshot.hasError) {
-                    return Container(); // Or display a small error indicator
-                  } else {
-                    final orderCount = snapshot.data ?? 0;
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.indigo.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        "$orderCount orders",
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.indigo.shade700,
-                        ),
-                      ),
-                    );
-                  }
+                    ),
+                  );
                 },
               ),
             ],

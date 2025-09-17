@@ -7,8 +7,11 @@ import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
+import 'package:notdle/providers/invoice_provider.dart';
+import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/screens/invoice_details_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   const CreateOrderScreen({super.key});
@@ -21,7 +24,6 @@ class CreateOrderScreen extends StatefulWidget {
 
 class _CreateOrderScreenState extends State<CreateOrderScreen> {
   final _formKey = GlobalKey<FormState>();
-  final dbHelper = DatabaseHelper.instance;
 
   String _orderTitle = "";
   Customer? _selectedCustomer;
@@ -36,7 +38,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   @override
   void initState() {
     super.initState();
-    _customersFuture = dbHelper.fetchCustomers();
+    // _customersFuture = dbHelper.fetchCustomers();
   }
 
   Future<void> _selectDueDate(BuildContext context) async {
@@ -96,7 +98,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         createdDate: currentDateTime
       );
 
-      await dbHelper.insertOrder(newOrder);
+      // await dbHelper.insertOrder(newOrder);
+      await Provider.of<OrderProvider>(
+        context,
+        listen: false,
+      ).addOrder(newOrder);
 
 
       Provider.of<DashBoardProvider>(context, listen: false).fetchCounts();
@@ -160,6 +166,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   void _generateInvoice(Order newOrder) async {
     if (_paymentStatus != 'Pending' && _paymentAmount != null) {
       final newInvoice = Invoice(
+        id: Uuid().v4(),
         title: 'Invoice for $_orderTitle',
         customerId: _selectedCustomer!.id!,
         status: _paymentStatus,
@@ -168,7 +175,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         orderId: newOrder.id,
       );
 
-      await dbHelper.insertInvoice(newInvoice);
+      // await dbHelper.insertInvoice(newInvoice);
+
+      await Provider.of<InvoiceProvider>(
+        context,
+        listen: false,
+      ).addInvoice(newInvoice);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Order and Invoice created successfully!'),

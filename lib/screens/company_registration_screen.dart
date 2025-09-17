@@ -7,8 +7,10 @@ import 'package:notdle/models/company.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/pages/dashboards/dashboard_app.dart';
+import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/screens/login_page_screen.dart';
 import 'package:notdle/services/session_manager.dart';
+import 'package:provider/provider.dart';
 
 class CompanyRegistrationScreen extends StatefulWidget {
   const CompanyRegistrationScreen({super.key});
@@ -22,7 +24,6 @@ class CompanyRegistrationScreen extends StatefulWidget {
 
 class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _dbHelper = DatabaseHelper.instance;
 
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -51,16 +52,16 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
   Future<void> _registerCompany() async {
     if (_formKey.currentState!.validate()) {
       // ➡️ Perform the pre-check
-      final bool exists = await _dbHelper.companyExists(
-        _emailController.text,
-        _mobileController.text,
-      );
-
-      if (exists) {
-        // ➡️ Show alert dialog if company already exists
-        _showLoginDialog();
-        return;
-      }
+      // final bool exists = await _dbHelper.companyExists(
+      //   _emailController.text,
+      //   _mobileController.text,
+      // );
+      //
+      // if (exists) {
+      //   // ➡️ Show alert dialog if company already exists
+      //   _showLoginDialog();
+      //   return;
+      // }
 
       final newCompany = Company(
         fullName: _fullNameController.text,
@@ -74,16 +75,22 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
       );
 
       // ➡️ Await the returned company object after insertion
-      final registeredCompany = await _dbHelper.registerCompany(newCompany);
+      // final registeredCompany = await _dbHelper.registerCompany(newCompany);
+
+      final registeredCompany = await Provider.of<CompanyProvider>(context, listen: false)
+          .registerCompany(newCompany);
+
 
       debugPrint("Saved company $registeredCompany");
 
       //Persist data to shared preferences
-      await SessionManager.saveCompany(registeredCompany);
+      await SessionManager.saveCompany(registeredCompany!);
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Registration successful!')));
+      if(mounted){
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Registration successful!')));
+      }
 
       // Navigator.of(context).pushReplacement(
       //   MaterialPageRoute(builder: (context) => const DashboardAppScreen()),

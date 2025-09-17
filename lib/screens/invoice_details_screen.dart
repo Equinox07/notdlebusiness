@@ -10,8 +10,11 @@ import 'package:notdle/models/company.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
+import 'package:notdle/providers/customer_provider.dart';
+import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/services/session_manager.dart';
 import 'package:notdle/widgets/status_chip.dart';
+import 'package:provider/provider.dart';
 // import 'package:notdle/widgets/status_chip.dart';
 
 // Private data model to hold all fetched details
@@ -37,7 +40,7 @@ class InvoiceDetailsScreen extends StatefulWidget {
 class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
   late Future<_InvoiceDetailsData> _invoiceDetailsFuture;
   late Future<Company?> _companyFuture;
-  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  // final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
 
   @override
@@ -48,12 +51,15 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
   }
 
   Future<_InvoiceDetailsData> _fetchInvoiceDetails() async {
-    final order = await DatabaseHelper.instance.getOrderById(
-      widget.invoice.orderId,
-    );
-    final customer = await DatabaseHelper.instance.fetchCustomerById(
-      widget.invoice.customerId,
-    );
+    // final order = await DatabaseHelper.instance.getOrderById(
+    //   widget.invoice.orderId,
+    // );
+
+    final order = await Provider.of<OrderProvider>(context, listen: false).getOrderById(widget.invoice.orderId);
+        // .get(widget.invoice.customerId);
+
+    final customer = await Provider.of<CustomerProvider>(context, listen: false)
+        .getCustomerById(widget.invoice.customerId); //DatabaseHelper.instance.fetchCustomerById(widget.invoice.customerId,);
 
     return _InvoiceDetailsData(
       invoice: widget.invoice,

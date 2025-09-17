@@ -34,7 +34,8 @@ dependencies:
   shared_preferences: ^2.2.3
   provider: "^6.1.2"
   floor: ^1.4.2
-
+  pdf: ^3.10.4
+  printing: ^5.12.0
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +75,7 @@ flutter:
     - assets/images/bgplain.png
     - assets/images/us_flag.png
     - assets/images/app_icon.png
+    - assets/db/app_database.db
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

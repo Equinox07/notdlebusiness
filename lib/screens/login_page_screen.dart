@@ -6,9 +6,11 @@ import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/pages/dashboards/dashboard_app.dart';
 import 'package:notdle/pages/dashboards/dashboard_screen.dart';
+import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/screens/company_registration_screen.dart';
 import 'package:notdle/screens/main.dart';
 import 'package:notdle/services/session_manager.dart';
+import 'package:provider/provider.dart';
 
 class LoginPageScreen extends StatefulWidget {
   const LoginPageScreen({super.key});
@@ -21,7 +23,7 @@ class LoginPageScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginPageScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _dbHelper = DatabaseHelper.instance;
+  // final _dbHelper = DatabaseHelper.instance;
 
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -35,41 +37,7 @@ class _LoginScreenState extends State<LoginPageScreen> {
     super.dispose();
   }
 
-  Future<void> _login() async {
-    if (_formKey.currentState!.validate()) {
-    // You'll need to implement a getCompanyByEmailAndPassword method in your DatabaseHelper
-      final company = await _dbHelper.getCompanyByEmailAndMobile(
-        _emailController.text,
-        _passwordController.text,
-      );
 
-      if (company != null) {
-        // On successful login
-        await SessionManager.saveCompany(company);
-
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Login successful!')));
-        AppNavigator.toHome();
-        // Navigator.of(context).pushReplacement(
-        //   MaterialPageRoute(
-        //     builder: (context) => const MainScreen(),
-        //   ), //DashboardScreen
-        // );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Invalid email or password.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-    // Navigator.of(context).pushReplacement(
-    //   MaterialPageRoute(builder: (context) => const MainScreen()),
-    // ); //DashboardScreen
-    // AppNavigator.toHome();
-  }
 
   Widget _buildInputField({
     required String label,
@@ -110,6 +78,48 @@ class _LoginScreenState extends State<LoginPageScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+    Future<void> _login() async {
+      if (_formKey.currentState!.validate()) {
+        // You'll need to implement a getCompanyByEmailAndPassword method in your DatabaseHelper
+        // final company = await _dbHelper.getCompanyByEmailAndMobile(
+        //   _emailController.text,
+        //   _passwordController.text,
+        // );
+        final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
+
+        final company = await companyProvider.getCompanyByEmailAndMobile(_emailController.text, _passwordController.text);
+
+
+        if(!mounted) return;
+
+        if (company != null) {
+          // On successful login
+          await SessionManager.saveCompany(company);
+
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Login successful!')));
+          AppNavigator.toHome();
+          // Navigator.of(context).pushReplacement(
+          //   MaterialPageRoute(
+          //     builder: (context) => const MainScreen(),
+          //   ), //DashboardScreen
+          // );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Invalid email or password.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+      // Navigator.of(context).pushReplacement(
+      //   MaterialPageRoute(builder: (context) => const MainScreen()),
+      // ); //DashboardScreen
+      // AppNavigator.toHome();
+    }
 
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 600;

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
+import 'package:notdle/providers/customer_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
 import 'package:flutter/services.dart';
@@ -68,11 +69,16 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       imagePath: _profileImage?.path, // Save image path if available
     );
 
-    final savedCustomer = await DatabaseHelper.instance.insertCustomer(
-      newCustomer,
-    );
+    // final savedCustomer = await DatabaseHelper.instance.insertCustomer(
+    //   newCustomer,
+    // );
+    final savedCustomer = await Provider.of<CustomerProvider>(context, listen: false)
+        .addNewCustomer(newCustomer);
 
-    Provider.of<DashBoardProvider>(context, listen: false).fetchCounts();
+    if(mounted){
+      Provider.of<DashBoardProvider>(context, listen: false).fetchCounts();
+    }
+
     return savedCustomer;
   }
 

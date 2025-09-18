@@ -110,7 +110,7 @@ class _$AppDatabase extends AppDatabase {
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `orders` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `customerId` TEXT NOT NULL, `status` TEXT NOT NULL, `paymentStatus` TEXT NOT NULL, `paymentAmount` REAL, `dueDate` TEXT, `notes` TEXT, `createdDate` TEXT NOT NULL, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `measurements` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `customerId` TEXT NOT NULL, `measurementValues` TEXT NOT NULL, `createdDate` INTEGER NOT NULL, `updatedDate` INTEGER, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE)');
+            'CREATE TABLE IF NOT EXISTS `measurements` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `customerId` TEXT NOT NULL, `measurementValues` TEXT NOT NULL, `createdDate` INTEGER NOT NULL, `updatedDate` INTEGER, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION)');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `invoices` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `customerId` TEXT NOT NULL, `status` TEXT NOT NULL, `totalAmount` REAL NOT NULL, `date` INTEGER NOT NULL, `orderId` TEXT NOT NULL, `createdDate` TEXT, `updatedDate` TEXT, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, FOREIGN KEY (`orderId`) REFERENCES `orders` (`id`) ON UPDATE NO ACTION ON DELETE SET NULL, PRIMARY KEY (`id`))');
 
@@ -249,8 +249,68 @@ class _$CompanyDao extends CompanyDao {
   }
 
   @override
-  Future<void> insertCompany(Company company) async {
-    await _companyInsertionAdapter.insert(company, OnConflictStrategy.replace);
+  Future<Company?> getCompanyByEmail(String email) async {
+    return _queryAdapter.query('SELECT * FROM company WHERE email = ?1 LIMIT 1',
+        mapper: (Map<String, Object?> row) => Company(
+            id: row['id'] as String?,
+            fullName: row['fullName'] as String,
+            email: row['email'] as String,
+            mobile: row['mobile'] as String,
+            businessName: row['businessName'] as String,
+            yearsOfExperience: row['yearsOfExperience'] as int,
+            registrationNumber: row['registrationNumber'] as String,
+            address: row['address'] as String,
+            countryCode: row['countryCode'] as String,
+            imagePath: row['imagePath'] as String?,
+            imageUrl: row['imageUrl'] as String?),
+        arguments: [email]);
+  }
+
+  @override
+  Future<Company?> getCompanyByMobile(String mobile) async {
+    return _queryAdapter.query(
+        'SELECT * FROM company WHERE mobile = ?1 LIMIT 1',
+        mapper: (Map<String, Object?> row) => Company(
+            id: row['id'] as String?,
+            fullName: row['fullName'] as String,
+            email: row['email'] as String,
+            mobile: row['mobile'] as String,
+            businessName: row['businessName'] as String,
+            yearsOfExperience: row['yearsOfExperience'] as int,
+            registrationNumber: row['registrationNumber'] as String,
+            address: row['address'] as String,
+            countryCode: row['countryCode'] as String,
+            imagePath: row['imagePath'] as String?,
+            imageUrl: row['imageUrl'] as String?),
+        arguments: [mobile]);
+  }
+
+  @override
+  Future<Company?> getCompanyByEmailAndMobile(
+    String mobile,
+    String password,
+  ) async {
+    return _queryAdapter.query(
+        'SELECT * FROM company WHERE mobile = ?1 AND email= ?2 LIMIT 1',
+        mapper: (Map<String, Object?> row) => Company(
+            id: row['id'] as String?,
+            fullName: row['fullName'] as String,
+            email: row['email'] as String,
+            mobile: row['mobile'] as String,
+            businessName: row['businessName'] as String,
+            yearsOfExperience: row['yearsOfExperience'] as int,
+            registrationNumber: row['registrationNumber'] as String,
+            address: row['address'] as String,
+            countryCode: row['countryCode'] as String,
+            imagePath: row['imagePath'] as String?,
+            imageUrl: row['imageUrl'] as String?),
+        arguments: [mobile, password]);
+  }
+
+  @override
+  Future<int> insertCompany(Company company) {
+    return _companyInsertionAdapter.insertAndReturnId(
+        company, OnConflictStrategy.replace);
   }
 
   @override
@@ -355,6 +415,12 @@ class _$CustomerDao extends CustomerDao {
             imageUrl: row['imageUrl'] as String?,
             createdDate: _dateTimeConvertor.decode(row['createdDate'] as int)),
         arguments: [id]);
+  }
+
+  @override
+  Future<int?> getCustomerCount() async {
+    return _queryAdapter.query('SELECT COUNT(*) FROM customers',
+        mapper: (Map<String, Object?> row) => row.values.first as int);
   }
 
   @override
@@ -493,6 +559,95 @@ class _$OrderDao extends OrderDao {
   }
 
   @override
+  Future<int?> getActiveOrderCount() async {
+    return _queryAdapter.query(
+        'SELECT COUNT(*) FROM orders WHERE status != \"Completed\"',
+        mapper: (Map<String, Object?> row) => row.values.first as int);
+  }
+
+  @override
+  Future<Order?> getSoonestDueOrder() async {
+    return _queryAdapter.query(
+        'SELECT * FROM orders ORDER BY dueDate ASC LIMIT 1',
+        mapper: (Map<String, Object?> row) => Order(
+            title: row['title'] as String,
+            customerId: row['customerId'] as String,
+            status: row['status'] as String,
+            paymentStatus: row['paymentStatus'] as String,
+            paymentAmount: row['paymentAmount'] as double?,
+            dueDate: row['dueDate'] as String?,
+            notes: row['notes'] as String?,
+            createdDate: row['createdDate'] as String,
+            id: row['id'] as String?));
+  }
+
+  @override
+  Future<Customer?> getCustomer(String customerId) async {
+    return _queryAdapter.query('SELECT * FROM customers WHERE id = ?1',
+        mapper: (Map<String, Object?> row) => Customer(
+            id: row['id'] as String?,
+            name: row['name'] as String,
+            phone: row['phone'] as String,
+            email: row['email'] as String?,
+            lastVisit: _dateTimeConvertor.decode(row['lastVisit'] as int),
+            gender: row['gender'] as String,
+            address: row['address'] as String?,
+            imagePath: row['imagePath'] as String?,
+            imageUrl: row['imageUrl'] as String?,
+            createdDate: _dateTimeConvertor.decode(row['createdDate'] as int)),
+        arguments: [customerId]);
+  }
+
+  @override
+  Future<Invoice?> getInvoiceByOrderId(String orderId) async {
+    return _queryAdapter.query(
+        'SELECT * FROM invoices WHERE orderId = ?1 LIMIT 1',
+        mapper: (Map<String, Object?> row) => Invoice(
+            id: row['id'] as String,
+            title: row['title'] as String,
+            customerId: row['customerId'] as String,
+            status: row['status'] as String,
+            totalAmount: row['totalAmount'] as double,
+            date: _dateTimeConvertor.decode(row['date'] as int),
+            orderId: row['orderId'] as String,
+            createdDate: row['createdDate'] as String?,
+            updatedDate: row['updatedDate'] as String?),
+        arguments: [orderId]);
+  }
+
+  @override
+  Future<List<Invoice>?> getInvoicesByOrderId(String orderId) async {
+    return _queryAdapter.queryList('SELECT * FROM invoices WHERE orderId = ?1',
+        mapper: (Map<String, Object?> row) => Invoice(
+            id: row['id'] as String,
+            title: row['title'] as String,
+            customerId: row['customerId'] as String,
+            status: row['status'] as String,
+            totalAmount: row['totalAmount'] as double,
+            date: _dateTimeConvertor.decode(row['date'] as int),
+            orderId: row['orderId'] as String,
+            createdDate: row['createdDate'] as String?,
+            updatedDate: row['updatedDate'] as String?),
+        arguments: [orderId]);
+  }
+
+  @override
+  Future<Invoice?> getInvoiceByCustomerId(String customerId) async {
+    return _queryAdapter.query('SELECT * FROM invoices WHERE customerId = ?1',
+        mapper: (Map<String, Object?> row) => Invoice(
+            id: row['id'] as String,
+            title: row['title'] as String,
+            customerId: row['customerId'] as String,
+            status: row['status'] as String,
+            totalAmount: row['totalAmount'] as double,
+            date: _dateTimeConvertor.decode(row['date'] as int),
+            orderId: row['orderId'] as String,
+            createdDate: row['createdDate'] as String?,
+            updatedDate: row['updatedDate'] as String?),
+        arguments: [customerId]);
+  }
+
+  @override
   Future<void> insertOrder(Order order) async {
     await _orderInsertionAdapter.insert(order, OnConflictStrategy.replace);
   }
@@ -599,8 +754,45 @@ class _$MeasurementDao extends MeasurementDao {
   }
 
   @override
-  Future<void> insertMeasurement(Measurement measurement) async {
-    await _measurementInsertionAdapter.insert(
+  Future<List<Measurement>> getMeasurementsByCustomerId(
+      String customerId) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM measurements WHERE customerId = ?1',
+        mapper: (Map<String, Object?> row) => Measurement(
+            id: row['id'] as int?,
+            customerId: row['customerId'] as String,
+            measurementValues: _measurementMapConverter
+                .decode(row['measurementValues'] as String),
+            createdDate: _dateTimeConvertor.decode(row['createdDate'] as int),
+            updatedDate:
+                _dateTimeNullConvertor.decode(row['updatedDate'] as int?)),
+        arguments: [customerId]);
+  }
+
+  @override
+  Future<Measurement?> getMeasurementById(int id) async {
+    return _queryAdapter.query('SELECT * FROM measurements WHERE id = ?1',
+        mapper: (Map<String, Object?> row) => Measurement(
+            id: row['id'] as int?,
+            customerId: row['customerId'] as String,
+            measurementValues: _measurementMapConverter
+                .decode(row['measurementValues'] as String),
+            createdDate: _dateTimeConvertor.decode(row['createdDate'] as int),
+            updatedDate:
+                _dateTimeNullConvertor.decode(row['updatedDate'] as int?)),
+        arguments: [id]);
+  }
+
+  @override
+  Future<void> deleteMeasurementsByCustomerId(String customerId) async {
+    await _queryAdapter.queryNoReturn(
+        'DELETE FROM measurements WHERE customerId = ?1',
+        arguments: [customerId]);
+  }
+
+  @override
+  Future<int> insertMeasurement(Measurement measurement) {
+    return _measurementInsertionAdapter.insertAndReturnId(
         measurement, OnConflictStrategy.replace);
   }
 

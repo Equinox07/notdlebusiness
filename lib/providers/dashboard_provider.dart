@@ -24,8 +24,8 @@ class DashBoardProvider with ChangeNotifier {
 
 
   Future<void> fetchCounts() async {
-    _orderCount = await orderDao.getActiveOrderCount();
-    _customerCount = await customerDao.getCustomerCount();
+    _orderCount = (await orderDao.getActiveOrderCount())!;
+    _customerCount = (await customerDao.getCustomerCount())!;
     _soonestDueOrder = await orderDao.getSoonestDueOrder();
     notifyListeners();
   }

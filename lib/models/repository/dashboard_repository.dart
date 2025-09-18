@@ -7,16 +7,13 @@ class DashboardRepository {
   final OrderDao orderDao;
   final CustomerDao customerDao;
 
-  DashboardRepository({
-    required this.orderDao,
-    required this.customerDao,
-  });
+  DashboardRepository({required this.orderDao, required this.customerDao});
 
-  Future<int> getActiveOrderCount() {
+  Future<int?> getActiveOrderCount() {
     return orderDao.getActiveOrderCount();
   }
 
-  Future<int> getCustomerCount() {
+  Future<int?> getCustomerCount() {
     return customerDao.getCustomerCount();
   }
 
@@ -25,21 +22,29 @@ class DashboardRepository {
   }
 
   /// Returns a map of day abbreviations to order counts for last 7 days
-  Future<List<WeeklyOrderStats>> getWeeklyOrderStats() async {
-    final rawList = await orderDao.getWeeklyOrderCounts();
-
-    // Map rawList to WeeklyOrderStats
-    return rawList.map((row) {
-      return WeeklyOrderStats(
-        row['day'] as String? ?? '',
-        (row['count'] as int?) ?? 0,
-      );
-    }).toList();
-  }
+  // Future<List<WeeklyOrderStats>> getWeeklyOrderStats() async {
+  //   final rawList = await orderDao.getWeeklyOrderCounts();
+  //
+  //   // Map rawList to WeeklyOrderStats
+  //   return rawList.map((row) {
+  //     return WeeklyOrderStats(
+  //       row['day'] as String? ?? '',
+  //       (row['count'] as int?) ?? 0,
+  //     );
+  //   }).toList();
+  // }
+  // Future<List<WeeklyOrderStats>> getWeeklyOrderStats() async {
+  //   final rawList = await orderDao.getWeeklyOrderCounts();
+  //
+  //   // Map typed objects to WeeklyOrderStats
+  //   return rawList.map((item) {
+  //     return WeeklyOrderStats(item.day, item.count);
+  //   }).toList();
+  // }
 
   List<WeeklyOrderStats> fillMissingDays(List<WeeklyOrderStats> rawData) {
     final days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    final Map<String, int> map = { for (var d in days) d: 0 };
+    final Map<String, int> map = {for (var d in days) d: 0};
 
     for (var stat in rawData) {
       map[stat.day] = stat.orderCount;
@@ -48,7 +53,7 @@ class DashboardRepository {
     return days.map((d) => WeeklyOrderStats(d, map[d]!)).toList();
   }
 
-// Future<void> fetchCounts() async {
+  // Future<void> fetchCounts() async {
   //   _orderCount = await dashboardRepository.getActiveOrderCount();
   //   _customerCount = await dashboardRepository.getCustomerCount();
   //   _soonestDueOrder = await dashboardRepository.getSoonestDueOrder();
@@ -62,4 +67,3 @@ class WeeklyOrderStats {
 
   WeeklyOrderStats(this.day, this.orderCount);
 }
-

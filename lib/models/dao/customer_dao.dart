@@ -19,6 +19,6 @@ abstract class CustomerDao {
   Future<void> deleteCustomer(Customer customer);
 
   @Query('SELECT COUNT(*) FROM customers')
-  Future<int> getCustomerCount();
+  Future<int?> getCustomerCount();
 
 }

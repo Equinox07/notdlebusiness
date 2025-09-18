@@ -104,7 +104,7 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `Company` (`id` TEXT NOT NULL, `fullName` TEXT NOT NULL, `email` TEXT NOT NULL, `mobile` TEXT NOT NULL, `businessName` TEXT NOT NULL, `yearsOfExperience` INTEGER NOT NULL, `registrationNumber` TEXT NOT NULL, `address` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `imagePath` TEXT, `imageUrl` TEXT, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `company` (`id` TEXT NOT NULL, `fullName` TEXT NOT NULL, `email` TEXT NOT NULL, `mobile` TEXT NOT NULL, `businessName` TEXT NOT NULL, `yearsOfExperience` INTEGER NOT NULL, `registrationNumber` TEXT NOT NULL, `address` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `imagePath` TEXT, `imageUrl` TEXT, PRIMARY KEY (`id`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `customers` (`id` TEXT, `name` TEXT NOT NULL, `phone` TEXT NOT NULL, `email` TEXT, `lastVisit` INTEGER NOT NULL, `gender` TEXT NOT NULL, `address` TEXT, `imagePath` TEXT, `imageUrl` TEXT, `createdDate` INTEGER NOT NULL, PRIMARY KEY (`id`))');
         await database.execute(
@@ -154,7 +154,7 @@ class _$CompanyDao extends CompanyDao {
   )   : _queryAdapter = QueryAdapter(database),
         _companyInsertionAdapter = InsertionAdapter(
             database,
-            'Company',
+            'company',
             (Company item) => <String, Object?>{
                   'id': item.id,
                   'fullName': item.fullName,
@@ -170,7 +170,7 @@ class _$CompanyDao extends CompanyDao {
                 }),
         _companyUpdateAdapter = UpdateAdapter(
             database,
-            'Company',
+            'company',
             ['id'],
             (Company item) => <String, Object?>{
                   'id': item.id,

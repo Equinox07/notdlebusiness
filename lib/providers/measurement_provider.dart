@@ -70,6 +70,75 @@ class MeasurementProvider extends ChangeNotifier {
     return measurements;
   }
 
+  Future<List<Measurement>> getAllMeasurementWithCustomers() async {
+    final measurements = await measurementDao.getAllMeasurements();
+    final allCustomers = await customerDao.getAllCustomers();
+
+    final customerMap = {
+      for (final c in allCustomers) c.id: c
+    };
+
+    for (final m in measurements) {
+      final customer = customerMap[m.customerId];
+      if (customer != null) {
+        m.linkCustomer(customer);
+      }
+    }
+
+    return measurements;
+  }
+
+  Future<void> getAllMeasurementWithCustomer() async {
+    final measurements = await measurementDao.getAllMeasurements();
+    final allCustomers = await customerDao.getAllCustomers();
+
+    final customerMap = {
+      for (final c in allCustomers) c.id: c
+    };
+
+    for (final m in measurements) {
+      final customer = customerMap[m.customerId];
+      if (customer != null) {
+        m.linkCustomer(customer);
+      }
+    }
+
+    _measurements = measurements;
+    notifyListeners();
+
+    // return measurements;
+  }
+
+
+  // Future<List<Measurement>> getAllMeasurementWithCustomers() async {
+  //   final measurements = await measurementDao.getAllMeasurements();
+  //
+  //   // Get all unique customer IDs
+  //   final customerIds = measurements
+  //       .map((m) => m.customerId)
+  //       .toSet()
+  //       .toList();
+  //
+  //   // Fetch all customers in one go
+  //   final customers = await customerDao.getCustomersByIds(customerIds);
+  //
+  //   // Map customers by ID for quick lookup
+  //   final customerMap = {
+  //     for (final c in customers) c.id: c
+  //   };
+  //
+  //   // Link customers
+  //   for (final m in measurements) {
+  //     final customer = customerMap[m.customerId];
+  //     if (customer != null) {
+  //       m.linkCustomer(customer);
+  //     }
+  //   }
+  //
+  //   return measurements;
+  // }
+
+
   void clear() {
     _customerMeasurements = [];
     notifyListeners();

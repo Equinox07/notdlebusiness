@@ -6,7 +6,7 @@ class MeasurementMapConverter extends TypeConverter<Map<String, double>, String>
   @override
   Map<String, double> decode(String databaseValue) {
     final Map<String, dynamic> decoded = jsonDecode(databaseValue);
-    return decoded.map((key, value) => MapEntry(key, (databaseValue as num).toDouble()));
+    return decoded.map((key, value) => MapEntry(key, (value as num).toDouble()));
   }
 
   @override

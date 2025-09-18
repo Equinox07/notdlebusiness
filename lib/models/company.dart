@@ -5,7 +5,9 @@ import 'package:uuid/uuid.dart';
 
 const uuid = Uuid();
 
-@entity
+@Entity(
+  tableName: 'company'
+)
 class Company {
   @PrimaryKey()
   final String id;

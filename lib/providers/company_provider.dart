@@ -1,5 +1,7 @@
 // lib/providers/company_provider.dart
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:notdle/models/company.dart';
 import 'package:notdle/models/dao/company_dao.dart';
@@ -42,8 +44,15 @@ class CompanyProvider with ChangeNotifier {
       throw CompanyAlreadyExistsException("Mobile number already in use.");
     }
 
+     Map<String, dynamic> jsonCompany = newCompany.toMap();
+
+    debugPrint("ToRegister $jsonCompany");
    final registered = await companyDao.insertCompany(newCompany);
-    var saved = await companyDao.findCompanyById(registered as String);
+
+
+    debugPrint("registered ${newCompany.id}");
+
+    var saved = await companyDao.findCompanyById(newCompany.id);
    _company = saved;
     notifyListeners();
     return saved;

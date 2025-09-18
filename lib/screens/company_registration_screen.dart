@@ -11,6 +11,7 @@ import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/screens/login_page_screen.dart';
 import 'package:notdle/services/session_manager.dart';
 import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
 
 class CompanyRegistrationScreen extends StatefulWidget {
   const CompanyRegistrationScreen({super.key});
@@ -64,6 +65,7 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
       // }
 
       final newCompany = Company(
+        id: Uuid().v4(),
         fullName: _fullNameController.text,
         email: _emailController.text,
         mobile: _mobileController.text,

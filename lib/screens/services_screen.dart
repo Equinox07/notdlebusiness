@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/service_model.dart';
+import 'package:notdle/screens/all_measurement_screen.dart';
 // Your navigation destinations
 
 
@@ -19,7 +20,7 @@ class ServicesScreen extends StatelessWidget {
       iconColor: Colors.blue,
     ),
     ServiceModel(
-      title: 'Measureme..',
+      title: 'Measurements',
       description: 'Manage and update client measurements',
       icon: Icons.straighten,
       iconColor: Colors.orange,
@@ -76,18 +77,29 @@ class ServicesScreen extends StatelessWidget {
                 // Handle navigation based on service type
                 switch (service.title) {
                   case 'Customers':
+                    debugPrint("Service clickd ${service.title}");
+
                   // Navigator.push(context, MaterialPageRoute(builder: (_) => const CustomersScreen()));
                     break;
                   case 'Measurements':
-                  // Navigator.push(context, MaterialPageRoute(builder: (_) => const AllMeasurementScreen()));
+                    debugPrint("Service clickd ${service.title}");
+
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const AllMeasurementScreen()));
                     break;
                   case 'Orders':
+                    debugPrint("Service clickd ${service.title}");
+
                   // Navigator.push(context, MaterialPageRoute(builder: (_) => const OrdersScreen()));
                     break;
+
                   case 'Designs':
+                    debugPrint("Service clickd ${service.title}");
+
                   // Navigator.push(context, MaterialPageRoute(builder: (_) => const DesignsScreen()));
                     break;
                   case 'Repairs':
+                    debugPrint("Service clickd ${service.title}");
+
                   // Navigator.push(context, MaterialPageRoute(builder: (_) => const RepairsScreen()));
                     break;
                 }
@@ -150,6 +162,8 @@ class _ServiceCard extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   // ➡️ Apply overflow to the description text

@@ -34,13 +34,12 @@ class _AllMeasurementScreenState extends State<AllMeasurementScreen> {
     setState(() {
       _isLoading = true;
     });
-    // final list =
-    //     await DatabaseHelper.instance.fetchAllMeasurementsWithCustomer();
-    // final measurementProvider = Provider.of<MeasurementProvider>(context, listen: false);
-    final allMeasurements = context.watch<MeasurementProvider>().measurements;
+
+     await context.read<MeasurementProvider>().getAllMeasurementWithCustomer();
+    // final allMeasurements = context.watch<MeasurementProvider>().measurements;
     setState(() {
-      measurements = allMeasurements;
-      filteredMeasurements = allMeasurements;
+      // measurements = allMeasurements;
+      // filteredMeasurements = allMeasurements;
       _isLoading = false;
     });
   }
@@ -80,6 +79,12 @@ class _AllMeasurementScreenState extends State<AllMeasurementScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+    final allmeasurements = context.watch<MeasurementProvider>().measurements;
+
+    filteredMeasurements = allmeasurements;
+    measurements = allmeasurements;
+
     final isTablet = MediaQuery.of(context).size.width > 600;
 
     return Scaffold(

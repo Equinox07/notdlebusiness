@@ -47,7 +47,7 @@ class CustomerProvider extends ChangeNotifier {
   Future<Customer> addNewCustomer(Customer customer) async {
     // final savedCustomer = await repository.insertCustomer(customer);
     final savedCustomer = await customerDao.insertCustomer(customer);
-    customer = (await customerDao.getCustomerById(savedCustomer as String))!;
+    customer = (await customerDao.getCustomerById(customer.id!))!;
     _customers.add(customer);
     notifyListeners();
     return customer;

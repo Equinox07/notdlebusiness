@@ -4,12 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
+import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart'; // Import image_picker
-import 'dart:io'; // For File
+import 'dart:io';
+
+import 'package:uuid/uuid.dart'; // For File
 
 class AddCustomerScreen extends StatefulWidget {
   const AddCustomerScreen({super.key});
@@ -59,6 +62,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     }
 
     final newCustomer = Customer(
+      id: Uuid().v4(),
       name: _nameController.text.trim(),
       gender: _selectedGender!,
       phone: _phoneController.text.trim(),
@@ -358,7 +362,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           onPressed: () async {
             final saved = await _saveCustomer();
             if (saved != null) {
-              // TODO: AppNavigator.toMeasurement2(customer: saved);
+              AppNavigator.toMeasurement2(customer: saved);
             }
           },
           style: ElevatedButton.styleFrom(

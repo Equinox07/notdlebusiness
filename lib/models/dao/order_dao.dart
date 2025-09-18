@@ -1,6 +1,8 @@
 
 import 'package:floor/floor.dart';
 import 'package:notdle/models/company.dart';
+import 'package:notdle/models/customer.dart';
+import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
 
 @dao
@@ -52,5 +54,18 @@ abstract class OrderDao{
   ORDER BY dayIndex;
 ''')
   Future<List<Map<String, Object?>>> getWeeklyOrderCounts();
+
+
+  @Query('SELECT * FROM customers WHERE id = :customerId')
+  Future<Customer?> getCustomer(String customerId);
+
+  @Query('SELECT * FROM invoices WHERE orderId = :orderId LIMIT 1')
+  Future<Invoice?> getInvoiceByOrderId(String orderId);
+
+  @Query('SELECT * FROM invoices WHERE orderId = :orderId')
+  Future<List<Invoice>?> getInvoicesByOrderId(String orderId);
+
+  @Query('SELECT * FROM invoices WHERE customerId = :customerId')
+  Future<Invoice?> getInvoiceByCustomerId(String customerId);
 
 }

@@ -106,12 +106,15 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
   Future<_OrderDetailsData?> _fetchOrderDetails() async {
-    final data = await dbHelper.getOrderWithDetails(widget.order.id);
+    // final data = await dbHelper.getOrderWithDetails(widget.order.id);
+    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+
+    final data = await orderProvider.getOrderWithDetails(widget.order.id);
     if (data != null) {
       return _OrderDetailsData(
-        order: data['order'],
-        customer: data['customer'],
-        invoice: data['invoice'],
+        order: data.order,
+        customer: data.customer,
+        invoice: data.invoice,
       );
     }
     return null;
@@ -126,6 +129,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(

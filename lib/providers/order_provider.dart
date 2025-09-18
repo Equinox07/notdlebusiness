@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:notdle/models/dao/order_dao.dart';
+import 'package:notdle/models/order_with_details.dart';
 import '../models/order.dart';
 
 class OrderProvider extends ChangeNotifier {
@@ -39,6 +40,20 @@ class OrderProvider extends ChangeNotifier {
     await orderDao.deleteOrder(order);
     await fetchOrders();
   }
+
+
+  Future<OrderWithDetails?> getOrderWithDetails(String orderId) async {
+    final order = await orderDao.getOrderById(orderId);
+    if (order == null) return null;
+
+    final customer = await orderDao.getCustomer(order.customerId);
+    final invoice = await orderDao.getInvoiceByCustomerId(order.customerId);
+
+    if (customer == null || invoice == null) return null;
+
+    return OrderWithDetails(order, customer, invoice);
+  }
+
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;

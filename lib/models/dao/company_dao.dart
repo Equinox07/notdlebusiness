@@ -5,7 +5,7 @@ import 'package:notdle/models/company.dart';
 @dao
 abstract class CompanyDao{
 
-  @Query('SELECT * FROM companies LIMIT 1')
+  @Query('SELECT * FROM Company LIMIT 1')
   Future<Company?> getCompany();
 
   @Query("SELECT * FROM Company")

@@ -1,4 +1,4 @@
-package com.avalon.notdle
+package com.notdle.designer
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -198,7 +198,7 @@ class _$CompanyDao extends CompanyDao {
 
   @override
   Future<Company?> getCompany() async {
-    return _queryAdapter.query('SELECT * FROM companies LIMIT 1',
+    return _queryAdapter.query('SELECT * FROM Company LIMIT 1',
         mapper: (Map<String, Object?> row) => Company(
             id: row['id'] as String?,
             fullName: row['fullName'] as String,

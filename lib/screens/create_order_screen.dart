@@ -6,6 +6,7 @@ import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
+import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
 import 'package:notdle/providers/invoice_provider.dart';
 import 'package:notdle/providers/order_provider.dart';
@@ -32,6 +33,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   String? _dueDate;
   String? _notes;
   String? _paymentAmount;
+  bool _isLoading = false;
 
   late Future<List<Customer>> _customersFuture;
 
@@ -39,6 +41,20 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   void initState() {
     super.initState();
     // _customersFuture = dbHelper.fetchCustomers();
+    _loadCustomers();
+  }
+
+  Future<void> _loadCustomers() async {
+    final customerProvider = Provider.of<CustomerProvider>(context, listen: false);
+    await customerProvider.fetchCustomers();
+    final customers = customerProvider.customers;
+
+    if(customers.isNotEmpty) {
+      _selectedCustomer ??= customers.first;
+    }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<void> _selectDueDate(BuildContext context) async {
@@ -88,6 +104,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       final String currentDateTime = DateTime.now().toIso8601String();
 
       final newOrder = Order(
+        id: Uuid().v4(),
         title: _orderTitle,
         customerId: _selectedCustomer!.id!,
         status: _status,
@@ -95,7 +112,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         paymentAmount: double.tryParse(_paymentAmount ?? ''),
         dueDate: _dueDate,
         notes: _notes,
-        createdDate: currentDateTime
+        createdDate: currentDateTime,
       );
 
       // await dbHelper.insertOrder(newOrder);
@@ -103,7 +120,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         context,
         listen: false,
       ).addOrder(newOrder);
-
 
       Provider.of<DashBoardProvider>(context, listen: false).fetchCounts();
 
@@ -175,12 +191,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         orderId: newOrder.id,
       );
 
-      // await dbHelper.insertInvoice(newInvoice);
-
       await Provider.of<InvoiceProvider>(
         context,
         listen: false,
       ).addInvoice(newInvoice);
+
+      if(!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -199,6 +215,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final customerProvider = Provider.of<CustomerProvider>(context);
+    final customers = customerProvider.customers;
+
+
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
@@ -209,171 +229,154 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
-      body: FutureBuilder<List<Customer>>(
-        future: _customersFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                "Error fetching customers: ${snapshot.error}",
-                style: GoogleFonts.poppins(),
-              ),
-            );
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  "No customers found. Please add a customer first.",
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    color: Colors.grey.shade600,
+      body:
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : customers.isEmpty
+              ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    "No customers found. Please add a customer first.",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ),
+              )
+              : SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader(
+                          "Order Details",
+                          icon: Icons.shopping_bag_outlined,
+                        ),
+                        const SizedBox(height: 12),
+                        _buildCard(
+                          children: [
+                            _buildTextFormField(
+                              label: "Order Title",
+                              hint: "e.g., Wedding Dress",
+                              onSaved: (value) => _orderTitle = value!,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildDropdownFormField<Customer>(
+                              label: "Select Customer",
+                              value: _selectedCustomer,
+                              items:
+                                  customers
+                                      .map(
+                                        (customer) => DropdownMenuItem(
+                                          value: customer,
+                                          child: Text(
+                                            customer.name,
+                                            style: GoogleFonts.poppins(),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                              onChanged: (customer) {
+                                setState(() => _selectedCustomer = customer);
+                              },
+                              validator:
+                                  (value) =>
+                                      value == null
+                                          ? "Please select a customer"
+                                          : null,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildDatePickerField(),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        _buildSectionHeader(
+                          "Status & Payment",
+                          icon: Icons.receipt_long,
+                        ),
+                        const SizedBox(height: 12),
+                        _buildCard(
+                          children: [
+                            _buildDropdownFormField<String>(
+                              label: "Status",
+                              value: _status,
+                              items:
+                                  ["Pending", "In Progress", "Completed"]
+                                      .map(
+                                        (status) => DropdownMenuItem(
+                                          value: status,
+                                          child: Text(
+                                            status,
+                                            style: GoogleFonts.poppins(),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                              onChanged:
+                                  (value) => setState(() => _status = value!),
+                            ),
+                            const SizedBox(height: 16),
+                            _buildDropdownFormField<String>(
+                              label: "Payment Status",
+                              value: _paymentStatus,
+                              items:
+                                  ["Pending", "Partial", "Full"]
+                                      .map(
+                                        (status) => DropdownMenuItem(
+                                          value: status,
+                                          child: Text(
+                                            status,
+                                            style: GoogleFonts.poppins(),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  _paymentStatus = value!;
+                                });
+                              },
+                            ),
+                            if (_paymentStatus != "Pending") ...[
+                              const SizedBox(height: 16),
+                              _buildTextFormField(
+                                label: "Amount Paid",
+                                hint: "e.g., 250.00",
+                                keyboardType: TextInputType.number,
+                                onSaved: (value) => _paymentAmount = value!,
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        _buildSectionHeader(
+                          "Notes",
+                          icon: Icons.description_outlined,
+                        ),
+                        const SizedBox(height: 12),
+                        _buildCard(
+                          children: [
+                            _buildTextFormField(
+                              label: "Notes (Optional)",
+                              hint: "Add any specific details here...",
+                              maxLines: 3,
+                              onSaved: (value) => _notes = value,
+                              validator: (value) => null,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 100),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            );
-          }
-
-          final customers = snapshot.data!;
-          // Set the first customer as the default if none is selected
-          _selectedCustomer ??= customers.first;
-
-          return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSectionHeader(
-                      "Order Details",
-                      icon: Icons.shopping_bag_outlined,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildCard(
-                      children: [
-                        _buildTextFormField(
-                          label: "Order Title",
-                          hint: "e.g., Wedding Dress",
-                          onSaved: (value) => _orderTitle = value!,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildDropdownFormField<Customer>(
-                          label: "Select Customer",
-                          value: _selectedCustomer,
-                          items:
-                              customers
-                                  .map(
-                                    (customer) => DropdownMenuItem(
-                                      value: customer,
-                                      child: Text(
-                                        customer.name,
-                                        style: GoogleFonts.poppins(),
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                          onChanged: (customer) {
-                            setState(() => _selectedCustomer = customer);
-                          },
-                          validator:
-                              (value) =>
-                                  value == null
-                                      ? "Please select a customer"
-                                      : null,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildDatePickerField(),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    _buildSectionHeader(
-                      "Status & Payment",
-                      icon: Icons.receipt_long,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildCard(
-                      children: [
-                        _buildDropdownFormField<String>(
-                          label: "Status",
-                          value: _status,
-                          items:
-                              ["Pending", "In Progress", "Completed"]
-                                  .map(
-                                    (status) => DropdownMenuItem(
-                                      value: status,
-                                      child: Text(
-                                        status,
-                                        style: GoogleFonts.poppins(),
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                          onChanged:
-                              (value) => setState(() => _status = value!),
-                        ),
-                        const SizedBox(height: 16),
-                        _buildDropdownFormField<String>(
-                          label: "Payment Status",
-                          value: _paymentStatus,
-                          items:
-                              ["Pending", "Partial", "Full"]
-                                  .map(
-                                    (status) => DropdownMenuItem(
-                                      value: status,
-                                      child: Text(
-                                        status,
-                                        style: GoogleFonts.poppins(),
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _paymentStatus = value!;
-                            });
-                          },
-                        ),
-                        if (_paymentStatus != "Pending") ...[
-                          const SizedBox(height: 16),
-                          _buildTextFormField(
-                            label: "Amount Paid",
-                            hint: "e.g., 250.00",
-                            keyboardType: TextInputType.number,
-                            onSaved: (value) => _paymentAmount = value!,
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    _buildSectionHeader(
-                      "Notes",
-                      icon: Icons.description_outlined,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildCard(
-                      children: [
-                        _buildTextFormField(
-                          label: "Notes (Optional)",
-                          hint: "Add any specific details here...",
-                          maxLines: 3,
-                          onSaved: (value) => _notes = value,
-                          validator: (value) => null,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 100),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
-      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _submitForm,

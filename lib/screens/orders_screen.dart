@@ -107,7 +107,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
           await Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => const CreateOrderScreen()),
           );
-          _onOrderCreated(); // Refresh the list after returning
+          // _onOrderCreated(); // Refresh the list after returning
         },
         label: Text(
           "New Order",

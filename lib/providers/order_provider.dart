@@ -41,19 +41,27 @@ class OrderProvider extends ChangeNotifier {
     await fetchOrders();
   }
 
-
   Future<OrderWithDetails?> getOrderWithDetails(String orderId) async {
+    debugPrint("Order provider" + orderId);
+
     final order = await orderDao.getOrderById(orderId);
     if (order == null) return null;
 
     final customer = await orderDao.getCustomer(order.customerId);
+    debugPrint("✅ Order found: ${order.id}");
+    debugPrint("🔍 Looking up customer with ID: ${order.customerId}");
+
     final invoice = await orderDao.getInvoiceByCustomerId(order.customerId);
 
-    if (customer == null || invoice == null) return null;
+    if (customer == null) {
+      debugPrint("❌ Customer not found for ID: ${order.customerId}");
+      return null;
+    }
+
+    if (invoice == null) return null;
 
     return OrderWithDetails(order, customer, invoice);
   }
-
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;

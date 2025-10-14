@@ -41,18 +41,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     'Pending',
     'In Progress',
     'Completed',
-    'Cancelled'
+    'Cancelled',
   ];
   final List<String> _paymentStatuses = [
     'Unpaid',
     'Paid',
     'Refunded',
-    'Partial'
+    'Partial',
   ];
-
-
-
-
 
   @override
   void initState() {
@@ -65,12 +61,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   // Helper method to update the order status
   Future<void> _updateOrderStatus(String? newStatus) async {
     if (newStatus != null && newStatus != _selectedStatus) {
-
       final orderProvider = Provider.of<OrderProvider>(context, listen: false);
 
-      final updateOrder = widget.order.copyWith(
-        status: newStatus
-      );
+      final updateOrder = widget.order.copyWith(status: newStatus);
 
       // await dbHelper.updateOrderStatus(widget.order.id, newStatus);
       await orderProvider.updateOrder(updateOrder);
@@ -86,12 +79,12 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   // Helper method to update the payment status
   Future<void> _updatePaymentStatus(String? newPaymentStatus) async {
-    if (newPaymentStatus != null && newPaymentStatus != _selectedPaymentStatus) {
-
+    if (newPaymentStatus != null &&
+        newPaymentStatus != _selectedPaymentStatus) {
       final orderProvider = Provider.of<OrderProvider>(context, listen: false);
 
       final updateOrder = widget.order.copyWith(
-          paymentStatus: newPaymentStatus
+        paymentStatus: newPaymentStatus,
       );
       await orderProvider.updateOrder(updateOrder);
 
@@ -107,9 +100,12 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   Future<_OrderDetailsData?> _fetchOrderDetails() async {
     // final data = await dbHelper.getOrderWithDetails(widget.order.id);
+
     final orderProvider = Provider.of<OrderProvider>(context, listen: false);
 
     final data = await orderProvider.getOrderWithDetails(widget.order.id);
+    // debugPrint("Data details.." + data!.customer.name);
+
     if (data != null) {
       return _OrderDetailsData(
         order: data.order,
@@ -129,7 +125,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
@@ -140,11 +135,20 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         backgroundColor: Colors.white,
         elevation: 1,
         actions: [
-          IconButton(icon: Icon(Icons.edit), onPressed: () {
-            showDialog(context: context, builder: (BuildContext context) {
-              return UpdateOrderModal(order: widget.order, onOrderUpdated: _refreshOrderData);
-            });
-          })
+          IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return UpdateOrderModal(
+                    order: widget.order,
+                    onOrderUpdated: _refreshOrderData,
+                  );
+                },
+              );
+            },
+          ),
         ],
       ),
       body: FutureBuilder<_OrderDetailsData?>(
@@ -281,11 +285,11 @@ Widget _buildSectionTitle(String title) {
 
 // Helper widget to build the dropdowns
 Widget _buildDropdown(
-    String label,
-    String value,
-    List<String> items,
-    void Function(String?) onChanged,
-    ) {
+  String label,
+  String value,
+  List<String> items,
+  void Function(String?) onChanged,
+) {
   return DropdownButtonFormField<String>(
     decoration: InputDecoration(
       labelText: label,
@@ -306,12 +310,10 @@ Widget _buildDropdown(
       ),
     ),
     value: value,
-    items: items.map((item) {
-      return DropdownMenuItem<String>(
-        value: item,
-        child: Text(item),
-      );
-    }).toList(),
+    items:
+        items.map((item) {
+          return DropdownMenuItem<String>(value: item, child: Text(item));
+        }).toList(),
     onChanged: onChanged,
   );
 }
@@ -731,5 +733,3 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
-
-

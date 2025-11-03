@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:notdle/db/database_helper.dart';
+// import 'package:notdle/db/database_helper.dart'; // Unused import
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
@@ -22,7 +22,6 @@ class _OrderDetailsData {
 
 class OrderDetailsScreen extends StatefulWidget {
   static const String tag = "order_details";
-  // final String orderId;
   final Order order;
 
   const OrderDetailsScreen({super.key, required this.order});
@@ -32,79 +31,26 @@ class OrderDetailsScreen extends StatefulWidget {
 }
 
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
-  // final dbHelper = DatabaseHelper.instance;
   late Future<_OrderDetailsData?> _orderDetailsFuture;
-  late String _selectedStatus;
-  late String _selectedPaymentStatus;
-
-  final List<String> _orderStatuses = [
-    'Pending',
-    'In Progress',
-    'Completed',
-    'Cancelled',
-  ];
-  final List<String> _paymentStatuses = [
-    'Unpaid',
-    'Paid',
-    'Refunded',
-    'Partial',
-  ];
+  // Store the order ID in the state to ensure it's constant for all fetches.
+  late final String _orderId;
 
   @override
   void initState() {
     super.initState();
+    // 1. Set the order ID from the initial widget.
+    _orderId = widget.order.id;
+    // 2. Fetch the initial data using the stored ID.
     _orderDetailsFuture = _fetchOrderDetails();
-    _selectedStatus = widget.order.status;
-    _selectedPaymentStatus = widget.order.paymentStatus;
-  }
-
-  // Helper method to update the order status
-  Future<void> _updateOrderStatus(String? newStatus) async {
-    if (newStatus != null && newStatus != _selectedStatus) {
-      final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-
-      final updateOrder = widget.order.copyWith(status: newStatus);
-
-      // await dbHelper.updateOrderStatus(widget.order.id, newStatus);
-      await orderProvider.updateOrder(updateOrder);
-
-      setState(() {
-        _selectedStatus = newStatus;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Order status updated to $newStatus')),
-      );
-    }
-  }
-
-  // Helper method to update the payment status
-  Future<void> _updatePaymentStatus(String? newPaymentStatus) async {
-    if (newPaymentStatus != null &&
-        newPaymentStatus != _selectedPaymentStatus) {
-      final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-
-      final updateOrder = widget.order.copyWith(
-        paymentStatus: newPaymentStatus,
-      );
-      await orderProvider.updateOrder(updateOrder);
-
-      // await dbHelper.updateOrderPaymentStatus(widget.order.id, newPaymentStatus);
-      setState(() {
-        _selectedPaymentStatus = newPaymentStatus;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Payment status updated to $newPaymentStatus')),
-      );
-    }
   }
 
   Future<_OrderDetailsData?> _fetchOrderDetails() async {
-    // final data = await dbHelper.getOrderWithDetails(widget.order.id);
-
+    // It's good practice to check if the widget is still mounted before using context.
+    if (!mounted) return null;
     final orderProvider = Provider.of<OrderProvider>(context, listen: false);
 
-    final data = await orderProvider.getOrderWithDetails(widget.order.id);
-    // debugPrint("Data details.." + data!.customer.name);
+    // 3. Use the state's _orderId for all fetches, not widget.order.id.
+    final data = await orderProvider.getOrderWithDetails(_orderId);
 
     if (data != null) {
       return _OrderDetailsData(
@@ -113,163 +59,166 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         invoice: data.invoice,
       );
     }
+    // If you see "Order not found", it's likely this line is being reached.
+    // Add a debug print to confirm if the fetch is failing.
+    debugPrint("Could not fetch details for order ID: $_orderId. 'getOrderWithDetails' returned null.");
     return null;
   }
 
-  // Method to refresh the screen after modal is closed
+  // Central method to refresh the screen's data.
   void _refreshOrderData() {
-    setState(() {
-      _orderDetailsFuture = _fetchOrderDetails();
-    });
+    if (mounted) {
+      setState(() {
+        _orderDetailsFuture = _fetchOrderDetails();
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey.shade100,
-      appBar: AppBar(
-        title: Text(
-          "Order Details",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 1,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return UpdateOrderModal(
-                    order: widget.order,
-                    onOrderUpdated: _refreshOrderData,
-                  );
-                },
-              );
-            },
-          ),
-        ],
-      ),
-      body: FutureBuilder<_OrderDetailsData?>(
-        future: _orderDetailsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text(
-                "Error: ${snapshot.error}",
-                style: GoogleFonts.poppins(),
-              ),
-            );
-          } else if (!snapshot.hasData) {
-            return Center(
-              child: Text("Order not found.", style: GoogleFonts.poppins()),
-            );
-          }
+    return FutureBuilder<_OrderDetailsData?>(
+      future: _orderDetailsFuture,
+      builder: (context, snapshot) {
+        // Determine the current order data. Use the initial widget.order as a fallback.
+        final currentOrder = snapshot.data?.order ?? widget.order;
 
-          final orderDetails = snapshot.data!;
-          final order = orderDetails.order;
-          final customer = orderDetails.customer;
-          final invoice = orderDetails.invoice;
-
-          return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // _buildSectionTitle('Status & Payment'),
-                  // const SizedBox(height: 8),
-                  // Card(
-                  //   elevation: 1,
-                  //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  //   child: Padding(
-                  //     padding: const EdgeInsets.all(16.0),
-                  //     child: Column(
-                  //       crossAxisAlignment: CrossAxisAlignment.start,
-                  //       children: [
-                  //         _buildDropdown(
-                  //           'Order Status',
-                  //           _selectedStatus,
-                  //           _orderStatuses,
-                  //               (newValue) => _updateOrderStatus(newValue),
-                  //         ),
-                  //         const SizedBox(height: 16),
-                  //         _buildDropdown(
-                  //           'Payment Status',
-                  //           _selectedPaymentStatus,
-                  //           _paymentStatuses,
-                  //               (newValue) => _updatePaymentStatus(newValue),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //   ),
-                  // ),
-                  _OrderSummaryCard(
-                    order: order,
-                    paymentStatus: order.paymentStatus,
-                  ),
-                  const SizedBox(height: 16),
-                  if (order.dueDate != null) ...[
-                    _TimeInfoCard(dueDate: order.dueDate!),
-                    const SizedBox(height: 16),
-                  ],
-                  if (customer != null) ...[
-                    _CustomerInfoCard(
-                      customerName: customer.name,
-                      phone: customer.phone,
-                      email: customer.email ?? 'N/A',
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                  if (order.notes != null && order.notes!.isNotEmpty) ...[
-                    _NotesCard(notes: order.notes!),
-                    const SizedBox(height: 16),
-                  ],
-                  if (invoice != null) ...[
-                    _InvoiceCard(invoice: invoice),
-                    const SizedBox(height: 16),
-                  ],
-                ],
-              ),
+        return Scaffold(
+          backgroundColor: Colors.grey.shade100,
+          appBar: AppBar(
+            title: Text(
+              "Order Details",
+              style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
             ),
-          );
-        },
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FutureBuilder<_OrderDetailsData?>(
-        future: _orderDetailsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting ||
-              !snapshot.hasData) {
-            return const SizedBox.shrink(); // Hide the button while loading
-          }
-          final order = snapshot.data!.order;
-          return FloatingActionButton.extended(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => CreateInvoiceScreen(order: order),
+            backgroundColor: Colors.white,
+            elevation: 1,
+            actions: [
+              // Only show the edit button if we have data to edit.
+              if (snapshot.connectionState == ConnectionState.done && snapshot.hasData)
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return UpdateOrderModal(
+                          // Pass the most up-to-date order from the snapshot.
+                          order: currentOrder,
+                          onOrderUpdated: _refreshOrderData,
+                        );
+                      },
+                    );
+                  },
                 ),
-              );
-            },
-            backgroundColor: Colors.indigo.shade600,
-            label: Text(
-              "Create Invoice",
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
+            ],
+          ),
+          body: _buildBody(context, snapshot),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+          floatingActionButton: _buildFab(context, snapshot),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody(BuildContext context, AsyncSnapshot<_OrderDetailsData?> snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (snapshot.hasError) {
+      // Added more detailed error logging for debugging.
+      debugPrint("FutureBuilder error: ${snapshot.error}\n${snapshot.stackTrace}");
+      return Center(
+        child: Text(
+          "Error: ${snapshot.error}",
+          style: GoogleFonts.poppins(),
+        ),
+      );
+    } else if (!snapshot.hasData || snapshot.data == null) {
+      return Center(
+        child: Text("Order not found.", style: GoogleFonts.poppins()),
+      );
+    }
+
+    final orderDetails = snapshot.data!;
+    final order = orderDetails.order;
+    final customer = orderDetails.customer;
+    final invoice = orderDetails.invoice;
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _OrderSummaryCard(
+              order: order,
+              // Use the paymentStatus from the fetched order object
+              paymentStatus: order.paymentStatus,
             ),
-            icon: const Icon(Icons.receipt, color: Colors.white),
-          );
-        },
+            const SizedBox(height: 16),
+            if (order.dueDate != null) ...[
+              _TimeInfoCard(dueDate: order.dueDate!),
+              const SizedBox(height: 16),
+            ],
+            if (customer != null) ...[
+              _CustomerInfoCard(
+                customerName: customer.name,
+                phone: customer.phone,
+                email: customer.email ?? 'N/A',
+              ),
+              const SizedBox(height: 16),
+            ],
+            if (order.notes != null && order.notes!.isNotEmpty) ...[
+              _NotesCard(notes: order.notes!),
+              const SizedBox(height: 16),
+            ],
+            if (invoice != null) ...[
+              _InvoiceCard(invoice: invoice),
+              const SizedBox(height: 16),
+            ],
+          ],
+        ),
       ),
     );
   }
+
+  Widget _buildFab(BuildContext context, AsyncSnapshot<_OrderDetailsData?> snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting ||
+        !snapshot.hasData ||
+        snapshot.data == null) {
+      return const SizedBox.shrink(); // Hide FAB while loading or if no data
+    }
+
+    final orderDetails = snapshot.data!;
+    // Hide FAB if an invoice already exists
+    if (orderDetails.invoice != null) {
+      return const SizedBox.shrink();
+    }
+
+    return FloatingActionButton.extended(
+      onPressed: () async {
+        // Navigate and await result to refresh if an invoice was created.
+        final result = await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => CreateInvoiceScreen(order: orderDetails.order),
+          ),
+        );
+        // If the create invoice screen returns true, refresh the data.
+        if (result == true && mounted) {
+          _refreshOrderData();
+        }
+      },
+      backgroundColor: Colors.indigo.shade600,
+      label: Text(
+        "Create Invoice",
+        style: GoogleFonts.poppins(
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+      icon: const Icon(Icons.receipt, color: Colors.white),
+    );
+  }
 }
+
 
 // Helper widget to build section titles
 Widget _buildSectionTitle(String title) {
@@ -285,11 +234,11 @@ Widget _buildSectionTitle(String title) {
 
 // Helper widget to build the dropdowns
 Widget _buildDropdown(
-  String label,
-  String value,
-  List<String> items,
-  void Function(String?) onChanged,
-) {
+    String label,
+    String value,
+    List<String> items,
+    void Function(String?) onChanged,
+    ) {
   return DropdownButtonFormField<String>(
     decoration: InputDecoration(
       labelText: label,
@@ -310,10 +259,9 @@ Widget _buildDropdown(
       ),
     ),
     value: value,
-    items:
-        items.map((item) {
-          return DropdownMenuItem<String>(value: item, child: Text(item));
-        }).toList(),
+    items: items.map((item) {
+      return DropdownMenuItem<String>(value: item, child: Text(item));
+    }).toList(),
     onChanged: onChanged,
   );
 }
@@ -353,6 +301,8 @@ class _OrderSummaryCard extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
                   ),
                 ),
               ],
@@ -474,14 +424,18 @@ class _CustomerInfoCard extends StatelessWidget {
                         Icons.call_outlined,
                         color: Colors.green.shade600,
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        // TODO: Implement call functionality
+                      },
                     ),
                     IconButton(
                       icon: Icon(
                         Icons.email_outlined,
                         color: Colors.blue.shade600,
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        // TODO: Implement email functionality
+                      },
                     ),
                   ],
                 ),
@@ -652,8 +606,10 @@ class _StatusChip extends StatelessWidget {
         return Colors.blue.shade600;
       case "Pending":
         return Colors.orange.shade600;
+      case "Cancelled":
+        return Colors.red.shade600;
       default:
-        return Colors.grey;
+        return Colors.grey.shade600;
     }
   }
 }
@@ -693,15 +649,16 @@ class _PaymentStatusChip extends StatelessWidget {
 
   Color _getPaymentColor(String status) {
     switch (status) {
-      case "Full":
       case "Paid":
         return Colors.green.shade600;
       case "Partial":
         return Colors.blue.shade600;
-      case "Pending":
+      case "Unpaid":
         return Colors.orange.shade600;
+      case "Refunded":
+        return Colors.red.shade600;
       default:
-        return Colors.grey;
+        return Colors.grey.shade600;
     }
   }
 }
@@ -720,14 +677,16 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // <-- Added the build method
     return Row(
       children: [
         Icon(icon, color: iconColor, size: 20),
         const SizedBox(width: 12),
-        Text(
-          label,
-          style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey.shade700),
+        Expanded(
+          child: Text(
+            label,
+            style:
+            GoogleFonts.poppins(fontSize: 16, color: Colors.grey.shade700),
+          ),
         ),
       ],
     );

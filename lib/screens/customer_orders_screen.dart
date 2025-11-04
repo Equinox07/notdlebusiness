@@ -3,10 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/order.dart';
-import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/screens/order_details_screen.dart';
 import 'package:provider/provider.dart';
@@ -21,22 +19,31 @@ class CustomerOrdersScreen extends StatefulWidget {
 }
 
 class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
-  late Future<List<Order>> _ordersFuture;
-
   @override
   void initState() {
     super.initState();
-    // _ordersFuture = DatabaseHelper.instance.getCustomerOrders(
-    //   widget.customer.id!,
-    // );
-    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-    orderProvider.fetchOrdersForCustomer(widget.customer.id!);
+    // Use postFrameCallback to ensure the context is available
+    // and to fetch data right after the first frame is built.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshOrders();
+    });
+  }
+
+  // Centralized refresh logic
+  Future<void> _refreshOrders() async {
+    // Check if the widget is still in the tree before using the provider.
+    if (mounted) {
+      // We call the provider to fetch the data. The Consumer will handle the UI update.
+      // We assert that customer.id is not null, as it's essential for this screen.
+      await Provider.of<OrderProvider>(context, listen: false)
+          .fetchOrdersForCustomer(widget.customer.id!);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         title: Text(
           "${widget.customer.name}'s Orders",
@@ -45,47 +52,64 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
         backgroundColor: Colors.white,
         elevation: 1,
       ),
-      body: FutureBuilder<List<Order>>(
-        future: _ordersFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+      // Use a Consumer to listen for changes in the OrderProvider
+      body: Consumer<OrderProvider>(
+        builder: (context, orderProvider, child) {
+          if (orderProvider.isLoading) {
             return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          }
+
+          if (orderProvider.customerOrders.isEmpty) {
             return Center(
-              child: Text(
-                "No orders found for this customer.",
-                style: GoogleFonts.poppins(fontSize: 16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.inbox_outlined, size: 60, color: Colors.grey.shade400),
+                  const SizedBox(height: 16),
+                  Text(
+                    "No Orders Found",
+                    style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  Text(
+                    "This customer has no orders yet.",
+                    style: GoogleFonts.poppins(color: Colors.grey.shade600),
+                  ),
+                ],
               ),
             );
-          } else {
-            final orders = snapshot.data!;
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
+          }
+
+          final orders = orderProvider.customerOrders;
+          // Use RefreshIndicator for pull-to-refresh functionality
+          return RefreshIndicator(
+            onRefresh: _refreshOrders,
+            child: ListView.builder(
+              padding: const EdgeInsets.fromLTRB(12, 16, 12, 16),
               itemCount: orders.length,
               itemBuilder: (context, index) {
                 final order = orders[index];
                 return OrderCard(
                   order: order,
-                  onTap: () {
-                    Navigator.of(context).push(
+                  onTap: () async {
+                    // Await navigation to refresh the list if changes were made
+                    await Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder:
-                            (context) => OrderDetailsScreen(order: order),
+                        builder: (context) => OrderDetailsScreen(order: order),
                       ),
                     );
+                    _refreshOrders();
                   },
                 );
               },
-            );
-          }
+            ),
+          );
         },
       ),
     );
   }
 }
 
+// Redesigned "classic" Order Card to match other screens
 class OrderCard extends StatelessWidget {
   const OrderCard({required this.order, required this.onTap, super.key});
 
@@ -96,81 +120,72 @@ class OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     String getFormattedDueDate(String? dueDate) {
       if (dueDate == null || dueDate.isEmpty) {
-        return "Due: N/A";
+        return "No due date";
       }
       try {
         final date = DateFormat("yyyy-M-d").parse(dueDate);
         return "Due: ${DateFormat('MMM d, y').format(date)}";
       } catch (e) {
-        // Fallback for an invalid date format
-        return "Due: N/A";
+        return "Invalid date";
       }
     }
 
-    return InkWell(
-      onTap: onTap,
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.only(bottom: 16),
+    return Card(
+      elevation: 1.5,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // --- Top Section: Primary Info ---
+              Text(
+                order.title,
+                style: GoogleFonts.poppins(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade800,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              // This screen is already filtered for a customer, so we don't need to show the name again.
+              // We can show the Order ID instead for better context.
+              const SizedBox(height: 4),
+              Text(
+                "Order ID: ${order.id.substring(0, 8)}...",
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12.0),
+                child: Divider(height: 1),
+              ),
+              // --- Bottom Section: Status & Metadata ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: Text(
-                      order.title,
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.indigo.shade800,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  // Group status chips together
+                  Row(
+                    children: [
+                      _StatusChip(status: order.status),
+                      const SizedBox(width: 8),
+                      _PaymentStatusChip(status: order.paymentStatus),
+                    ],
                   ),
-                  _StatusChip(status: order.status),
-                ],
-              ),
-              const SizedBox(height: 8),
-              // Use a FutureBuilder to get the customer's name
-              FutureBuilder<Customer?>(
-                future: Provider.of<CustomerProvider>(context, listen: false)
-                    .getCustomerById(order.customerId),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Text(
-                      "Loading customer...",
-                      style: GoogleFonts.poppins(color: Colors.grey.shade600),
-                    );
-                  } else if (snapshot.hasData) {
-                    return Text(
-                      "Customer: ${snapshot.data!.name}",
-                      style: GoogleFonts.poppins(color: Colors.grey.shade600),
-                    );
-                  } else {
-                    return Text(
-                      "Customer: Unknown",
-                      style: GoogleFonts.poppins(color: Colors.grey.shade600),
-                    );
-                  }
-                },
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _PaymentStatusChip(status: order.paymentStatus),
+                  // Due date aligned to the right
                   Text(
-                    // Safely check for null before parsing the date
                     getFormattedDueDate(order.dueDate),
                     style: GoogleFonts.poppins(
                       fontSize: 13,
-                      color: Colors.red.shade400,
-                      fontStyle: FontStyle.italic,
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
@@ -192,7 +207,7 @@ class _StatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color statusColor = _getStatusColor(status);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: statusColor.withOpacity(0.15),
         borderRadius: BorderRadius.circular(20),
@@ -201,7 +216,7 @@ class _StatusChip extends StatelessWidget {
         status,
         style: GoogleFonts.poppins(
           color: statusColor,
-          fontSize: 14,
+          fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -216,8 +231,10 @@ class _StatusChip extends StatelessWidget {
         return Colors.blue.shade600;
       case "Pending":
         return Colors.orange.shade600;
+      case "Cancelled":
+        return Colors.red.shade600;
       default:
-        return Colors.grey;
+        return Colors.grey.shade700;
     }
   }
 }
@@ -231,7 +248,7 @@ class _PaymentStatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color statusColor = _getPaymentColor(status);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: statusColor.withOpacity(0.15),
         borderRadius: BorderRadius.circular(20),
@@ -239,13 +256,13 @@ class _PaymentStatusChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.payment, size: 16, color: statusColor),
+          Icon(_getPaymentIcon(status), size: 14, color: statusColor),
           const SizedBox(width: 4),
           Text(
             status,
             style: GoogleFonts.poppins(
               color: statusColor,
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -256,15 +273,31 @@ class _PaymentStatusChip extends StatelessWidget {
 
   Color _getPaymentColor(String status) {
     switch (status) {
-      case "Full":
       case "Paid":
         return Colors.green.shade600;
       case "Partial":
         return Colors.blue.shade600;
-      case "Pending":
+      case "Unpaid":
         return Colors.orange.shade600;
+      case "Refunded":
+        return Colors.red.shade600;
       default:
-        return Colors.grey;
+        return Colors.grey.shade700;
+    }
+  }
+
+  IconData _getPaymentIcon(String status) {
+    switch (status) {
+      case "Paid":
+        return Icons.check_circle_outline;
+      case "Partial":
+        return Icons.pie_chart_outline;
+      case "Unpaid":
+        return Icons.hourglass_empty_rounded;
+      case "Refunded":
+        return Icons.remove_circle_outline;
+      default:
+        return Icons.help_outline;
     }
   }
 }

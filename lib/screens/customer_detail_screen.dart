@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/navigation/app_navigation.dart';
+import 'package:notdle/screens/create_order_screen.dart';
 import 'package:notdle/screens/customer_orders_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -252,10 +253,13 @@ class _QuickActionsCard extends StatelessWidget {
                   icon: Icons.add_shopping_cart,
                   label: 'New Order',
                   color: Colors.green.shade600,
-                  onTap: () => debugPrint("Create Order"),
-                  // AppNavigator.toCreateOrder(
-                  // customer: null,
-                  // ), // AppNavigator.toOrders(),
+                  onTap: () =>  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => CreateOrderScreen(customer: customer),
+                    ),
+                  )
+                      //AppNavigator.toCreateOrder(customer: customer),
+                    // AppNavigator.toOrders(),
                 ),
               ),
             ],

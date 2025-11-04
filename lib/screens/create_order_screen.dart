@@ -15,7 +15,10 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 class CreateOrderScreen extends StatefulWidget {
-  const CreateOrderScreen({super.key});
+  // 1. Add an optional customer parameter to the constructor.
+  final Customer? customer;
+
+  const CreateOrderScreen({super.key, this.customer});
 
   static const String tag = "create_order";
 
@@ -30,32 +33,43 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   String _orderTitle = "";
   Customer? _selectedCustomer;
   String _status = "Pending";
-  String _paymentStatus = "Unpaid"; // Changed default to be more descriptive
+  String _paymentStatus = "Unpaid";
   DateTime? _dueDate;
   String? _notes;
   String? _paymentAmount;
 
-  // Using a FutureBuilder for cleaner state management
   late Future<List<Customer>> _customersFuture;
 
-  // Define statuses as constants to prevent typos
   static const List<String> _orderStatuses = ["Pending", "In Progress", "Completed", "Cancelled"];
   static const List<String> _paymentStatuses = ["Unpaid", "Partial", "Paid"];
 
   @override
   void initState() {
     super.initState();
+    // 2. If a customer is passed to the screen, set it as the selected one.
+    if (widget.customer != null) {
+      _selectedCustomer = widget.customer;
+    }
     _customersFuture = _loadCustomers();
   }
 
   Future<List<Customer>> _loadCustomers() async {
-    // This now returns the list for the FutureBuilder
     final customerProvider = Provider.of<CustomerProvider>(context, listen: false);
     await customerProvider.fetchCustomers();
     final customers = customerProvider.customers;
 
-    if (customers.isNotEmpty && _selectedCustomer == null) {
-      // Pre-select the first customer
+    // from the fetched list to ensure object equality for the Dropdown.
+    if (widget.customer != null) {
+      try {
+        _selectedCustomer = customers.firstWhere((c) => c.id == widget.customer!.id);
+      } catch (e) {
+        // Handle case where the passed customer is not in the list, though this is unlikely.
+        _selectedCustomer = null;
+      }
+    }
+
+    // Only pre-select the first customer if no customer was passed in and none is selected.
+    if (widget.customer == null && customers.isNotEmpty && _selectedCustomer == null) {
       setState(() {
         _selectedCustomer = customers.first;
       });
@@ -97,9 +111,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     }
     _formKey.currentState!.save();
 
-    if (_selectedCustomer == null) {
+    if (_selectedCustomer == null || _selectedCustomer!.id == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please select a customer", style: GoogleFonts.poppins())),
+        SnackBar(content: Text("Please select a valid customer", style: GoogleFonts.poppins())),
       );
       return;
     }
@@ -112,7 +126,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       paymentStatus: _paymentStatus,
       paymentAmount: double.tryParse(_paymentAmount ?? '0'),
       dueDate: _dueDate != null ? DateFormat('yyyy-MM-dd').format(_dueDate!) : null,
-      notes: _notes,
+      notes: _notes ?? '', // Provide a default empty string
       createdDate: DateTime.now().toIso8601String(),
     );
 
@@ -161,10 +175,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       id: const Uuid().v4(),
       title: 'Invoice for ${newOrder.title}',
       customerId: newOrder.customerId,
-      status: 'Pending', // Invoices should start as Pending/Draft
+      status: 'Pending',
       totalAmount: newOrder.paymentAmount ?? 0.0,
       date: DateTime.now(),
-      // dueDate: _dueDate ?? DateTime.now().add(const Duration(days: 14)),
+      // dueDate: _dueDate ?? DateTime.now().add(const Duration(days: 14)), // Provide a default
       orderId: newOrder.id,
     );
 
@@ -172,7 +186,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
     if (!mounted) return;
 
-    // Navigate to the new invoice, replacing the create screen
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => InvoiceDetailsScreen(invoice: newInvoice),
@@ -256,6 +269,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                     onSaved: (value) => _orderTitle = value!,
                   ),
                   const SizedBox(height: 16),
+                  // 3. Conditionally disable the dropdown if a customer was passed in.
                   _buildDropdownFormField<Customer>(
                     label: "Select Customer",
                     value: _selectedCustomer,
@@ -263,7 +277,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                       value: customer,
                       child: Text(customer.name, style: GoogleFonts.poppins()),
                     )).toList(),
-                    onChanged: (customer) => setState(() => _selectedCustomer = customer),
+                    // If a customer is passed via the widget, disable the dropdown.
+                    onChanged: widget.customer != null
+                        ? null
+                        : (customer) => setState(() => _selectedCustomer = customer),
                     validator: (value) => value == null ? "Please select a customer" : null,
                   ),
                   const SizedBox(height: 16),
@@ -345,7 +362,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     );
   }
 
-  // Redesigned "Classic" Card
   Widget _buildCard({required List<Widget> children}) {
     return Container(
       decoration: BoxDecoration(
@@ -400,7 +416,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     required String label,
     T? value,
     required List<DropdownMenuItem<T>> items,
-    required ValueChanged<T?> onChanged,
+    required ValueChanged<T?>? onChanged, // Allow onChanged to be nullable
     FormFieldValidator<T>? validator,
   }) {
     return DropdownButtonFormField<T>(
@@ -416,6 +432,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.indigo.shade600, width: 2.0),
         ),
+        // Grey out the field when disabled
+        filled: onChanged == null,
+        fillColor: onChanged == null ? Colors.grey.shade200 : null,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       ),
       value: value,

@@ -174,15 +174,16 @@ class AppNavigator {
     }
   }
 
-  static void toCreateOrder(List<Customer> customers) {
-    if (customers.isNotEmpty) {
-      navigatorKey.currentState?.pushNamed(
-        CreateOrderScreen.tag,
-        arguments: customers,
-      );
-    } else {
-      navigatorKey.currentState?.pushNamed(OrdersScreen.tag);
-    }
+  static void toCreateOrder({Customer? customer}) {
+    navigatorKey.currentState?.pushNamed(CreateOrderScreen.tag, arguments: customer);
+    // if (customer.isNotEmpty) {
+    //   navigatorKey.currentState?.pushNamed(
+    //     CreateOrderScreen.tag,
+    //     arguments: customers,
+    //   );
+    // } else {
+    //   navigatorKey.currentState?.pushNamed(OrdersScreen.tag);
+    // }
   }
 
 

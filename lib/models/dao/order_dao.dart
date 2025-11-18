@@ -1,9 +1,7 @@
 import 'package:floor/floor.dart';
-import 'package:notdle/models/company.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
-import 'package:notdle/models/weekly_order_count.dart';
 
 @dao
 abstract class OrderDao {

@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/measurement.dart';
 import 'package:notdle/navigation/app_navigation.dart';
@@ -80,7 +79,7 @@ class _CustomerMeasurementScreenState
     "Skirt",
     "Full Dress",
   ];
-  String _selectedMeasureType = "None";
+  final String _selectedMeasureType = "None";
 
   final List<String> _sleeveOptions = ["None", "Short", "3 Quarters", "Full"];
   String _selectedSleeve = "None";
@@ -255,7 +254,9 @@ class _CustomerMeasurementScreenState
 
   @override
   void dispose() {
-    for (var controller in _controllers.values) controller.dispose();
+    for (var controller in _controllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 

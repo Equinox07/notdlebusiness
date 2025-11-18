@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/company.dart';
 import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/services/session_manager.dart';

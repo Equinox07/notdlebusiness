@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/company.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';

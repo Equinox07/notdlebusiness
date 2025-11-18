@@ -7,7 +7,7 @@ class InsightCard extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
 
-  const InsightCard({
+  const InsightCard({super.key, 
     required this.title,
     required this.value,
     required this.subtitle,

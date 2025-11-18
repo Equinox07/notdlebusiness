@@ -2,14 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:notdle/db/database_helper.dart';
-import 'package:notdle/models/company.dart';
-import 'package:notdle/models/order.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
 import 'package:notdle/providers/notification_provider.dart';
-import 'package:notdle/services/session_manager.dart';
 import 'package:notdle/widgets/deadline_card.dart';
 import 'package:provider/provider.dart';
 

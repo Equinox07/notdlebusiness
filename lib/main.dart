@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:notdle/db/app_database.dart';
 import 'package:notdle/pages/index_page.dart';
-import 'package:notdle/pages/login_app.dart';
-import 'package:notdle/pages/signup_page.dart';
 import 'package:notdle/providers/app_provider.dart';
 import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/providers/customer_provider.dart';
@@ -11,9 +9,7 @@ import 'package:notdle/providers/invoice_provider.dart';
 import 'package:notdle/providers/measurement_provider.dart';
 import 'package:notdle/providers/notification_provider.dart';
 import 'package:notdle/providers/order_provider.dart';
-import 'package:notdle/services/session_manager.dart';
 import 'package:provider/provider.dart';
-// import 'package:notdle/pages/index_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

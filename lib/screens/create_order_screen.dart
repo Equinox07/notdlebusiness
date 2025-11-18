@@ -91,8 +91,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
               onPrimary: Colors.white,
               surface: Colors.white,
               onSurface: Colors.black87,
-            ),
-            dialogBackgroundColor: Colors.white,
+            ), dialogTheme: DialogThemeData(backgroundColor: Colors.white),
           ),
           child: child!,
         );

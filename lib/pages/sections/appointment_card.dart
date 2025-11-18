@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 class AppointmentCard extends StatelessWidget {
   final String title, client, date, time;
 
-  const AppointmentCard(this.title, this.client, this.date, this.time);
+  const AppointmentCard(this.title, this.client, this.date, this.time, {super.key});
 
   @override
   Widget build(BuildContext context) {

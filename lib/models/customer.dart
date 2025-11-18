@@ -1,9 +1,6 @@
 // lib/models/customer.dart
 
 import 'package:floor/floor.dart';
-import 'package:notdle/db/database_helper.dart';
-import 'package:uuid/uuid.dart';
-import 'package:sqflite/sqflite.dart';
 
 @Entity(tableName: 'customers')
 class Customer {

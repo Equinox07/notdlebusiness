@@ -1,7 +1,6 @@
 // lib/screens/create_invoice_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/order.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/providers/customer_provider.dart';

@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/measurement.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/measurement_provider.dart';

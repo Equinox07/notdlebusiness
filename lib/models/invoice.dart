@@ -1,6 +1,5 @@
 // lib/models/invoice.dart
 import 'package:floor/floor.dart';
-import 'package:uuid/uuid.dart';
 import 'customer.dart';
 import 'order.dart';
 

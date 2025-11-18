@@ -2,13 +2,9 @@
 //LoginPageScreen
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/navigation/app_navigation.dart';
-import 'package:notdle/pages/dashboards/dashboard_app.dart';
-import 'package:notdle/pages/dashboards/dashboard_screen.dart';
 import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/screens/company_registration_screen.dart';
-import 'package:notdle/screens/main.dart';
 import 'package:notdle/services/session_manager.dart';
 import 'package:provider/provider.dart';
 
@@ -79,7 +75,7 @@ class _LoginScreenState extends State<LoginPageScreen> {
   @override
   Widget build(BuildContext context) {
 
-    Future<void> _login() async {
+    Future<void> login() async {
       if (_formKey.currentState!.validate()) {
         // You'll need to implement a getCompanyByEmailAndPassword method in your DatabaseHelper
         // final company = await _dbHelper.getCompanyByEmailAndMobile(
@@ -182,7 +178,7 @@ class _LoginScreenState extends State<LoginPageScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _login,
+                  onPressed: login,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     backgroundColor: Colors.indigo.shade600,

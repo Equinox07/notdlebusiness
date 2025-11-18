@@ -1,6 +1,5 @@
 // lib/providers/company_provider.dart
 
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:notdle/models/company.dart';

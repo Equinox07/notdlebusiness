@@ -1,9 +1,6 @@
 
 import 'package:floor/floor.dart';
-import 'package:notdle/models/company.dart';
-import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/measurement.dart';
-import 'package:notdle/models/order.dart';
 
 @dao
 abstract class MeasurementDao{

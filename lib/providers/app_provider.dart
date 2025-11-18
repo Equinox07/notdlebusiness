@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:notdle/db/app_database.dart';
 import 'package:notdle/models/company.dart';
 import 'package:notdle/models/customer.dart';

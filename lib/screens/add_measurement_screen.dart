@@ -2,7 +2,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:notdle/db/database_helper.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/measurement.dart';
 import 'package:notdle/providers/customer_provider.dart';
@@ -272,7 +271,9 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
 
   @override
   void dispose() {
-    for (var controller in _controllers.values) controller.dispose();
+    for (var controller in _controllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 

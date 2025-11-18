@@ -3,8 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/measurement.dart';
-import 'package:notdle/models/customer.dart';
-import 'package:notdle/screens/add_measurement_screen.dart';
 import 'package:notdle/screens/customer_measurement.dart';
 
 // Assuming your Customer and Measurement models are correctly defined.

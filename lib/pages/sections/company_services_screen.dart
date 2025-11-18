@@ -81,7 +81,7 @@ class CompanyServicesScreen extends StatelessWidget {
 class _ServiceCard extends StatelessWidget {
   final ServiceModel service;
 
-  const _ServiceCard({super.key, required this.service});
+  const _ServiceCard({required this.service});
 
   @override
   Widget build(BuildContext context) {

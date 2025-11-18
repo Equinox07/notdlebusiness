@@ -1,16 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:notdle/pages/sections/company_services_screen.dart';
 import 'package:notdle/screens/customers_screen.dart';
-import 'package:notdle/screens/fabric_screen.dart';
 import 'package:notdle/screens/invoices_screen.dart';
 import 'package:notdle/screens/orders_screen.dart';
-import 'package:notdle/screens/profile_screen.dart';
-import 'package:notdle/screens/projects_screen.dart';
 import 'package:notdle/screens/services_screen.dart';
-import 'package:notdle/pages/sections/appointment_card.dart';
 import 'package:notdle/pages/dashboards/dashboard_home.dart';
-import 'package:notdle/pages/sections/insight_card.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});

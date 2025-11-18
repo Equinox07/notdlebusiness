@@ -1,8 +1,5 @@
 // lib/screens/invoice_details_screen.dart
 
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:notdle/models/customer.dart';
 
 // class _CustomerInfoCard extends StatelessWidget {
 //   final Customer customer;

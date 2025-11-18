@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/order.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/order_provider.dart';

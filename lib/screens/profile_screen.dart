@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:notdle/models/company.dart';
+import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/services/session_manager.dart';
 import 'package:provider/provider.dart';
@@ -279,7 +280,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         onPressed: () {
-          // TODO: Implement logout logic
+          SessionManager.clearSession();
+          AppNavigator.toLogin2();
         },
       ),
     );

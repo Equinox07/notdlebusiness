@@ -16,6 +16,7 @@ import 'package:notdle/screens/customer_detail_screen.dart';
 import 'package:notdle/screens/customer_measurement.dart';
 import 'package:notdle/screens/customers_screen.dart';
 import 'package:notdle/screens/invoices_screen.dart';
+import 'package:notdle/screens/login_page_screen.dart';
 import 'package:notdle/screens/main.dart';
 import 'package:notdle/screens/notification_screen.dart';
 import 'package:notdle/screens/order_details_screen.dart';
@@ -117,6 +118,13 @@ class AppNavigator {
     navigatorKey.currentState?.pushNamedAndRemoveUntil(
       LoginApp.tag,
       (route) => false,
+    );
+  }
+
+  static void toLogin2() {
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      LoginPageScreen.tag,
+          (route) => false,
     );
   }
 
@@ -268,8 +276,8 @@ class AppNavigator {
   }
 }
 
-class RandomeScreen extends StatelessWidget {
-  const RandomeScreen({super.key});
+class RandomScreen extends StatelessWidget {
+  const RandomScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

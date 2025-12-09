@@ -1,4 +1,4 @@
-package com.notdle.designer
+package com.notdle.business
 
 import io.flutter.embedding.android.FlutterActivity
 

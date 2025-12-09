@@ -46,6 +46,7 @@ class CompanyProvider with ChangeNotifier {
      Map<String, dynamic> jsonCompany = newCompany.toMap();
 
     debugPrint("ToRegister $jsonCompany");
+
    final registered = await companyDao.insertCompany(newCompany);
 
 

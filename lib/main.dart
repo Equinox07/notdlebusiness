@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:notdle/db/app_database.dart';
 import 'package:notdle/pages/index_page.dart';
 import 'package:notdle/providers/app_provider.dart';
@@ -12,8 +13,8 @@ import 'package:notdle/providers/order_provider.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
+  WidgetsBinding widgetsBinding =  WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   final db = await $FloorAppDatabase.databaseBuilder('app_database').build();
 
   final appProvider = AppProvider();
@@ -40,4 +41,7 @@ void main() async {
       child: const IndexPage(),
     ),
   );
+
+  FlutterNativeSplash.remove();
 }
+

@@ -4,7 +4,8 @@ import 'dart:async';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
-  static const String _baseUrl = 'http://localhost:8080/api';
+  // static const String _baseUrl = 'http://localhost:8080/api';
+  static const String _baseUrl = 'https://unreprovable-jacquelynn-unconceived.ngrok-free.dev/api';
   final _storage = const FlutterSecureStorage();
   static final ApiService _instance = ApiService._internal();
   
@@ -38,6 +39,34 @@ class ApiService {
       Uri.parse('$_baseUrl/auth/login'),
       headers: await _getHeaders(),
       body: json.encode({
+        'email': email,
+        'password': password,
+      }),
+    );
+
+    final data = _handleResponse(response);
+    if (data != null && data['token'] != null) {
+      await _storage.write(key: 'auth_token', value: data['token']);
+    }
+    return data;
+  }
+
+  // User Registration
+  Future<Map<String, dynamic>> signup({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String password,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/auth/signup'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: json.encode({
+        'firstName': firstName,
+        'lastName': lastName,
         'email': email,
         'password': password,
       }),

@@ -7,6 +7,8 @@ class User {
   final String? companyId;
   final String? avatarUrl;
   final String role;
+  final bool hasCompany;
+  final String authProvider;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -19,6 +21,8 @@ class User {
     this.companyId,
     this.avatarUrl,
     this.role = 'ROLE_USER',
+    this.hasCompany = false,
+    this.authProvider = 'local',
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : createdAt = createdAt ?? DateTime.now(),
@@ -34,6 +38,8 @@ class User {
       companyId: json['companyId'] as String?,
       avatarUrl: json['avatarUrl'] as String?,
       role: json['role'] as String? ?? 'ROLE_USER',
+      hasCompany: json['hasCompany'] as bool? ?? false,
+      authProvider: json['authProvider'] as String? ?? 'local',
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,
@@ -53,6 +59,8 @@ class User {
       if (companyId != null) 'companyId': companyId,
       if (avatarUrl != null) 'avatarUrl': avatarUrl,
       'role': role,
+      'hasCompany': hasCompany,
+      'authProvider': authProvider,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -68,6 +76,8 @@ class User {
     String? companyId,
     String? avatarUrl,
     String? role,
+    bool? hasCompany,
+    String? authProvider,
   }) {
     return User(
       id: id ?? this.id,
@@ -78,6 +88,8 @@ class User {
       companyId: companyId ?? this.companyId,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       role: role ?? this.role,
+      hasCompany: hasCompany ?? this.hasCompany,
+      authProvider: authProvider ?? this.authProvider,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );

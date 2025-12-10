@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:notdle/models/user_model.dart';
 
 class ApiService {
   // static const String _baseUrl = 'http://localhost:8080/api';
@@ -21,6 +22,50 @@ class ApiService {
       'Accept': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
     };
+  }
+
+  // Get current authenticated user
+  Future<User> getCurrentUser() async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.get(
+        Uri.parse('$_baseUrl/users/me'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final userData = json.decode(response.body);
+        final user = User.fromJson(userData);
+        
+        // Store user data in secure storage
+        await _storage.write(key: 'user_data', value: json.encode(user.toJson()));
+        
+        return user;
+      } else {
+        throw Exception('Failed to fetch user data: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching user data: $e');
+    }
+  }
+
+  // Get stored user data
+  Future<User?> getStoredUser() async {
+    try {
+      final userData = await _storage.read(key: 'user_data');
+      if (userData != null) {
+        return User.fromJson(json.decode(userData));
+      }
+      return null;
+    } catch (e) {
+      await _storage.delete(key: 'user_data');
+      return null;
+    }
+  }
+
+  // Clear stored user data
+  Future<void> clearUserData() async {
+    await _storage.delete(key: 'user_data');
   }
 
   // Handle API response

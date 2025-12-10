@@ -90,6 +90,7 @@ flutter:
     - assets/images/bgplain.png
     - assets/images/us_flag.png
     - assets/images/app_icon.png
+    - assets/splash_screen.png
     - assets/db/app_database.db
   #   - images/a_dot_ham.jpeg
 

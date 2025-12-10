@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/navigation/app_navigation.dart';
+import 'package:notdle/pages/signup_page.dart';
 import 'package:notdle/screens/signup_screen.dart';
 import 'package:notdle/services/api_service.dart';
 import 'package:notdle/services/session_manager.dart';
@@ -19,11 +20,8 @@ class LoginPageScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginPageScreen> {
   final _formKey = GlobalKey<FormState>();
   final _apiService = ApiService();
-
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
-
 
   @override
   void dispose() {
@@ -32,8 +30,7 @@ class _LoginScreenState extends State<LoginPageScreen> {
     super.dispose();
   }
 
-
-
+  // Make text white for better visibility on dark background
   Widget _buildInputField({
     required String label,
     required TextEditingController controller,
@@ -47,12 +44,13 @@ class _LoginScreenState extends State<LoginPageScreen> {
       style: GoogleFonts.poppins(
         fontSize: 16,
         fontWeight: FontWeight.w500,
+        color: Colors.white,
       ),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: GoogleFonts.poppins(color: Colors.grey.shade600),
+        labelStyle: GoogleFonts.poppins(color: Colors.white),
         filled: true,
-        fillColor: Colors.grey.shade200,
+        fillColor: Colors.white.withOpacity(0.2),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -77,7 +75,6 @@ class _LoginScreenState extends State<LoginPageScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     Future<void> login() async {
       if (_formKey.currentState!.validate()) {
         try {
@@ -89,7 +86,6 @@ class _LoginScreenState extends State<LoginPageScreen> {
           if (!mounted) return;
 
           if (data != null && data['token'] != null) {
-            // On successful login, you might want to save user data or navigate
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Login successful!')),
             );
@@ -118,114 +114,175 @@ class _LoginScreenState extends State<LoginPageScreen> {
     final maxFormWidth = isTablet ? 500.0 : double.infinity;
     final horizontalPadding = isTablet ? 32.0 : 24.0;
 
+    // Logo and App Name widget
+    final logoWidget = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Image.asset(
+          'assets/images/logo.png',
+          width: isTablet ? 40 : 32,
+        ),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Notdle',
+              style: GoogleFonts.poppins(
+                fontSize: isTablet ? 24 : 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'Precision in every stitch',
+              style: GoogleFonts.poppins(
+                fontSize: isTablet ? 12 : 10,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
           automaticallyImplyLeading: false,
           backgroundColor: Colors.white,
           elevation: 0,
-          // title: Text(
-          //   "Login",
-          //   style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-          // ),
+          title: logoWidget,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  'assets/images/us_flag.png',
+                  width: isTablet ? 36 : 30,
+                ),
+              ),
+            ),
+          ],
         ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Image.asset(
-                  'assets/images/app_icon.png',
-                  width:
-                  isTablet
-                      ? screenWidth * 0.08
-                      : screenWidth * 0.12,
+        body: Stack(
+          children: [
+            // Background Image
+            Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/splash_screen.png'),
+                  fit: BoxFit.cover,
                 ),
-                Text(
-                  "Welcome back!",
-                  style: GoogleFonts.poppins(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.indigo.shade800,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "Login to your account to continue.",
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-                const SizedBox(height: 32),
-                _buildInputField(
-                  label: "Email",
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: 16),
-                _buildInputField(
-                  label: "Password",
-                  controller: _passwordController,
-                  isPassword: true,
-                ),
-                const SizedBox(height: 32),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: login,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.indigo.shade600,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      "Login",
+              ),
+            ),
+            // Semi-transparent overlay
+            Container(
+              color: Colors.black.withOpacity(0.5),
+            ),
+            // Content
+            Center(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxFormWidth),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                    const SizedBox(height: 20),
+                    Text(
+                      "Welcome back!",
                       style: GoogleFonts.poppins(
-                        fontSize: 18,
+                        fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                // New: Register link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+                    const SizedBox(height: 8),
                     Text(
-                      "Don't have an account?",
-                      style: GoogleFonts.poppins(color: Colors.grey.shade600),
+                      "Login to your account to continue.",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder:
-                                (context) => const SignupScreenPage(),
+                    const SizedBox(height: 32),
+                    _buildInputField(
+                      label: "Email",
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildInputField(
+                      label: "Password",
+                      controller: _passwordController,
+                      isPassword: true,
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: login,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.indigo.shade600,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        );
-                      },
-                      child: Text(
-                        "Register",
-                        style: GoogleFonts.poppins(
-                          color: Colors.indigo.shade600,
-                          fontWeight: FontWeight.bold,
+                        ),
+                        child: Text(
+                          "Login",
+                          style: GoogleFonts.poppins(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white
+                          ),
                         ),
                       ),
                     ),
-                  ],
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Don't have an account? ",
+                          style: GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const SignupScreenPage(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            "Register",
+                            style: GoogleFonts.poppins(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                        const SizedBox(height: 40),
+                      ],
+                    ),
+                  ),
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

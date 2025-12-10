@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:notdle/db/app_database.dart';
 import 'package:notdle/pages/index_page.dart';
+import 'package:notdle/providers/api_provider.dart';
 import 'package:notdle/providers/app_provider.dart';
 import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/providers/customer_provider.dart';
@@ -24,6 +25,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AppProvider()..init()),
+        ChangeNotifierProvider(create: (_) => ApiProvider()),
         ChangeNotifierProvider(
           create:
               (_) => MeasurementProvider(

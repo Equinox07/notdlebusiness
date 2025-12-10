@@ -68,6 +68,25 @@ class ApiService {
     await _storage.delete(key: 'user_data');
   }
 
+  // Get company by ID
+  Future<Map<String, dynamic>> getCompanyById(String companyId) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.get(
+        Uri.parse('$_baseUrl/companies/$companyId'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Failed to fetch company: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching company: $e');
+    }
+  }
+
   // Handle API response
   dynamic _handleResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {

@@ -1,6 +1,7 @@
 // lib/screens/signup_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:notdle/pages/dashboards/dashboard_screen.dart';
 import 'package:provider/provider.dart';
 import '../providers/api_provider.dart';
 import 'company_registration_screen.dart';
@@ -72,39 +73,63 @@ class _SignupScreenState extends State<SignupScreenPage> {
   }
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
 
-    if (_passwordController.text != _confirmPasswordController.text) {
-      setState(() => _errorMessage = 'Passwords do not match');
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final apiProvider = Provider.of<ApiProvider>(context, listen: false);
-      await apiProvider.apiService.signup(
-        firstName: _firstNameController.text.trim(),
-        lastName: _lastNameController.text.trim(),
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
-
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const CompanyRegistrationScreen(),
-          ),
+      try {
+        final apiProvider = Provider.of<ApiProvider>(context, listen: false);
+        await apiProvider.apiService.signup(
+          firstName: _firstNameController.text.trim(),
+          lastName: _lastNameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
         );
+
+        // Fetch the current user after successful signup
+        final user = await apiProvider.apiService.getCurrentUser();
+        
+        if (!mounted) return;
+        
+        // Check if user has a company
+        if (user.hasCompany) {
+          // If user has a company, fetch company data and navigate to dashboard
+          try {
+            final company = await apiProvider.apiService.getCompanyById(user.companyId!);
+            if (!mounted) return;
+            Navigator.pushReplacementNamed(
+              context, 
+              DashboardScreen.tag,
+              arguments: company,
+            );
+          } catch (e) {
+            setState(() {
+              _errorMessage = 'Failed to fetch company data: ${e.toString()}';
+            });
+            return;
+          }
+        } else {
+          // If no company, navigate to company registration
+          if (!mounted) return;
+          Navigator.pushReplacementNamed(
+            context, 
+            CompanyRegistrationScreen.tag,
+            arguments: user,
+          );
+        }
+      } catch (e) {
+        setState(() {
+          _errorMessage = 'Failed to create account: ${e.toString()}';
+        });
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
-    } catch (e) {
-      setState(() => _errorMessage = 'Failed to create account: $e');
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 

@@ -104,7 +104,7 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `company` (`id` TEXT NOT NULL, `fullName` TEXT NOT NULL, `email` TEXT NOT NULL, `mobile` TEXT NOT NULL, `businessName` TEXT NOT NULL, `yearsOfExperience` INTEGER NOT NULL, `registrationNumber` TEXT NOT NULL, `address` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `imagePath` TEXT, `imageUrl` TEXT, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `company` (`id` TEXT NOT NULL, `businessName` TEXT NOT NULL, `ownerName` TEXT NOT NULL, `email` TEXT NOT NULL, `mobile` TEXT NOT NULL, `yearsOfExperience` INTEGER NOT NULL, `registrationNumber` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `address` TEXT NOT NULL, `logoUrl` TEXT, `imagePath` TEXT, `active` INTEGER NOT NULL, PRIMARY KEY (`id`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `customers` (`id` TEXT, `name` TEXT NOT NULL, `phone` TEXT NOT NULL, `email` TEXT, `lastVisit` INTEGER NOT NULL, `gender` TEXT NOT NULL, `address` TEXT, `imagePath` TEXT, `imageUrl` TEXT, `createdDate` INTEGER NOT NULL, PRIMARY KEY (`id`))');
         await database.execute(
@@ -157,16 +157,17 @@ class _$CompanyDao extends CompanyDao {
             'company',
             (Company item) => <String, Object?>{
                   'id': item.id,
-                  'fullName': item.fullName,
+                  'businessName': item.businessName,
+                  'ownerName': item.ownerName,
                   'email': item.email,
                   'mobile': item.mobile,
-                  'businessName': item.businessName,
                   'yearsOfExperience': item.yearsOfExperience,
                   'registrationNumber': item.registrationNumber,
-                  'address': item.address,
                   'countryCode': item.countryCode,
+                  'address': item.address,
+                  'logoUrl': item.logoUrl,
                   'imagePath': item.imagePath,
-                  'imageUrl': item.imageUrl
+                  'active': item.active ? 1 : 0
                 }),
         _companyUpdateAdapter = UpdateAdapter(
             database,
@@ -174,16 +175,17 @@ class _$CompanyDao extends CompanyDao {
             ['id'],
             (Company item) => <String, Object?>{
                   'id': item.id,
-                  'fullName': item.fullName,
+                  'businessName': item.businessName,
+                  'ownerName': item.ownerName,
                   'email': item.email,
                   'mobile': item.mobile,
-                  'businessName': item.businessName,
                   'yearsOfExperience': item.yearsOfExperience,
                   'registrationNumber': item.registrationNumber,
-                  'address': item.address,
                   'countryCode': item.countryCode,
+                  'address': item.address,
+                  'logoUrl': item.logoUrl,
                   'imagePath': item.imagePath,
-                  'imageUrl': item.imageUrl
+                  'active': item.active ? 1 : 0
                 });
 
   final sqflite.DatabaseExecutor database;
@@ -200,51 +202,54 @@ class _$CompanyDao extends CompanyDao {
   Future<Company?> getCompany() async {
     return _queryAdapter.query('SELECT * FROM Company LIMIT 1',
         mapper: (Map<String, Object?> row) => Company(
-            id: row['id'] as String?,
-            fullName: row['fullName'] as String,
+            id: row['id'] as String,
+            businessName: row['businessName'] as String,
+            ownerName: row['ownerName'] as String,
             email: row['email'] as String,
             mobile: row['mobile'] as String,
-            businessName: row['businessName'] as String,
             yearsOfExperience: row['yearsOfExperience'] as int,
             registrationNumber: row['registrationNumber'] as String,
-            address: row['address'] as String,
             countryCode: row['countryCode'] as String,
+            address: row['address'] as String,
+            logoUrl: row['logoUrl'] as String?,
             imagePath: row['imagePath'] as String?,
-            imageUrl: row['imageUrl'] as String?));
+            active: (row['active'] as int) != 0));
   }
 
   @override
   Future<List<Company>> findAllCompanies() async {
     return _queryAdapter.queryList('SELECT * FROM Company',
         mapper: (Map<String, Object?> row) => Company(
-            id: row['id'] as String?,
-            fullName: row['fullName'] as String,
+            id: row['id'] as String,
+            businessName: row['businessName'] as String,
+            ownerName: row['ownerName'] as String,
             email: row['email'] as String,
             mobile: row['mobile'] as String,
-            businessName: row['businessName'] as String,
             yearsOfExperience: row['yearsOfExperience'] as int,
             registrationNumber: row['registrationNumber'] as String,
-            address: row['address'] as String,
             countryCode: row['countryCode'] as String,
+            address: row['address'] as String,
+            logoUrl: row['logoUrl'] as String?,
             imagePath: row['imagePath'] as String?,
-            imageUrl: row['imageUrl'] as String?));
+            active: (row['active'] as int) != 0));
   }
 
   @override
   Future<Company?> findCompanyById(String id) async {
     return _queryAdapter.query('SELECT * FROM Company WHERE id=?1',
         mapper: (Map<String, Object?> row) => Company(
-            id: row['id'] as String?,
-            fullName: row['fullName'] as String,
+            id: row['id'] as String,
+            businessName: row['businessName'] as String,
+            ownerName: row['ownerName'] as String,
             email: row['email'] as String,
             mobile: row['mobile'] as String,
-            businessName: row['businessName'] as String,
             yearsOfExperience: row['yearsOfExperience'] as int,
             registrationNumber: row['registrationNumber'] as String,
-            address: row['address'] as String,
             countryCode: row['countryCode'] as String,
+            address: row['address'] as String,
+            logoUrl: row['logoUrl'] as String?,
             imagePath: row['imagePath'] as String?,
-            imageUrl: row['imageUrl'] as String?),
+            active: (row['active'] as int) != 0),
         arguments: [id]);
   }
 
@@ -252,17 +257,18 @@ class _$CompanyDao extends CompanyDao {
   Future<Company?> getCompanyByEmail(String email) async {
     return _queryAdapter.query('SELECT * FROM company WHERE email = ?1 LIMIT 1',
         mapper: (Map<String, Object?> row) => Company(
-            id: row['id'] as String?,
-            fullName: row['fullName'] as String,
+            id: row['id'] as String,
+            businessName: row['businessName'] as String,
+            ownerName: row['ownerName'] as String,
             email: row['email'] as String,
             mobile: row['mobile'] as String,
-            businessName: row['businessName'] as String,
             yearsOfExperience: row['yearsOfExperience'] as int,
             registrationNumber: row['registrationNumber'] as String,
-            address: row['address'] as String,
             countryCode: row['countryCode'] as String,
+            address: row['address'] as String,
+            logoUrl: row['logoUrl'] as String?,
             imagePath: row['imagePath'] as String?,
-            imageUrl: row['imageUrl'] as String?),
+            active: (row['active'] as int) != 0),
         arguments: [email]);
   }
 
@@ -271,17 +277,18 @@ class _$CompanyDao extends CompanyDao {
     return _queryAdapter.query(
         'SELECT * FROM company WHERE mobile = ?1 LIMIT 1',
         mapper: (Map<String, Object?> row) => Company(
-            id: row['id'] as String?,
-            fullName: row['fullName'] as String,
+            id: row['id'] as String,
+            businessName: row['businessName'] as String,
+            ownerName: row['ownerName'] as String,
             email: row['email'] as String,
             mobile: row['mobile'] as String,
-            businessName: row['businessName'] as String,
             yearsOfExperience: row['yearsOfExperience'] as int,
             registrationNumber: row['registrationNumber'] as String,
-            address: row['address'] as String,
             countryCode: row['countryCode'] as String,
+            address: row['address'] as String,
+            logoUrl: row['logoUrl'] as String?,
             imagePath: row['imagePath'] as String?,
-            imageUrl: row['imageUrl'] as String?),
+            active: (row['active'] as int) != 0),
         arguments: [mobile]);
   }
 
@@ -293,17 +300,18 @@ class _$CompanyDao extends CompanyDao {
     return _queryAdapter.query(
         'SELECT * FROM company WHERE mobile = ?1 AND email= ?2 LIMIT 1',
         mapper: (Map<String, Object?> row) => Company(
-            id: row['id'] as String?,
-            fullName: row['fullName'] as String,
+            id: row['id'] as String,
+            businessName: row['businessName'] as String,
+            ownerName: row['ownerName'] as String,
             email: row['email'] as String,
             mobile: row['mobile'] as String,
-            businessName: row['businessName'] as String,
             yearsOfExperience: row['yearsOfExperience'] as int,
             registrationNumber: row['registrationNumber'] as String,
-            address: row['address'] as String,
             countryCode: row['countryCode'] as String,
+            address: row['address'] as String,
+            logoUrl: row['logoUrl'] as String?,
             imagePath: row['imagePath'] as String?,
-            imageUrl: row['imageUrl'] as String?),
+            active: (row['active'] as int) != 0),
         arguments: [mobile, password]);
   }
 

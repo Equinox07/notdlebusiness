@@ -1,9 +1,6 @@
 // lib/models/company.dart
 
 import 'package:floor/floor.dart';
-import 'package:uuid/uuid.dart';
-
-const uuid = Uuid();
 
 @Entity(
   tableName: 'company'
@@ -11,45 +8,48 @@ const uuid = Uuid();
 class Company {
   @PrimaryKey()
   final String id;
-  final String fullName;
+  final String businessName;
+  final String ownerName;
   final String email;
   final String mobile;
-  final String businessName;
   final int yearsOfExperience;
   final String registrationNumber;
+  final String countryCode;
   final String address;
-  final String countryCode; // New field for the country code
-  final String? imagePath; // New: Local path to the company's logo
-  final String? imageUrl;  // New: Remote URL for the company's logo
+  final String? logoUrl;
+  final String? imagePath;
+  final bool active;
 
   Company({
-    String? id,
-    required this.fullName,
+    required this.id,
+    required this.businessName,
+    required this.ownerName,
     required this.email,
     required this.mobile,
-    required this.businessName,
     required this.yearsOfExperience,
     required this.registrationNumber,
+    required this.countryCode,
     required this.address,
-    required this.countryCode, // Add to the constructor
+    this.logoUrl,
     this.imagePath,
-    this.imageUrl,
-  }) : id = id ?? uuid.v4();
+    this.active = true,
+  });
 
   // Factory constructor to create a Company from a Map
   factory Company.fromMap(Map<String, dynamic> map) {
     return Company(
       id: map['id'] as String,
-      fullName: map['fullName'] as String,
+      businessName: map['businessName'] as String,
+      ownerName: map['ownerName'] as String,
       email: map['email'] as String,
       mobile: map['mobile'] as String,
-      businessName: map['businessName'] as String,
-      yearsOfExperience: map['yearsOfExperience'] as int,
+      yearsOfExperience: (map['yearsOfExperience'] as num).toInt(),
       registrationNumber: map['registrationNumber'] as String,
+      countryCode: map['countryCode'] as String,
       address: map['address'] as String,
-      countryCode: map['countryCode'] as String, // Add to fromMap
+      logoUrl: map['logoUrl'] as String?,
       imagePath: map['imagePath'] as String?,
-      imageUrl: map['imageUrl'] as String?,
+      active: map['active'] as bool? ?? true,
     );
   }
 
@@ -57,45 +57,47 @@ class Company {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'fullName': fullName,
+      'businessName': businessName,
+      'ownerName': ownerName,
       'email': email,
       'mobile': mobile,
-      'businessName': businessName,
       'yearsOfExperience': yearsOfExperience,
       'registrationNumber': registrationNumber,
+      'countryCode': countryCode,
       'address': address,
-      'countryCode': countryCode, // Add to toMap
+      'logoUrl': logoUrl,
       'imagePath': imagePath,
-      'imageUrl': imageUrl,
+      'active': active,
     };
   }
 
-
   Company copyWith({
     String? id,
-    String? fullName,
+    String? businessName,
+    String? ownerName,
     String? email,
     String? mobile,
-    String? businessName,
     int? yearsOfExperience,
     String? registrationNumber,
-    String? address,
     String? countryCode,
+    String? address,
+    String? logoUrl,
     String? imagePath,
-    String? imageUrl,
+    bool? active,
   }) {
     return Company(
       id: id ?? this.id,
-      fullName: fullName ?? this.fullName,
+      businessName: businessName ?? this.businessName,
+      ownerName: ownerName ?? this.ownerName,
       email: email ?? this.email,
       mobile: mobile ?? this.mobile,
-      businessName: businessName ?? this.businessName,
       yearsOfExperience: yearsOfExperience ?? this.yearsOfExperience,
       registrationNumber: registrationNumber ?? this.registrationNumber,
-      address: address ?? this.address,
       countryCode: countryCode ?? this.countryCode,
+      address: address ?? this.address,
+      logoUrl: logoUrl ?? this.logoUrl,
       imagePath: imagePath ?? this.imagePath,
-      imageUrl: imageUrl ?? this.imageUrl,
+      active: active ?? this.active,
     );
   }
 }

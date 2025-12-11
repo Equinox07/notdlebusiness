@@ -99,6 +99,8 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
       
       // Map response to Company object
       final registeredCompany = Company.fromMap(response);
+
+      debugPrint('Registered Company: $registeredCompany');
       
       // Save company to session
       await SessionManager.saveCompany(registeredCompany);

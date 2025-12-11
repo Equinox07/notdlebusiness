@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -9,6 +10,7 @@ class ApiService {
   static const String _baseUrl = 'https://unreprovable-jacquelynn-unconceived.ngrok-free.dev/api';
   final _storage = const FlutterSecureStorage();
   static final ApiService _instance = ApiService._internal();
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   
   factory ApiService() => _instance;
   
@@ -102,19 +104,41 @@ class ApiService {
     try {
       final headers = await _getHeaders();
       final response = await http.post(
-        Uri.parse('$_baseUrl/companies/register'),
+        Uri.parse('$_baseUrl/companies'),
         headers: headers,
         body: json.encode(companyData),
       );
 
       if (response.statusCode == 201) {
         return json.decode(response.body);
+      } else if (response.statusCode == 401) {
+        // Clear all user data and tokens
+        await _storage.deleteAll();  // Clear all stored data
+        await clearUserData();      // Clear any additional user data
+        
+        // Navigate to login screen if we have a valid context
+        if (navigatorKey.currentContext != null) {
+          if (navigatorKey.currentState != null) {
+            navigatorKey.currentState!.pushNamedAndRemoveUntil(
+              '/login',
+              (route) => false,
+            );
+          } else {
+            Navigator.of(navigatorKey.currentContext!).pushNamedAndRemoveUntil(
+              '/login',
+              (route) => false,
+            );
+          }
+        }
+        throw Exception('Session expired. Please login again.');
       } else {
         final error = json.decode(response.body);
+        debugPrint('Registration Error: $error');
         throw Exception(error['message'] ?? 'Failed to register company');
       }
     } catch (e) {
-      throw Exception('Error registering company: $e');
+      debugPrint('Registration Error: $e');
+      rethrow;
     }
   }
 

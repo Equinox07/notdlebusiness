@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/pages/signup_page.dart';
+import 'package:notdle/screens/company_registration_screen.dart';
 import 'package:notdle/screens/signup_screen.dart';
 import 'package:notdle/services/api_service.dart';
 import 'package:notdle/services/session_manager.dart';
@@ -76,32 +77,63 @@ class _LoginScreenState extends State<LoginPageScreen> {
   @override
   Widget build(BuildContext context) {
     Future<void> login() async {
-      if (_formKey.currentState!.validate()) {
-        try {
-          final data = await _apiService.login(
-            _emailController.text,
-            _passwordController.text,
+      if (!_formKey.currentState!.validate()) return;
+
+      try {
+        // Show loading indicator
+        if (mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            },
           );
+        }
 
-          if (!mounted) return;
+        // Perform login
+        final data = await _apiService.login(
+          _emailController.text,
+          _passwordController.text,
+        );
+        
+        // Get fresh user data from the server
+        await _apiService.getCurrentUser();
 
-          if (data != null && data['token'] != null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Login successful!')),
-            );
-            AppNavigator.toHome();
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Invalid email or password.'),
-                backgroundColor: Colors.red,
-              ),
-            );
+        // Get stored user data
+        final user = await _apiService.getStoredUser();
+        
+        if (user == null) {
+          throw Exception('Failed to load user data');
+        }
+        
+        // Close loading dialog
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+
+        // Check if user has a company
+        if (user.hasCompany) {
+          // Navigate to dashboard
+          if (mounted) {
+            Navigator.of(context).pushReplacementNamed('dashboard');
           }
-        } catch (e) {
+        } else {
+          // Navigate to company registration
+          if (mounted) {
+            Navigator.of(context).pushReplacementNamed(CompanyRegistrationScreen.tag);
+          }
+        }
+      } catch (e) {
+        // Close loading dialog if still open
+        if (mounted) {
+          Navigator.of(context).pop();
+          // Show error message
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to login: $e'),
+              content: Text('Login failed: ${e.toString()}'),
               backgroundColor: Colors.red,
             ),
           );

@@ -166,7 +166,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              company.fullName,
+              company.businessName,
               style: GoogleFonts.poppins(
                 fontSize: 16,
                 color: Colors.grey.shade600,

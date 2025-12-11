@@ -117,7 +117,7 @@ class _DashboardScreenState extends State<DashboardAppScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Good morning, ${company.fullName} 👋',
+                                      'Good morning, ${company.ownerName} 👋',
                                       style: GoogleFonts.poppins(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,

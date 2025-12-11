@@ -48,7 +48,7 @@ class AppProvider extends ChangeNotifier {
     if (existingCompany == null) {
       final company = Company(
         id: const Uuid().v4(),
-        fullName: 'Jane Doe',
+        ownerName: 'Jane Doe',
         email: 'jane@biz.com',
         mobile: '+123456789',
         businessName: 'Jane\'s Co.',
@@ -57,7 +57,7 @@ class AppProvider extends ChangeNotifier {
         address: '123 Main Street',
         countryCode: 'US',
         imagePath: null,
-        imageUrl: null,
+        logoUrl: null,
       );
       await companyDao.insertCompany(company);
     }

@@ -97,6 +97,27 @@ class ApiService {
     }
   }
 
+  // Register a new company
+  Future<Map<String, dynamic>> registerCompany(Map<String, dynamic> companyData) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.post(
+        Uri.parse('$_baseUrl/companies/register'),
+        headers: headers,
+        body: json.encode(companyData),
+      );
+
+      if (response.statusCode == 201) {
+        return json.decode(response.body);
+      } else {
+        final error = json.decode(response.body);
+        throw Exception(error['message'] ?? 'Failed to register company');
+      }
+    } catch (e) {
+      throw Exception('Error registering company: $e');
+    }
+  }
+
   // Authentication
   Future<Map<String, dynamic>> login(String email, String password) async {
     final response = await http.post(

@@ -1,15 +1,14 @@
 // lib/screens/company_registration_screen.dart
 
-import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:notdle/models/company.dart';
-import 'package:notdle/navigation/app_navigation.dart';
-import 'package:notdle/providers/company_provider.dart';
-import 'package:notdle/screens/login_page_screen.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:notdle/models/company.dart'; 
+import 'package:notdle/pages/dashboards/dashboard_screen.dart';
+import 'package:notdle/providers/api_provider.dart';
 import 'package:notdle/services/session_manager.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
+import 'package:country_code_picker/country_code_picker.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CompanyRegistrationScreen extends StatefulWidget {
   const CompanyRegistrationScreen({super.key});
@@ -22,15 +21,15 @@ class CompanyRegistrationScreen extends StatefulWidget {
 }
 
 class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
+  static const _loadingWidget = Center(child: CircularProgressIndicator());
+  
   final _formKey = GlobalKey<FormState>();
-
   final _emailController = TextEditingController();
+  final _addressController = TextEditingController();
   final _mobileController = TextEditingController();
   final _businessNameController = TextEditingController();
   final _yearsOfExperienceController = TextEditingController();
   final _registrationNumberController = TextEditingController();
-  final _addressController = TextEditingController();
-  final _countryCodeController = TextEditingController();
   String? _selectedCountryCode;
 
   @override
@@ -41,99 +40,87 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
     _yearsOfExperienceController.dispose();
     _registrationNumberController.dispose();
     _addressController.dispose();
-    _countryCodeController.dispose();
     super.dispose();
   }
 
   Future<void> _registerCompany() async {
-    if (_formKey.currentState!.validate()) {
-      // ➡️ Perform the pre-check
-      // final bool exists = await _dbHelper.companyExists(
-      //   _emailController.text,
-      //   _mobileController.text,
-      // );
-      //
-      // if (exists) {
-      //   // ➡️ Show alert dialog if company already exists
-      //   _showLoginDialog();
-      //   return;
-      // }
-
-      final newCompany = Company(
-        id: Uuid().v4(),
-        fullName: '', // Full name is no longer collected
-        email: _emailController.text,
-        mobile: _mobileController.text,
-        businessName: _businessNameController.text,
-        yearsOfExperience: int.parse(_yearsOfExperienceController.text),
-        registrationNumber: _registrationNumberController.text,
-        address: _addressController.text,
-        countryCode: _selectedCountryCode!,
-      );
-
-      // ➡️ Await the returned company object after insertion
-      // final registeredCompany = await _dbHelper.registerCompany(newCompany);
-
-      final registeredCompany = await Provider.of<CompanyProvider>(context, listen: false)
-          .registerCompany(newCompany);
-
-
-      debugPrint("Saved company $registeredCompany");
-
-      //Persist data to shared preferences
-      await SessionManager.saveCompany(registeredCompany!);
-
-      if(mounted){
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Registration successful!')));
-      }
-
-      // Navigator.of(context).pushReplacement(
-      //   MaterialPageRoute(builder: (context) => const DashboardAppScreen()),
-      // );
-
-      AppNavigator.toHome2();
+    if (!_formKey.currentState!.validate()) return;
+    if (!mounted) return;
+    
+    try {
+      _showLoadingOverlay();
+      await _registerCompanyProcess();
+    } catch (e) {
+      _handleError(e);
+    } finally {
+      _hideLoadingOverlay();
     }
   }
-
-  // ➡️ New method to show the alert dialog
-  void _showLoginDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Account Already Exists'),
-          content: const Text(
-            'The provided email or mobile number is already registered. Please log in.',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) => const LoginPageScreen(),
-                  ),
-                );
-              },
-              child: const Text('Go to Login'),
-            ),
-          ],
-        );
-      },
+  
+  void _showLoadingOverlay() {
+    if (!mounted) return;
+    context.loaderOverlay.show();
+  }
+  
+  void _hideLoadingOverlay() {
+    if (!mounted) return;
+    context.loaderOverlay.hide();
+  }
+  
+  void _handleError(dynamic error) {
+    if (!mounted) return;
+    
+    final errorMessage = 'Error: ${error.toString()}';
+    debugPrint('Registration Error: $errorMessage');
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(errorMessage)),
     );
   }
 
-  // lib/screens/company_registration_screen.dart
+  Future<void> _registerCompanyProcess() async {
+    final apiProvider = Provider.of<ApiProvider>(context, listen: false);
+    
+    // Create company data map for API
+    final companyData = {
+      'businessName': _businessNameController.text.trim(),
+      'email': _emailController.text.trim(),
+      'mobile': _mobileController.text.trim(),
+      'yearsOfExperience':
+          int.tryParse(_yearsOfExperienceController.text.trim()) ?? 0,
+      'registrationNumber': _registrationNumberController.text.trim(),
+      'address': _addressController.text.trim(),
+      'countryCode': _selectedCountryCode,
+    };
 
-  // ... (other code)
+    try {
+      // Register company via API
+      final response = await apiProvider.apiService.registerCompany(companyData);
+      
+      // Map response to Company object
+      final registeredCompany = Company.fromMap(response);
+      
+      // Save company to session
+      await SessionManager.saveCompany(registeredCompany);
+      
+      // Refresh current user data to update hasCompany status
+      await apiProvider.apiService.getCurrentUser();
+      
+      if (!mounted) return;
+      
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Company registered successfully!')),
+      );
+      
+      // Navigate to dashboard
+      Navigator.of(context).pushReplacementNamed(DashboardScreen.tag);
+      
+    } catch (e) {
+      debugPrint('Error registering company: $e');
+      rethrow; // This will be caught in the calling method
+    }
+  }
 
   Widget _buildInputField({
     required String label,
@@ -177,48 +164,12 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
     );
   }
 
-  // Widget _buildInputField({
-  //   required String label,
-  //   required TextEditingController controller,
-  //   TextInputType keyboardType = TextInputType.text,
-  //   bool isRequired = true,
-  //   int maxLines = 1,
-  // }) {
-  //   return TextFormField(
-  //     controller: controller,
-  //     keyboardType: keyboardType,
-  //     maxLines: maxLines,
-  //     decoration: InputDecoration(
-  //       labelText: label,
-  //       labelStyle: GoogleFonts.poppins(color: Colors.grey.shade600),
-  //       filled: true,
-  //       fillColor: Colors.grey.shade200,
-  //       border: OutlineInputBorder(
-  //         borderRadius: BorderRadius.circular(12),
-  //         borderSide: BorderSide.none,
-  //       ),
-  //       enabledBorder: OutlineInputBorder(
-  //         borderRadius: BorderRadius.circular(12),
-  //         borderSide: BorderSide.none,
-  //       ),
-  //       focusedBorder: OutlineInputBorder(
-  //         borderRadius: BorderRadius.circular(12),
-  //         borderSide: BorderSide(color: Colors.indigo.shade600, width: 2),
-  //       ),
-  //     ),
-  //     validator: (value) {
-  //       if (isRequired && (value == null || value.isEmpty)) {
-  //         return 'This field is required.';
-  //       }
-  //       return null;
-  //     },
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
+    return LoaderOverlay(
+      useDefaultLoading: true,
+      child: Scaffold(
+        backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false, // This removes the back button
         title: Text(
@@ -231,7 +182,7 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
         backgroundColor: Colors.indigo,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
+        body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Form(
           key: _formKey,
@@ -259,15 +210,19 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
                 label: "Email",
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter an email address.';
+                  }
+                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                    return 'Please enter a valid email address.';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
-              // _buildInputField(
-              //   label: "Mobile Number",
-              //   controller: _mobileController,
-              //   keyboardType: TextInputType.phone,
-              // ),
-              // Mobile number and country code in a single row
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     decoration: BoxDecoration(
@@ -277,7 +232,7 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
                     child: CountryCodePicker(
                       onChanged: (CountryCode code) {
                         setState(() {
-                          _selectedCountryCode = code.code!;
+                          _selectedCountryCode = code.dialCode;
                         });
                       },
                       initialSelection: 'US',
@@ -288,7 +243,6 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
                     ),
                   ),
                   const SizedBox(width: 16),
-
                   Expanded(
                     child: _buildInputField(
                       label: "Mobile Number",
@@ -320,6 +274,15 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
                 label: "Years of Experience",
                 controller: _yearsOfExperienceController,
                 keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'This field is required.';
+                  }
+                  if (int.tryParse(value) == null) {
+                    return 'Please enter a valid number.';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
               _buildInputField(
@@ -357,6 +320,7 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

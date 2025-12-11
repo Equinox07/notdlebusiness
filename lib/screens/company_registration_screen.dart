@@ -24,27 +24,24 @@ class CompanyRegistrationScreen extends StatefulWidget {
 class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _mobileController = TextEditingController();
   final _businessNameController = TextEditingController();
   final _yearsOfExperienceController = TextEditingController();
   final _registrationNumberController = TextEditingController();
   final _addressController = TextEditingController();
-  final _countryCodeController = TextEditingController(); // New controller
-  // State variable to hold the selected country code
+  final _countryCodeController = TextEditingController();
   String? _selectedCountryCode;
 
   @override
   void dispose() {
-    _fullNameController.dispose();
     _emailController.dispose();
     _mobileController.dispose();
     _businessNameController.dispose();
     _yearsOfExperienceController.dispose();
     _registrationNumberController.dispose();
     _addressController.dispose();
-    _countryCodeController.dispose(); // Dispose the new controller
+    _countryCodeController.dispose();
     super.dispose();
   }
 
@@ -64,7 +61,7 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
 
       final newCompany = Company(
         id: Uuid().v4(),
-        fullName: _fullNameController.text,
+        fullName: '', // Full name is no longer collected
         email: _emailController.text,
         mobile: _mobileController.text,
         businessName: _businessNameController.text,
@@ -223,12 +220,16 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
+        automaticallyImplyLeading: false, // This removes the back button
         title: Text(
-          "Company Registration",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+          'Company Registration',
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
         ),
+        backgroundColor: Colors.indigo,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
@@ -254,11 +255,6 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              _buildInputField(
-                label: "Full Name",
-                controller: _fullNameController,
-              ),
-              const SizedBox(height: 16),
               _buildInputField(
                 label: "Email",
                 controller: _emailController,

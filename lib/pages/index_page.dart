@@ -16,6 +16,7 @@ import 'package:notdle/screens/notification_screen.dart';
 import 'package:notdle/screens/orders_screen.dart';
 import 'package:notdle/pages/signup_page.dart';
 import 'package:notdle/screens/profile_screen.dart';
+import 'package:notdle/services/api_service.dart';
 import 'package:notdle/services/session_manager.dart';
 
 class IndexPage extends StatelessWidget {
@@ -56,26 +57,54 @@ class IndexPage extends StatelessWidget {
 
 
 class _StartupScreen extends StatelessWidget {
+  final ApiService _apiService = ApiService();
+
+  Future<Widget> _determineInitialRoute() async {
+    try {
+      // Check if we have a stored user
+      final user = await _apiService.getStoredUser();
+      
+      if (user == null) {
+        // No user found, go to login
+        return const LoginPageScreen();
+      }
+      
+      // User found, check if they have a company
+      if (!user.hasCompany) {
+        // No company, go to company registration
+        return CompanyRegistrationScreen();
+      }
+      
+      // User has a company, go to dashboard
+      return const DashboardScreen();
+    } catch (e) {
+      // In case of any error, default to login screen
+      debugPrint('Error determining initial route: $e');
+      return const LoginPageScreen();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: SessionManager.getCompany(),
+    return FutureBuilder<Widget>(
+      future: _determineInitialRoute(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          // Show a loading screen while checking shared preferences
+          // Show a loading screen while determining the route
           return const Scaffold(
+            backgroundColor: Colors.white,
             body: Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.indigo),
+              ),
             ),
           );
-        } else if (snapshot.hasData) {
-          // If company data exists, navigate to the main screen
-          return const DashboardScreen();
-          //DashboardAppScreen
-          //DashboardScreen
-        } else {
-          // If no company data, navigate to the login screen
+        } else if (snapshot.hasError) {
+          // If there's an error, show login screen as fallback
           return const LoginPageScreen();
+        } else {
+          // Return the determined route
+          return snapshot.data ?? const LoginPageScreen();
         }
       },
     );

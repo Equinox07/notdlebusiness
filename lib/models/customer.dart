@@ -13,7 +13,7 @@ class Customer {
   final String gender;
   final String? address;
   String? imagePath;
-  String? imageUrl;
+  String? profileImageUrl;
   final DateTime createdDate;
 
   Customer({
@@ -25,7 +25,7 @@ class Customer {
     required this.gender,
     this.address,
     this.imagePath,
-    this.imageUrl,
+    this.profileImageUrl,
     required this.createdDate,
   });
 
@@ -40,7 +40,7 @@ class Customer {
   //     'gender': gender,
   //     'address': address,
   //     'imagePath': imagePath,
-  //     'imageUrl': imageUrl,
+  //     'profileImageUrl': profileImageUrl,
   //     'createdDate': createdDate.toIso8601String(),
   //   };
   // }
@@ -56,7 +56,7 @@ class Customer {
   //     gender: map['gender'],
   //     address: map['address'],
   //     imagePath: map['imagePath'],
-  //     imageUrl: map['imageUrl'],
+  //     profileImageUrl: map['profileImageUrl'],
   //     createdDate: DateTime.parse(map['createdDate']),
   //   );
   // }

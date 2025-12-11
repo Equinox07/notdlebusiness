@@ -106,7 +106,7 @@ class _$AppDatabase extends AppDatabase {
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `company` (`id` TEXT NOT NULL, `businessName` TEXT NOT NULL, `ownerName` TEXT NOT NULL, `email` TEXT NOT NULL, `mobile` TEXT NOT NULL, `yearsOfExperience` INTEGER NOT NULL, `registrationNumber` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `address` TEXT NOT NULL, `logoUrl` TEXT, `imagePath` TEXT, `active` INTEGER NOT NULL, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `customers` (`id` TEXT, `name` TEXT NOT NULL, `phone` TEXT NOT NULL, `email` TEXT, `lastVisit` INTEGER NOT NULL, `gender` TEXT NOT NULL, `address` TEXT, `imagePath` TEXT, `imageUrl` TEXT, `createdDate` INTEGER NOT NULL, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `customers` (`id` TEXT, `name` TEXT NOT NULL, `phone` TEXT NOT NULL, `email` TEXT, `lastVisit` INTEGER NOT NULL, `gender` TEXT NOT NULL, `address` TEXT, `imagePath` TEXT, `profileImageUrl` TEXT, `createdDate` INTEGER NOT NULL, PRIMARY KEY (`id`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `orders` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `customerId` TEXT NOT NULL, `status` TEXT NOT NULL, `paymentStatus` TEXT NOT NULL, `paymentAmount` REAL, `dueDate` TEXT, `notes` TEXT, `createdDate` TEXT NOT NULL, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, PRIMARY KEY (`id`))');
         await database.execute(
@@ -344,7 +344,7 @@ class _$CustomerDao extends CustomerDao {
                   'gender': item.gender,
                   'address': item.address,
                   'imagePath': item.imagePath,
-                  'imageUrl': item.imageUrl,
+                  'profileImageUrl': item.profileImageUrl,
                   'createdDate': _dateTimeConvertor.encode(item.createdDate)
                 }),
         _customerUpdateAdapter = UpdateAdapter(
@@ -360,7 +360,7 @@ class _$CustomerDao extends CustomerDao {
                   'gender': item.gender,
                   'address': item.address,
                   'imagePath': item.imagePath,
-                  'imageUrl': item.imageUrl,
+                  'profileImageUrl': item.profileImageUrl,
                   'createdDate': _dateTimeConvertor.encode(item.createdDate)
                 }),
         _customerDeletionAdapter = DeletionAdapter(
@@ -376,7 +376,7 @@ class _$CustomerDao extends CustomerDao {
                   'gender': item.gender,
                   'address': item.address,
                   'imagePath': item.imagePath,
-                  'imageUrl': item.imageUrl,
+                  'profileImageUrl': item.profileImageUrl,
                   'createdDate': _dateTimeConvertor.encode(item.createdDate)
                 });
 
@@ -404,7 +404,7 @@ class _$CustomerDao extends CustomerDao {
             gender: row['gender'] as String,
             address: row['address'] as String?,
             imagePath: row['imagePath'] as String?,
-            imageUrl: row['imageUrl'] as String?,
+            profileImageUrl: row['profileImageUrl'] as String?,
             createdDate: _dateTimeConvertor.decode(row['createdDate'] as int)));
   }
 
@@ -420,7 +420,7 @@ class _$CustomerDao extends CustomerDao {
             gender: row['gender'] as String,
             address: row['address'] as String?,
             imagePath: row['imagePath'] as String?,
-            imageUrl: row['imageUrl'] as String?,
+            profileImageUrl: row['profileImageUrl'] as String?,
             createdDate: _dateTimeConvertor.decode(row['createdDate'] as int)),
         arguments: [id]);
   }
@@ -601,7 +601,7 @@ class _$OrderDao extends OrderDao {
             gender: row['gender'] as String,
             address: row['address'] as String?,
             imagePath: row['imagePath'] as String?,
-            imageUrl: row['imageUrl'] as String?,
+            profileImageUrl: row['profileImageUrl'] as String?,
             createdDate: _dateTimeConvertor.decode(row['createdDate'] as int)),
         arguments: [customerId]);
   }

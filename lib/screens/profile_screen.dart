@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:notdle/models/company.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/company_provider.dart';
+import 'package:notdle/providers/api_provider.dart';
 import 'package:notdle/services/session_manager.dart';
 import 'package:provider/provider.dart';
 
@@ -261,6 +262,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // A helper method for the logout button
   Widget _buildLogoutButton(BuildContext context) {
+    final apiProvider = Provider.of<ApiProvider>(context, listen: false);
+    
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
@@ -279,9 +282,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        onPressed: () {
-          SessionManager.clearSession();
-          AppNavigator.toLogin2();
+        onPressed: () async {
+          try {
+            // Clear user data from secure storage
+            await apiProvider.apiService.clearUserData();
+            
+            // Clear session data
+            await SessionManager.clearSession();
+            
+            // Navigate to login screen
+            if (mounted) {
+              AppNavigator.toLogin2();
+            }
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Error during logout: $e'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
         },
       ),
     );

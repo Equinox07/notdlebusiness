@@ -184,16 +184,12 @@ class SyncService {
           );
           // Update invoice items
           for (final item in invoice.items) {
-            // Assuming invoiceDao has an updateInvoiceItem method
-            // If not, this part will need to be adjusted based on your DAO
             await invoiceProvider.invoiceDao.updateInvoiceItem(
               item.copyWith(isSynced: true, syncDate: DateTime.now()),
             );
           }
           // Update payments
           for (final payment in invoice.payments) {
-            // Assuming invoiceDao has an updatePayment method
-            // If not, this part will need to be adjusted based on your DAO
             await invoiceProvider.invoiceDao.updatePayment(
               payment.copyWith(isSynced: true, syncDate: DateTime.now()),
             );

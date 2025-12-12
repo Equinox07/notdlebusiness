@@ -14,12 +14,20 @@ class InvoiceProvider extends ChangeNotifier {
   List<Invoice> get invoices => _invoices;
 
   Future<void> fetchInvoices() async {
-    _invoices = await invoiceDao.getAllInvoices();
+    final invoices = await invoiceDao.getAllInvoices();
+    for (var i = 0; i < invoices.length; i++) {
+      final items = await invoiceDao.getInvoiceItems(invoices[i].id);
+      invoices[i] = invoices[i].copyWith(items: items);
+    }
+    _invoices = invoices;
     notifyListeners();
   }
 
   Future<void> addInvoice(Invoice invoice) async {
     await invoiceDao.insertInvoice(invoice);
+    for (final item in invoice.items) {
+      await invoiceDao.insertInvoiceItem(item);
+    }
     await fetchInvoices();
   }
 
@@ -38,12 +46,10 @@ class InvoiceProvider extends ChangeNotifier {
     final invoice = Invoice(
       id: const Uuid().v4(),
       invoiceNumber: generateInvoiceNumber(),
-      title: 'Invoice for ${order.title}',
       customerId: order.customerId,
       status: 'unpaid',
-      totalAmount: order.paymentAmount ?? 0.0,
-      date: DateTime.now(),
-      orderId: order.id,
+      issueDate: DateTime.now(),
+      dueDate: DateTime.now().add(const Duration(days: 30)),
       createdDate: DateTime.now().toIso8601String(),
       updatedDate: DateTime.now().toIso8601String(),
     );

@@ -96,8 +96,8 @@ class SyncService {
         // Assuming order model needs to be converted to OrderDto
         final orderDto = OrderDto(
           orderNumber: order.orderNumber!,
-          orderDate: order.createdDate,
-          expectedDeliveryDate: order.expectedDeliveryDate,
+          orderDate:  DateTime.parse(order.createdDate),
+          expectedDeliveryDate: order.expectedDeliveryDate!,
           notes: order.notes,
           status: order.status,
           subtotal: order.subtotal!,

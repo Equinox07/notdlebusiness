@@ -1,5 +1,7 @@
 // lib/models/invoice.dart
 import 'package:floor/floor.dart';
+import 'package:notdle/models/invoice_item.dart';
+import 'package:notdle/models/payment.dart'; // Import the Payment model
 import 'customer.dart';
 import 'order.dart';
 
@@ -30,6 +32,11 @@ class Invoice {
   final double? total;
   final String? projectId;
 
+  @ignore
+  final List<InvoiceItem> items;
+  @ignore
+  final List<Payment> payments; // Add payments list
+
   Invoice({
     required this.id,
     required this.customerId,
@@ -45,6 +52,8 @@ class Invoice {
     this.tax,
     this.total,
     this.projectId,
+    this.items = const [],
+    this.payments = const [], // Initialize payments list
   });
 
   Invoice copyWith({
@@ -61,6 +70,8 @@ class Invoice {
     double? tax,
     double? total,
     String? projectId,
+    List<InvoiceItem>? items,
+    List<Payment>? payments, // Add payments to copyWith
   }) {
     return Invoice(
       id: id,
@@ -77,6 +88,8 @@ class Invoice {
       tax: tax ?? this.tax,
       total: total ?? this.total,
       projectId: projectId ?? this.projectId,
+      items: items ?? this.items,
+      payments: payments ?? this.payments, // Update payments in copyWith
     );
   }
 }

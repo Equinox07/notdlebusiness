@@ -1,5 +1,6 @@
 // lib/models/order.dart
 import 'package:floor/floor.dart';
+import 'package:notdle/models/order_item.dart'; // Import the OrderItem model
 import 'package:uuid/uuid.dart';
 import 'customer.dart';
 
@@ -24,8 +25,10 @@ class Order {
   final double? subtotal;
   final double? total;
   final double? tax;
-  final String? expectedDeliveryDate;
+  final DateTime? expectedDeliveryDate;
 
+  @ignore
+  final List<OrderItem> items; // Add items list
 
   Order({
     required this.title,
@@ -42,6 +45,7 @@ class Order {
     this.total,
     this.tax,
     this.expectedDeliveryDate,
+    this.items = const [], // Initialize items list
   }) : id = id ?? const Uuid().v4();
 
 
@@ -58,7 +62,8 @@ class Order {
     double? subtotal,
     double? total,
     double? tax,
-    String? expectedDeliveryDate,
+    DateTime? expectedDeliveryDate,
+    List<OrderItem>? items, // Add items to copyWith
   }) {
     return Order(
       id: id,
@@ -75,6 +80,7 @@ class Order {
       total: total ?? this.total,
       tax: tax ?? this.tax,
       expectedDeliveryDate: expectedDeliveryDate ?? this.expectedDeliveryDate,
+      items: items ?? this.items, // Update items in copyWith
     );
   }
   //

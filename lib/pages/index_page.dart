@@ -9,6 +9,7 @@ import 'package:notdle/screens/all_measurement_screen.dart';
 import 'package:notdle/screens/company_registration_screen.dart';
 import 'package:notdle/screens/create_order_screen.dart';
 import 'package:notdle/screens/customers_screen.dart';
+import 'package:notdle/screens/data_page.dart';
 import 'package:notdle/screens/invoices_screen.dart';
 import 'package:notdle/screens/login_page_screen.dart';
 import 'package:notdle/screens/main.dart';
@@ -16,6 +17,7 @@ import 'package:notdle/screens/notification_screen.dart';
 import 'package:notdle/screens/orders_screen.dart';
 import 'package:notdle/pages/signup_page.dart';
 import 'package:notdle/screens/profile_screen.dart';
+import 'package:notdle/screens/settings_screen.dart';
 import 'package:notdle/services/api_service.dart';
 import 'package:notdle/services/session_manager.dart';
 
@@ -48,13 +50,15 @@ class IndexPage extends StatelessWidget {
         InvoicesScreen.tag: (context) => const InvoicesScreen(),
         NotificationScreen.tag: (context) => const NotificationScreen(),
         CompanyServicesScreen.tag: (context) => CompanyServicesScreen(),
+        CompanyServicesScreen.tag: (context) => CompanyServicesScreen(),
+        SettingsScreen.tag: (context) => const SettingsScreen(),
+        DataPage.tag: (context) => const DataPage(),
         // CreateOrderScreen.tag: (context) => const CreateOrderScreen(),
         // OrderDetailsScreen.tag: (context) => const OrderDetailsScreen(),
       },
     );
   }
 }
-
 
 class _StartupScreen extends StatelessWidget {
   final ApiService _apiService = ApiService();
@@ -63,18 +67,18 @@ class _StartupScreen extends StatelessWidget {
     try {
       // Check if we have a stored user
       final user = await _apiService.getStoredUser();
-      
+
       if (user == null) {
         // No user found, go to login
         return const LoginPageScreen();
       }
-      
+
       // User found, check if they have a company
       if (!user.hasCompany) {
         // No company, go to company registration
         return CompanyRegistrationScreen();
       }
-      
+
       // User has a company, go to dashboard
       return const DashboardScreen();
     } catch (e) {

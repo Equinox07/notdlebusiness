@@ -10,6 +10,7 @@ import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/providers/api_provider.dart';
 import 'package:notdle/services/session_manager.dart';
+import 'package:notdle/screens/settings_screen.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -24,7 +25,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late Future<Company?> _companyFuture;
   final ImagePicker _picker = ImagePicker();
-  // final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
   @override
   void initState() {
@@ -32,27 +32,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _companyFuture = SessionManager.getCompany();
   }
 
-
   // Method to handle picking an image from the gallery
   Future<void> _pickImage(Company company) async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      // Save the new image path to the database
-      // await _dbHelper.updateCompanyImagePath(company.id!, pickedFile.path);
-      final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
-
-      final updatedCompany = company.copyWith(
-          imagePath: pickedFile.path
+      final companyProvider = Provider.of<CompanyProvider>(
+        context,
+        listen: false,
       );
 
+      final updatedCompany = company.copyWith(imagePath: pickedFile.path);
+
       await companyProvider.update(updatedCompany);
-
-
-      // Update shared preferences with the new path
-      // final updatedCompany = company.copyWith(imagePath: pickedFile.path);
       await SessionManager.saveCompany(updatedCompany);
 
-      // Refresh the UI to display the new image
       setState(() {
         _companyFuture = Future.value(updatedCompany);
       });
@@ -61,20 +54,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-
-
-
-
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.white,
         title: Text(
           "My Profile",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(
+            color: Colors.black87,
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
         ),
-        backgroundColor: Colors.white,
-        elevation: 1,
+        centerTitle: true,
       ),
       body: FutureBuilder<Company?>(
         future: _companyFuture,
@@ -100,17 +93,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final company = snapshot.data!;
 
           return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  _buildProfileHeader(company),
-                  const SizedBox(height: 16),
-                  _buildDetailsCard(company),
-                  const SizedBox(height: 16),
-                  _buildLogoutButton(context),
-                ],
-              ),
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+            child: Column(
+              children: [
+                _buildProfileHeader(company),
+                const SizedBox(height: 24),
+                _buildDetailsSection(company),
+                const SizedBox(height: 24),
+                _buildActionsSection(context),
+              ],
             ),
           );
         },
@@ -118,123 +109,148 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // A helper method to build the profile header
   Widget _buildProfileHeader(Company company) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
+    return Column(
+      children: [
+        Stack(
           children: [
-            Stack(
-              children: [
-                // Display the image or a default icon
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.indigo,
-                  backgroundImage: company.imagePath != null
-                      ? FileImage(File(company.imagePath!)) as ImageProvider
-                      : null,
-                  child: company.imagePath == null
-                      ? const Icon(Icons.business, size: 50, color: Colors.white)
-                      : null,
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: GestureDetector(
-                    onTap: () => _pickImage(company),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.white,
-                      radius: 20,
-                      child: Icon(
-                        Icons.camera_alt,
-                        color: Colors.indigo.shade600,
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 4),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: CircleAvatar(
+                radius: 50,
+                backgroundColor: Colors.indigo.shade50,
+                backgroundImage:
+                    company.imagePath != null
+                        ? FileImage(File(company.imagePath!)) as ImageProvider
+                        : null,
+                child:
+                    company.imagePath == null
+                        ? Icon(
+                          Icons.business,
+                          size: 40,
+                          color: Colors.indigo.shade300,
+                        )
+                        : null,
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: GestureDetector(
+                onTap: () => _pickImage(company),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.indigo,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
                       ),
-                    ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.camera_alt,
+                    color: Colors.white,
+                    size: 16,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              company.businessName,
-              style: GoogleFonts.poppins(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              company.businessName,
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                color: Colors.grey.shade600,
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  // A helper method to build the company details card
-  Widget _buildDetailsCard(Company company) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _buildDetailRow(
-              icon: Icons.email,
-              label: 'Email',
-              value: company.email,
-            ),
-            const Divider(),
-            _buildDetailRow(
-              icon: Icons.phone,
-              label: 'Mobile',
-              value: '${company.countryCode} ${company.mobile}',
-            ),
-            const Divider(),
-            _buildDetailRow(
-              icon: Icons.business_outlined,
-              label: 'Registration No',
-              value: company.registrationNumber,
-            ),
-            const Divider(),
-            _buildDetailRow(
-              icon: Icons.work_outline,
-              label: 'Experience',
-              value: '${company.yearsOfExperience} years',
-            ),
-            const Divider(),
-            _buildDetailRow(
-              icon: Icons.location_on_outlined,
-              label: 'Address',
-              value: company.address,
-            ),
-          ],
+        const SizedBox(height: 16),
+        Text(
+          company.businessName,
+          style: GoogleFonts.poppins(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
         ),
+        const SizedBox(height: 4),
+        Text(
+          company.email,
+          style: GoogleFonts.poppins(fontSize: 14, color: Colors.grey.shade600),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailsSection(Company company) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _buildDetailItem(
+            icon: Icons.phone_outlined,
+            label: 'Mobile',
+            value: '${company.countryCode} ${company.mobile}',
+          ),
+          _buildDivider(),
+          _buildDetailItem(
+            icon: Icons.business_outlined,
+            label: 'Registration No',
+            value: company.registrationNumber,
+          ),
+          _buildDivider(),
+          _buildDetailItem(
+            icon: Icons.work_outline,
+            label: 'Experience',
+            value: '${company.yearsOfExperience} years',
+          ),
+          _buildDivider(),
+          _buildDetailItem(
+            icon: Icons.location_on_outlined,
+            label: 'Address',
+            value: company.address,
+          ),
+        ],
       ),
     );
   }
 
-  // A helper method for individual detail rows
-  Widget _buildDetailRow({
+  Widget _buildDetailItem({
     required IconData icon,
     required String label,
     required String value,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          Icon(icon, color: Colors.indigo),
-          const SizedBox(width: 12),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.indigo.shade50,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Colors.indigo, size: 22),
+          ),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,14 +258,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Text(
                   label,
                   style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade800,
+                    fontSize: 12,
+                    color: Colors.grey.shade500,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   value,
                   style: GoogleFonts.poppins(
-                    color: Colors.grey.shade600,
+                    fontSize: 15,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -260,52 +280,117 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // A helper method for the logout button
-  Widget _buildLogoutButton(BuildContext context) {
-    final apiProvider = Provider.of<ApiProvider>(context, listen: false);
-    
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        icon: const Icon(Icons.logout, color: Colors.white),
-        label: Text(
-          "Logout",
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+  Widget _buildDivider() {
+    return Divider(
+      height: 1,
+      thickness: 1,
+      indent: 68,
+      color: Colors.grey.shade100,
+    );
+  }
+
+  Widget _buildActionsSection(BuildContext context) {
+    return Column(
+      children: [
+        _buildActionButton(
+          context,
+          icon: Icons.settings_outlined,
+          label: "Settings",
+          onTap: () {
+            Navigator.of(context).pushNamed(SettingsScreen.tag);
+          },
         ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red.shade600,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+        const SizedBox(height: 16),
+        _buildActionButton(
+          context,
+          icon: Icons.logout,
+          label: "Logout",
+          isDestructive: true,
+          onTap: () => _handleLogout(context),
         ),
-        onPressed: () async {
-          try {
-            // Clear user data from secure storage
-            await apiProvider.apiService.clearUserData();
-            
-            // Clear session data
-            await SessionManager.clearSession();
-            
-            // Navigate to login screen
-            if (mounted) {
-              AppNavigator.toLogin2();
-            }
-          } catch (e) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Error during logout: $e'),
-                  backgroundColor: Colors.red,
+      ],
+    );
+  }
+
+  Widget _buildActionButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+    bool isDestructive = false,
+  }) {
+    final color = isDestructive ? Colors.red.shade600 : Colors.indigo;
+    final backgroundColor = isDestructive ? Colors.red.shade50 : Colors.white;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(icon, color: color, size: 22),
                 ),
-              );
-            }
-          }
-        },
+                const SizedBox(width: 16),
+                Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: isDestructive ? color : Colors.black87,
+                  ),
+                ),
+                const Spacer(),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.grey.shade400,
+                  size: 16,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    final apiProvider = Provider.of<ApiProvider>(context, listen: false);
+    try {
+      await apiProvider.apiService.clearUserData();
+      await SessionManager.clearSession();
+      if (context.mounted) {
+        AppNavigator.toLogin2();
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error during logout: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

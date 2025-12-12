@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:notdle/models/user_model.dart';
+import 'package:notdle/models/company.dart';
 
 class ApiService {
   // static const String _baseUrl = 'http://localhost:8080/api';
@@ -24,6 +25,29 @@ class ApiService {
       'Accept': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
     };
+  }
+
+  // Get company by ID
+  Future<Company> getCompanyById(String companyId) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.get(
+        Uri.parse('$_baseUrl/companies/$companyId'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final companyData = json.decode(response.body);
+        return Company.fromMap({
+          ...companyData,
+          'id': companyId, // Ensure ID is included in the map
+        });
+      } else {
+        throw Exception('Failed to load company data: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching company data: $e');
+    }
   }
 
   // Get current authenticated user
@@ -70,24 +94,24 @@ class ApiService {
     await _storage.delete(key: 'user_data');
   }
 
-  // Get company by ID
-  Future<Map<String, dynamic>> getCompanyById(String companyId) async {
-    try {
-      final headers = await _getHeaders();
-      final response = await http.get(
-        Uri.parse('$_baseUrl/companies/$companyId'),
-        headers: headers,
-      );
-
-      if (response.statusCode == 200) {
-        return json.decode(response.body);
-      } else {
-        throw Exception('Failed to fetch company: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw Exception('Error fetching company: $e');
-    }
-  }
+  // // Get company by ID
+  // Future<Map<String, dynamic>> getCompanyById(String companyId) async {
+  //   try {
+  //     final headers = await _getHeaders();
+  //     final response = await http.get(
+  //       Uri.parse('$_baseUrl/companies/$companyId'),
+  //       headers: headers,
+  //     );
+  //
+  //     if (response.statusCode == 200) {
+  //       return json.decode(response.body);
+  //     } else {
+  //       throw Exception('Failed to fetch company: ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     throw Exception('Error fetching company: $e');
+  //   }
+  // }
 
   // Handle API response
   dynamic _handleResponse(http.Response response) {

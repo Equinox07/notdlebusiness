@@ -2,6 +2,7 @@
 //LoginPageScreen
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:notdle/models/company.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/pages/signup_page.dart';
 import 'package:notdle/screens/company_registration_screen.dart';
@@ -109,20 +110,42 @@ class _LoginScreenState extends State<LoginPageScreen> {
           throw Exception('Failed to load user data');
         }
         
-        // Close loading dialog
-        if (mounted) {
-          Navigator.of(context).pop();
-        }
-
-        // Check if user has a company
-        if (user.hasCompany) {
-          // Navigate to dashboard
-          if (mounted) {
-            Navigator.of(context).pushReplacementNamed('dashboard');
+        // Check if user has a company and companyId is not null
+        if (user.hasCompany && user.companyId != null) {
+          try {
+            // Fetch company data
+            final companyData = await _apiService.getCompanyById(user.companyId!);
+            // final company = Company.fromMap(companyData);
+            
+            // Save company data to session
+            await SessionManager.saveCompany(companyData);
+            
+            // Close loading dialog
+            if (mounted) {
+              Navigator.of(context).pop();
+              // Navigate to dashboard
+              Navigator.of(context).pushReplacementNamed('dashboard');
+            }
+          } catch (e) {
+            // Close loading dialog
+            if (mounted) {
+              Navigator.of(context).pop();
+              // Show error but still allow login (company data might not be critical)
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Logged in, but failed to load company data: ${e.toString()}'),
+                  backgroundColor: Colors.orange,
+                ),
+              );
+              // Still navigate to dashboard even if company data fails
+              Navigator.of(context).pushReplacementNamed('dashboard');
+            }
           }
         } else {
-          // Navigate to company registration
+          // Close loading dialog
           if (mounted) {
+            Navigator.of(context).pop();
+            // Navigate to company registration if no company
             Navigator.of(context).pushReplacementNamed(CompanyRegistrationScreen.tag);
           }
         }

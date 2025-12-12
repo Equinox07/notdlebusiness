@@ -26,6 +26,8 @@ class Order {
   final double? total;
   final double? tax;
   final DateTime? expectedDeliveryDate;
+  final DateTime? syncDate; // New field
+  final bool isSynced; // New field
 
   @ignore
   final List<OrderItem> items; // Add items list
@@ -46,6 +48,8 @@ class Order {
     this.tax,
     this.expectedDeliveryDate,
     this.items = const [], // Initialize items list
+    this.syncDate, // Add to constructor
+    this.isSynced = false, // Add to constructor with default value
   }) : id = id ?? const Uuid().v4();
 
 
@@ -64,6 +68,8 @@ class Order {
     double? tax,
     DateTime? expectedDeliveryDate,
     List<OrderItem>? items, // Add items to copyWith
+    DateTime? syncDate, // Add to copyWith
+    bool? isSynced, // Add to copyWith
   }) {
     return Order(
       id: id,
@@ -81,6 +87,8 @@ class Order {
       tax: tax ?? this.tax,
       expectedDeliveryDate: expectedDeliveryDate ?? this.expectedDeliveryDate,
       items: items ?? this.items, // Update items in copyWith
+      syncDate: syncDate ?? this.syncDate, // Update in copyWith
+      isSynced: isSynced ?? this.isSynced, // Update in copyWith
     );
   }
   //

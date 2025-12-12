@@ -156,6 +156,7 @@ class _CustomerMeasurementScreenState
       customerId: widget.customer.id!,
       measurementValues: values,
       createdDate: DateTime.now(),
+      name: '',
     );
 
     // final saved = await DatabaseHelper.instance.insertMeasurement(measurement);

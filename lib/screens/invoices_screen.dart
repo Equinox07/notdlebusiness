@@ -162,8 +162,8 @@ class InvoiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isOverdue = invoice.status != 'Paid' && invoice.date.isBefore(DateTime.now());
-    final String formattedDueDate = DateFormat('MMM d, y').format(invoice.date);
+    final bool isOverdue = invoice.status != 'Paid' && invoice.date!.isBefore(DateTime.now());
+    final String formattedDueDate = DateFormat('MMM d, y').format(invoice.date!);
 
     return Card(
       elevation: 1.5,
@@ -187,7 +187,7 @@ class InvoiceCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          invoice.title,
+                          invoice.title!,
                           style: GoogleFonts.poppins(
                             fontSize: 17,
                             fontWeight: FontWeight.w600,
@@ -215,7 +215,7 @@ class InvoiceCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 16),
                   Text(
-                    "\$${invoice.totalAmount.toStringAsFixed(2)}",
+                    "\$${invoice.total?.toStringAsFixed(2)}",
                     style: GoogleFonts.poppins(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,

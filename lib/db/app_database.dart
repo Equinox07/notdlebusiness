@@ -10,6 +10,7 @@ import 'package:notdle/models/dao/order_dao.dart';
 import 'package:notdle/models/datetime_convertor.dart';
 import 'package:notdle/models/datetime_null_convertor.dart';
 import 'package:notdle/models/measurement_map_convertor.dart';
+import 'package:notdle/models/payment.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 import 'package:notdle/models/company.dart';
@@ -18,10 +19,11 @@ import 'package:notdle/models/order.dart';
 import 'package:notdle/models/measurement.dart';
 import 'package:notdle/models/invoice.dart';
 
+
 part 'app_database.g.dart'; // The file that will be generated
 
 @TypeConverters([DateTimeConvertor, MeasurementMapConverter, DateTimeNullConvertor])
-@Database(version: 1, entities: [Company, Customer, Order, Measurement, Invoice])
+@Database(version: 1, entities: [Company, Customer, Order, Measurement, Invoice, Payment ])
 abstract class AppDatabase extends FloorDatabase {
   CompanyDao get companyDao;
   CustomerDao get  customerDao;

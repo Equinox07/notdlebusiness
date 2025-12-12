@@ -101,7 +101,7 @@ class AppProvider extends ChangeNotifier {
           'chest': 40.0,
           'inseam': 32.5,
         },
-        createdDate: DateTime.now(),
+        createdDate: DateTime.now(), name: '',
       );
 
       await measurementDao.insertMeasurement(measurement);

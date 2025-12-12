@@ -44,20 +44,23 @@ class SyncService {
     final customers = await customerProvider.customerDao.getAllCustomers();
 
     for (final customer in customers) {
-      try {
-        // Assuming customer model needs to be converted to ClientDto
-        final clientDto = ClientDto(
-          name: customer.name,
-          email: customer.email!,
-          phoneNumber: customer.phone,
-          address: customer.address!,
-          companyId: _companyId,
-        );
-        await _apiClient.createClient(_companyId!, clientDto.toJson());
-        await customerProvider.customerDao.insertCustomer(customer.copyWith(isSynced: true));
-      } catch (e) {
-        // Handle error
-        print('Failed to sync client: ${customer.id}, error: $e');
+      if (!customer.isSynced) { // Only sync unsynced items
+        try {
+          final clientDto = ClientDto(
+            name: customer.name,
+            email: customer.email!,
+            phoneNumber: customer.phone,
+            address: customer.address!,
+            companyId: _companyId,
+          );
+          await _apiClient.createClient(_companyId!, clientDto.toJson());
+          // Update local record after successful sync
+          await customerProvider.customerDao.updateCustomer(
+            customer.copyWith(isSynced: true, syncDate: DateTime.now()),
+          );
+        } catch (e) {
+          print('Failed to sync client: ${customer.id}, error: $e');
+        }
       }
     }
   }
@@ -67,18 +70,21 @@ class SyncService {
     final measurements = await measurementProvider.measurementDao.getAllMeasurements();
 
     for (final measurement in measurements) {
-      try {
-        // Assuming measurement model needs to be converted to CreateMeasurementRequestDto
-        final measurementDto = CreateMeasurementRequestDto(
-          name: measurement.name,
-          measurementValues: measurement.measurementValues,
-          clientId: measurement.customerId,
-        );
-        await _apiClient.createMeasurement(measurementDto.toJson());
-        await measurementProvider.measurementDao.insertMeasurement(measurement.copyWith(isSynced: true));
-      } catch (e) {
-        // Handle error
-        print('Failed to sync measurement: ${measurement.id}, error: $e');
+      if (!measurement.isSynced) { // Only sync unsynced items
+        try {
+          final measurementDto = CreateMeasurementRequestDto(
+            name: measurement.name,
+            measurementValues: measurement.measurementValues,
+            clientId: measurement.customerId,
+          );
+          await _apiClient.createMeasurement(measurementDto.toJson());
+          // Update local record after successful sync
+          await measurementProvider.measurementDao.updateMeasurement(
+            measurement.copyWith(isSynced: true, syncDate: DateTime.now()),
+          );
+        } catch (e) {
+          print('Failed to sync measurement: ${measurement.id}, error: $e');
+        }
       }
     }
   }
@@ -92,32 +98,42 @@ class SyncService {
     final orders = await orderProvider.orderDao.getAllOrders();
 
     for (final order in orders) {
-      try {
-        // Assuming order model needs to be converted to OrderDto
-        final orderDto = OrderDto(
-          orderNumber: order.orderNumber!,
-          orderDate:  DateTime.parse(order.createdDate),
-          expectedDeliveryDate: order.expectedDeliveryDate!,
-          notes: order.notes,
-          status: order.status,
-          subtotal: order.subtotal!,
-          tax: order.tax!,
-          total: order.total!,
-          companyId: _companyId!,
-          clientId: order.customerId,
-          items: order.items.map((item) => OrderItemDto(
-            productName: item.productName,
-            productDescription: item.productDescription,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            taxRate: item.taxRate,
-            amount: item.amount,
-          )).toList(),
-        );
-        await _apiClient.createOrder(_companyId!, orderDto.toJson());
-      } catch (e) {
-        // Handle error
-        print('Failed to sync order: ${order.id}, error: $e');
+      if (!order.isSynced) { // Only sync unsynced items
+        try {
+          final orderDto = OrderDto(
+            orderNumber: order.orderNumber!,
+            orderDate:  DateTime.parse(order.createdDate),
+            expectedDeliveryDate: order.expectedDeliveryDate!,
+            notes: order.notes,
+            status: order.status,
+            subtotal: order.subtotal!,
+            tax: order.tax!,
+            total: order.total!,
+            companyId: _companyId!,
+            clientId: order.customerId,
+            items: order.items.map((item) => OrderItemDto(
+              productName: item.productName,
+              productDescription: item.productDescription,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              taxRate: item.taxRate,
+              amount: item.amount,
+            )).toList(),
+          );
+          await _apiClient.createOrder(_companyId!, orderDto.toJson());
+          // Update local record after successful sync
+          await orderProvider.orderDao.updateOrder(
+            order.copyWith(isSynced: true, syncDate: DateTime.now()),
+          );
+          // Update order items
+          for (final item in order.items) {
+            await orderProvider.orderDao.updateOrderItem(
+              item.copyWith(isSynced: true, syncDate: DateTime.now()),
+            );
+          }
+        } catch (e) {
+          print('Failed to sync order: ${order.id}, error: $e');
+        }
       }
     }
   }
@@ -131,40 +147,60 @@ class SyncService {
     final invoices = await invoiceProvider.invoiceDao.getAllInvoices();
 
     for (final invoice in invoices) {
-      try {
-        // Assuming invoice model needs to be converted to InvoiceDto
-        final invoiceDto = InvoiceDto(
-          invoiceNumber: invoice.invoiceNumber!,
-          issueDate: invoice.issueDate!,
-          dueDate: invoice.dueDate!,
-          notes: invoice.notes!,
-          terms: invoice.terms!,
-          subtotal: invoice.subtotal!,
-          tax: invoice.tax!,
-          total: invoice.total!,
-          status: invoice.status,
-          projectId: invoice.projectId!,
-          items: invoice.items.map((item) => InvoiceItemDto(
-            description: item.description,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            taxRate: item.taxRate,
-            amount: item.amount,
-          )).toList(),
-          payments: invoice.payments.map((payment) => PaymentDto(
-            amount: payment.amount,
-            paymentDate: payment.paymentDate,
-            referenceNumber: payment.referenceNumber,
-            notes: payment.notes,
-            status: payment.status,
-            invoiceId: payment.invoiceId,
-            companyId: _companyId!,
-          )).toList(),
-        );
-        await _apiClient.createInvoice(_companyId!, invoiceDto.toJson());
-      } catch (e) {
-        // Handle error
-        print('Failed to sync invoice: ${invoice.id}, error: $e');
+      if (!invoice.isSynced) { // Only sync unsynced items
+        try {
+          final invoiceDto = InvoiceDto(
+            invoiceNumber: invoice.invoiceNumber!,
+            issueDate: invoice.issueDate!,
+            dueDate: invoice.dueDate!,
+            notes: invoice.notes!,
+            terms: invoice.terms!,
+            subtotal: invoice.subtotal!,
+            tax: invoice.tax!,
+            total: invoice.total!,
+            status: invoice.status,
+            projectId: invoice.projectId!,
+            items: invoice.items.map((item) => InvoiceItemDto(
+              description: item.description,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              taxRate: item.taxRate,
+              amount: item.amount,
+            )).toList(),
+            payments: invoice.payments.map((payment) => PaymentDto(
+              amount: payment.amount,
+              paymentDate: payment.paymentDate,
+              referenceNumber: payment.referenceNumber,
+              notes: payment.notes,
+              status: payment.status,
+              invoiceId: payment.invoiceId,
+              companyId: _companyId!,
+            )).toList(),
+          );
+          await _apiClient.createInvoice(_companyId!, invoiceDto.toJson());
+          // Update local record after successful sync
+          await invoiceProvider.invoiceDao.updateInvoice(
+            invoice.copyWith(isSynced: true, syncDate: DateTime.now()),
+          );
+          // Update invoice items
+          for (final item in invoice.items) {
+            // Assuming invoiceDao has an updateInvoiceItem method
+            // If not, this part will need to be adjusted based on your DAO
+            await invoiceProvider.invoiceDao.updateInvoiceItem(
+              item.copyWith(isSynced: true, syncDate: DateTime.now()),
+            );
+          }
+          // Update payments
+          for (final payment in invoice.payments) {
+            // Assuming invoiceDao has an updatePayment method
+            // If not, this part will need to be adjusted based on your DAO
+            await invoiceProvider.invoiceDao.updatePayment(
+              payment.copyWith(isSynced: true, syncDate: DateTime.now()),
+            );
+          }
+        } catch (e) {
+          print('Failed to sync invoice: ${invoice.id}, error: $e');
+        }
       }
     }
   }

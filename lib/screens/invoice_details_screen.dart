@@ -54,7 +54,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
     //   widget.invoice.orderId,
     // );
 
-    final order = await Provider.of<OrderProvider>(context, listen: false).getOrderById(widget.invoice.orderId);
+    final order = await Provider.of<OrderProvider>(context, listen: false).getOrderById(widget.invoice.orderId!);
         // .get(widget.invoice.customerId);
 
     final customer = await Provider.of<CustomerProvider>(context, listen: false)
@@ -260,7 +260,7 @@ class _InvoiceHeaderCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            DateFormat('MMMM d, y').format(invoice.date),
+            DateFormat('MMMM d, y').format(invoice.date!),
             style: GoogleFonts.poppins(
               fontSize: 14,
               color: Colors.grey.shade600,
@@ -272,7 +272,7 @@ class _InvoiceHeaderCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "\$${invoice.totalAmount.toStringAsFixed(2)}",
+                "\$${invoice.total?.toStringAsFixed(2)}",
                 style: GoogleFonts.poppins(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -367,7 +367,7 @@ class _InvoiceBreakdownCard extends StatelessWidget {
             ),
           ),
           const Divider(height: 24),
-          _AmountRow(label: "Subtotal", amount: invoice.totalAmount),
+          _AmountRow(label: "Subtotal", amount: invoice.total!),
           const SizedBox(height: 8),
           _AmountRow(
             label: "Tax",
@@ -377,7 +377,7 @@ class _InvoiceBreakdownCard extends StatelessWidget {
           const Divider(height: 24),
           _AmountRow(
             label: "Total Amount",
-            amount: invoice.totalAmount,
+            amount: invoice.total!,
             isBold: true,
           ),
         ],

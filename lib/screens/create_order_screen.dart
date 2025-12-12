@@ -175,7 +175,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       title: 'Invoice for ${newOrder.title}',
       customerId: newOrder.customerId,
       status: 'Pending',
-      totalAmount: newOrder.paymentAmount ?? 0.0,
+      total: newOrder.paymentAmount ?? 0.0,
       date: DateTime.now(),
       // dueDate: _dueDate ?? DateTime.now().add(const Duration(days: 14)), // Provide a default
       orderId: newOrder.id,

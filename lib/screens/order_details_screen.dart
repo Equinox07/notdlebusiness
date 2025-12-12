@@ -549,7 +549,7 @@ class _InvoiceCard extends StatelessWidget {
             const SizedBox(height: 16),
             _InfoRow(
               icon: Icons.monetization_on_outlined,
-              label: "Amount: \$${invoice.totalAmount.toStringAsFixed(2)}",
+              label: "Amount: \$${invoice.total?.toStringAsFixed(2)}",
               iconColor: Colors.green,
             ),
             const SizedBox(height: 12),
@@ -561,7 +561,7 @@ class _InvoiceCard extends StatelessWidget {
             const SizedBox(height: 12),
             _InfoRow(
               icon: Icons.calendar_today,
-              label: "Date: ${DateFormat('MMM d, y').format(invoice.date)}",
+              label: "Date: ${DateFormat('MMM d, y').format(invoice.date!)}",
               iconColor: Colors.blue,
             ),
           ],

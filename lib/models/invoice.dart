@@ -19,6 +19,7 @@ class Invoice {
   @PrimaryKey()
   final String id;
   final String customerId; // Foreign key to Customer
+  final String? companyId; // New field: companyId - now optional
   final String status;
   final String? createdDate;
   final String? updatedDate;
@@ -31,6 +32,11 @@ class Invoice {
   final double? tax;
   final double? total;
   final String? projectId;
+  final DateTime? syncDate; // New field
+  final bool isSynced; // New field
+  final String? title; // New field
+  final DateTime? date; // New field
+  final String? orderId; // New field
 
   @ignore
   final List<InvoiceItem> items;
@@ -40,6 +46,7 @@ class Invoice {
   Invoice({
     required this.id,
     required this.customerId,
+    this.companyId, // Make optional in constructor
     required this.status,
     this.createdDate,
     this.updatedDate,
@@ -54,10 +61,16 @@ class Invoice {
     this.projectId,
     this.items = const [],
     this.payments = const [], // Initialize payments list
+    this.syncDate, // Add to constructor
+    this.isSynced = false, // Add to constructor with default value
+    this.title, // Add to constructor
+    this.date, // Add to constructor
+    this.orderId, // Add to constructor
   });
 
   Invoice copyWith({
     String? customerId,
+    String? companyId, // Make optional in copyWith
     String? status,
     String? createdDate,
     String? updatedDate,
@@ -72,10 +85,16 @@ class Invoice {
     String? projectId,
     List<InvoiceItem>? items,
     List<Payment>? payments, // Add payments to copyWith
+    DateTime? syncDate, // Add to copyWith
+    bool? isSynced, // Add to copyWith
+    String? title, // Add to copyWith
+    DateTime? date, // Add to copyWith
+    String? orderId, // Add to copyWith
   }) {
     return Invoice(
       id: id,
       customerId: customerId ?? this.customerId,
+      companyId: companyId ?? this.companyId, // Update in copyWith
       status: status ?? this.status,
       createdDate: createdDate ?? this.createdDate,
       updatedDate: updatedDate ?? this.updatedDate,
@@ -90,6 +109,11 @@ class Invoice {
       projectId: projectId ?? this.projectId,
       items: items ?? this.items,
       payments: payments ?? this.payments, // Update payments in copyWith
+      syncDate: syncDate ?? this.syncDate, // Update in copyWith
+      isSynced: isSynced ?? this.isSynced, // Update in copyWith
+      title: title ?? this.title, // Update in copyWith
+      date: date ?? this.date, // Update in copyWith
+      orderId: orderId ?? this.orderId, // Update in copyWith
     );
   }
 }

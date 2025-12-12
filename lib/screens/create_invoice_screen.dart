@@ -61,7 +61,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         title: _invoiceTitle,
         customerId: widget.order.customerId,
         status: _paymentStatus,
-        totalAmount: _totalAmount,
+        total: _totalAmount,
         date: DateTime.now(),
         orderId: widget.order.id,
       );

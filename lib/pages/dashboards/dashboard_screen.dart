@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/screens/customers_screen.dart';
 import 'package:notdle/screens/invoices_screen.dart';
 import 'package:notdle/screens/orders_screen.dart';
@@ -34,69 +35,68 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onNavTapped,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.indigo.shade600,
-        unselectedItemColor: Colors.grey.shade600,
-        backgroundColor: Colors.white,
-        elevation: 8,
-        items: [
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: "Dashboard",
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          child: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: _onNavTapped,
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: Colors.white,
+            selectedItemColor: Colors.indigo.shade600,
+            unselectedItemColor: Colors.grey.shade400,
+            selectedLabelStyle: GoogleFonts.poppins(
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+            unselectedLabelStyle: GoogleFonts.poppins(
+              fontWeight: FontWeight.w500,
+              fontSize: 12,
+            ),
+            elevation: 0,
+            items: [
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.dashboard_outlined),
+                activeIcon: const Icon(Icons.dashboard),
+                label: "Home",
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.people_outline),
+                activeIcon: const Icon(Icons.people),
+                label: "Clients",
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.design_services_outlined),
+                activeIcon: const Icon(Icons.design_services),
+                label: "Services",
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.shopping_bag_outlined),
+                activeIcon: const Icon(Icons.shopping_bag),
+                label: "Orders",
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.receipt_long_outlined),
+                activeIcon: const Icon(Icons.receipt_long),
+                label: "Invoices",
+              ),
+            ],
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: "Clients",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.design_services), // _ServiceBottomNavItem(isSelected: _selectedIndex == 2),
-            label: "Services",
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: "Orders",
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.attach_money),
-            label: "Invoices",
-          ),
-        ],
+        ),
       ),
-    );
-  }
-}
-
-
-class _ServiceBottomNavItem extends StatelessWidget {
-  final bool isSelected;
-  const _ServiceBottomNavItem({
-    required this.isSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          Icons.design_services,
-          color: isSelected ? Colors.indigo.shade600 : Colors.grey.shade600,
-          size: isSelected ? 30 : 24, // ✅ Larger icon for emphasis
-        ),
-        Text(
-          "Services",
-          style: TextStyle(
-            fontSize: isSelected ? 12 : 10,
-            color: isSelected ? Colors.indigo.shade600 : Colors.grey.shade600,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-          ),
-        ),
-      ],
     );
   }
 }

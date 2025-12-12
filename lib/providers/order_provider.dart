@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:notdle/models/dao/order_dao.dart';
 import 'package:notdle/models/order_with_details.dart';
+import 'package:notdle/utils/helpers.dart';
 import '../models/order.dart';
 
 class OrderProvider extends ChangeNotifier {
@@ -27,7 +28,8 @@ class OrderProvider extends ChangeNotifier {
   }
 
   Future<void> addOrder(Order order) async {
-    await orderDao.insertOrder(order);
+    final newOrder = order.copyWith(orderNumber: generateOrderNumber());
+    await orderDao.insertOrder(newOrder);
     await fetchOrders();
   }
 

@@ -16,76 +16,67 @@ import 'order.dart';
 class Invoice {
   @PrimaryKey()
   final String id;
-  final String title;
   final String customerId; // Foreign key to Customer
   final String status;
-  final double totalAmount;
-  final DateTime date; // Requires DateTimeConverter
-  final String orderId; // Foreign key to Order
   final String? createdDate;
   final String? updatedDate;
+  final String? invoiceNumber;
+  final DateTime? issueDate;
+  final DateTime? dueDate;
+  final String? notes;
+  final String? terms;
+  final double? subtotal;
+  final double? tax;
+  final double? total;
+  final String? projectId;
 
   Invoice({
     required this.id,
-    required this.title,
     required this.customerId,
     required this.status,
-    required this.totalAmount,
-    required this.date,
-    required this.orderId,
     this.createdDate,
     this.updatedDate,
+    this.invoiceNumber,
+    this.issueDate,
+    this.dueDate,
+    this.notes,
+    this.terms,
+    this.subtotal,
+    this.tax,
+    this.total,
+    this.projectId,
   });
 
   Invoice copyWith({
-    String? title,
     String? customerId,
     String? status,
-    double? totalAmount,
-    DateTime? date,
-    String? orderId,
     String? createdDate,
     String? updatedDate,
+    String? invoiceNumber,
+    DateTime? issueDate,
+    DateTime? dueDate,
+    String? notes,
+    String? terms,
+    double? subtotal,
+    double? tax,
+    double? total,
+    String? projectId,
   }) {
     return Invoice(
       id: id,
-      title: title ?? this.title,
       customerId: customerId ?? this.customerId,
       status: status ?? this.status,
-      totalAmount: totalAmount ?? this.totalAmount,
-      date: date ?? this.date,
-      orderId: orderId ?? this.orderId,
       createdDate: createdDate ?? this.createdDate,
       updatedDate: updatedDate ?? this.updatedDate,
+      invoiceNumber: invoiceNumber ?? this.invoiceNumber,
+      issueDate: issueDate ?? this.issueDate,
+      dueDate: dueDate ?? this.dueDate,
+      notes: notes ?? this.notes,
+      terms: terms ?? this.terms,
+      subtotal: subtotal ?? this.subtotal,
+      tax: tax ?? this.tax,
+      total: total ?? this.total,
+      projectId: projectId ?? this.projectId,
     );
   }
-
-
-  // // Convert an Invoice object into a Map.
-  // Map<String, dynamic> toMap() {
-  //   return {
-  //     'id': id,
-  //     'title': title,
-  //     'customerId': customerId,
-  //     'status': status,
-  //     'totalAmount': totalAmount,
-  //     'date': date.toIso8601String(), // Store date as a string
-  //     'orderId': orderId
-  //     // 'createdDate': createdDate
-  //   };
-  // }
-  //
-  // // Create an Invoice object from a Map.
-  // factory Invoice.fromMap(Map<String, dynamic> map) {
-  //   return Invoice(
-  //     id: map['id'],
-  //     title: map['title'],
-  //     customerId: map['customerId'] as int,
-  //     status: map['status'],
-  //     totalAmount: map['totalAmount'],
-  //     date: DateTime.parse(map['date']),
-  //     orderId: map['orderId']
-  //       // createdDate: map['createdDate'] as String
-  //   );
-  // }
 }

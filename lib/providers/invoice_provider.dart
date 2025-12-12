@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:notdle/models/dao/invoice_dao.dart';
+import 'package:notdle/utils/helpers.dart';
 import 'package:uuid/uuid.dart';
 import '../models/invoice.dart';
 import '../models/order.dart';
@@ -36,6 +37,7 @@ class InvoiceProvider extends ChangeNotifier {
   Future<void> createInvoiceFromOrder(Order order) async {
     final invoice = Invoice(
       id: const Uuid().v4(),
+      invoiceNumber: generateInvoiceNumber(),
       title: 'Invoice for ${order.title}',
       customerId: order.customerId,
       status: 'unpaid',

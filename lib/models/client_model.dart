@@ -1,0 +1,29 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'client_model.g.dart';
+
+@JsonSerializable()
+class ClientDto {
+  final String? id;
+  final String name;
+  final String email;
+  final String phoneNumber;
+  final String address;
+  final String? companyId;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  ClientDto({
+    this.id,
+    required this.name,
+    required this.email,
+    required this.phoneNumber,
+    required this.address,
+    this.companyId,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  factory ClientDto.fromJson(Map<String, dynamic> json) => _$ClientDtoFromJson(json);
+  Map<String, dynamic> toJson() => _$ClientDtoToJson(this);
+}

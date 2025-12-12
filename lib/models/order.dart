@@ -20,6 +20,11 @@ class Order {
   final String? dueDate;
   final String? notes;
   final String createdDate; // New field
+  final String? orderNumber;
+  final double? subtotal;
+  final double? total;
+  final double? tax;
+  final String? expectedDeliveryDate;
 
 
   Order({
@@ -32,6 +37,11 @@ class Order {
     this.notes,
     required this.createdDate, // Add to constructor
     String? id,
+    this.orderNumber,
+    this.subtotal,
+    this.total,
+    this.tax,
+    this.expectedDeliveryDate,
   }) : id = id ?? const Uuid().v4();
 
 
@@ -44,6 +54,11 @@ class Order {
     String? dueDate,
     String? notes,
     String? createdDate,
+    String? orderNumber,
+    double? subtotal,
+    double? total,
+    double? tax,
+    String? expectedDeliveryDate,
   }) {
     return Order(
       id: id,
@@ -55,6 +70,11 @@ class Order {
       dueDate: dueDate ?? this.dueDate,
       notes: notes ?? this.notes,
       createdDate: createdDate ?? this.createdDate,
+      orderNumber: orderNumber ?? this.orderNumber,
+      subtotal: subtotal ?? this.subtotal,
+      total: total ?? this.total,
+      tax: tax ?? this.tax,
+      expectedDeliveryDate: expectedDeliveryDate ?? this.expectedDeliveryDate,
     );
   }
   //

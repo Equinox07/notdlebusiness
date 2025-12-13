@@ -97,7 +97,7 @@ class AppNavigator {
   static void toMainScreen() {
     navigatorKey.currentState?.pushNamedAndRemoveUntil(
       MainScreen.tag,
-          (route) => false,
+      (route) => false,
     );
   }
 
@@ -110,7 +110,7 @@ class AppNavigator {
   static void toHome2() {
     navigatorKey.currentState?.pushNamedAndRemoveUntil(
       DashboardAppScreen.tag,
-          (route) => false,
+      (route) => false,
     );
   }
 
@@ -124,7 +124,7 @@ class AppNavigator {
   static void toLogin2() {
     navigatorKey.currentState?.pushNamedAndRemoveUntil(
       LoginPageScreen.tag,
-          (route) => false,
+      (route) => false,
     );
   }
 
@@ -161,9 +161,6 @@ class AppNavigator {
     navigatorKey.currentState?.pushNamed(CompanyServicesScreen.tag);
   }
 
-
-
-
   static void toCustomerDetails(Customer customer) {
     navigatorKey.currentState?.pushNamed(
       CustomerDetailScreen.tag,
@@ -183,7 +180,10 @@ class AppNavigator {
   }
 
   static void toCreateOrder({Customer? customer}) {
-    navigatorKey.currentState?.pushNamed(CreateOrderScreen.tag, arguments: customer);
+    navigatorKey.currentState?.pushNamed(
+      CreateOrderScreen.tag,
+      arguments: customer,
+    );
     // if (customer.isNotEmpty) {
     //   navigatorKey.currentState?.pushNamed(
     //     CreateOrderScreen.tag,
@@ -194,7 +194,6 @@ class AppNavigator {
     // }
   }
 
-
   static void toMeasurement2({Customer? customer}) {
     if (customer != null) {
       navigatorKey.currentState?.pushNamed(
@@ -202,7 +201,7 @@ class AppNavigator {
         arguments: customer,
       );
     } else {
-      navigatorKey.currentState?.pushNamed(AllMeasurementScreen.tag);
+      navigatorKey.currentState?.pushReplacementNamed(AllMeasurementScreen.tag);
     }
   }
 
@@ -242,10 +241,10 @@ class AppNavigator {
   static void toAddCustomer() {
     navigatorKey.currentState?.pushNamed(AddCustomerScreen.tag);
   }
+
   static void toCreateNewOrder() {
     navigatorKey.currentState?.pushNamed(CreateOrderScreen.tag);
   }
-
 
   static void toInvoice() {
     navigatorKey.currentState?.pushNamed(InvoicesScreen.tag);

@@ -26,6 +26,8 @@ class CustomerMeasurementScreen extends StatefulWidget {
 
 class _CustomerMeasurementScreenState extends State<CustomerMeasurementScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController =
+      TextEditingController(); // Controller for measurement name
   final Map<String, TextEditingController> _controllers = {};
 
   final ImagePicker _picker = ImagePicker();
@@ -108,7 +110,10 @@ class _CustomerMeasurementScreenState extends State<CustomerMeasurementScreen> {
         widget.customer.imagePath = picked.path;
       });
       // await DatabaseHelper.instance.updateCustomer(widget.customer);
-      await Provider.of<CustomerProvider>(context, listen: false).updateCustomer(widget.customer);
+      await Provider.of<CustomerProvider>(
+        context,
+        listen: false,
+      ).updateCustomer(widget.customer);
     }
   }
 
@@ -149,15 +154,17 @@ class _CustomerMeasurementScreenState extends State<CustomerMeasurementScreen> {
     }
 
     final measurement = Measurement(
-
       customerId: widget.customer.id!,
       measurementValues: values,
-      createdDate: DateTime.now(), name: '',
+      createdDate: DateTime.now(),
+      name: _nameController.text.trim(), // Use entered name
     );
 
     // final saved = await DatabaseHelper.instance.insertMeasurement(measurement);
-    final savedCustomer = await Provider.of<MeasurementProvider>(context, listen: false).addMeasurement(measurement);
-
+    final savedCustomer = await Provider.of<MeasurementProvider>(
+      context,
+      listen: false,
+    ).addMeasurement(measurement);
 
     if (!mounted) return;
     ScaffoldMessenger.of(
@@ -255,6 +262,7 @@ class _CustomerMeasurementScreenState extends State<CustomerMeasurementScreen> {
     for (var controller in _controllers.values) {
       controller.dispose();
     }
+    _nameController.dispose(); // Dispose name controller
     super.dispose();
   }
 
@@ -332,9 +340,45 @@ class _CustomerMeasurementScreenState extends State<CustomerMeasurementScreen> {
                 key: _formKey,
                 child: ListView.separated(
                   padding: const EdgeInsets.all(16),
-                  itemCount: _fields.length,
+                  itemCount: _fields.length + 1, // +1 for name field
                   itemBuilder: (context, index) {
-                    final field = _fields[index];
+                    if (index == 0) {
+                      return TextFormField(
+                        controller: _nameController,
+                        textCapitalization: TextCapitalization.words,
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        decoration: InputDecoration(
+                          labelText: "Measurement Name (e.g. Wedding Suit)",
+                          labelStyle: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade800,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 20,
+                            horizontal: 16,
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey.shade50,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          prefixIcon: Icon(
+                            Icons.label_outline,
+                            color: Colors.indigo.shade400,
+                          ),
+                        ),
+                        validator:
+                            (value) =>
+                                value == null || value.isEmpty
+                                    ? "Enter a name for this measurement"
+                                    : null,
+                      );
+                    }
+                    final field = _fields[index - 1];
                     return _buildFieldWidget(field);
                   },
                   separatorBuilder: (_, __) => const SizedBox(height: 16),

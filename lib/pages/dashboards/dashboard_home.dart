@@ -41,16 +41,24 @@ class _DashboardHomeState extends State<DashboardHome> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: Text("Dashboard"),
+        title: Text(
+          "Dashboard",
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.w700,
+            color: Colors.black87,
+            fontSize: 24,
+          ),
+        ),
         automaticallyImplyLeading: false,
+        backgroundColor: Colors.grey.shade50,
+        elevation: 0,
+        centerTitle: false,
         actions: [
           _NotificationBell(notificationProvider: notificationProvider),
           const SizedBox(width: 8),
-          _ProfileIcon(),
+          const _ProfileIcon(),
+          const SizedBox(width: 16),
         ],
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: Colors.black,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -345,16 +353,19 @@ class _ProfileIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: IconButton(
-        icon: CircleAvatar(
+    return IconButton(
+      icon: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.grey.shade300, width: 1.5),
+        ),
+        child: CircleAvatar(
           radius: 16,
-          backgroundColor: Colors.grey.shade200,
+          backgroundColor: Colors.white,
           child: const Icon(Icons.person, color: Colors.black87, size: 20),
         ),
-        onPressed: () => AppNavigator.toProfile(),
       ),
+      onPressed: () => AppNavigator.toProfile(),
     );
   }
 }

@@ -34,7 +34,7 @@ class _AllMeasurementScreenState extends State<AllMeasurementScreen> {
       _isLoading = true;
     });
 
-     await context.read<MeasurementProvider>().getAllMeasurementWithCustomer();
+    await context.read<MeasurementProvider>().getAllMeasurementWithCustomer();
     // final allMeasurements = context.watch<MeasurementProvider>().measurements;
     setState(() {
       // measurements = allMeasurements;
@@ -78,7 +78,6 @@ class _AllMeasurementScreenState extends State<AllMeasurementScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     final allmeasurements = context.watch<MeasurementProvider>().measurements;
 
     filteredMeasurements = allmeasurements;
@@ -90,11 +89,16 @@ class _AllMeasurementScreenState extends State<AllMeasurementScreen> {
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: Text(
-          'All Measurements',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+          'Measurements',
+          style: GoogleFonts.playfairDisplay(
+            fontWeight: FontWeight.w700,
+            color: Colors.black87,
+            fontSize: 24,
+          ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.grey.shade50,
         elevation: 0,
+        centerTitle: false,
       ),
       body: Column(
         children: [
@@ -222,70 +226,131 @@ class _MeasurementCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final customer = measurement.customer!;
     final date = measurement.createdDate;
+    final measurementName =
+        measurement.name.isNotEmpty ? measurement.name : "Untitled Measurement";
 
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 2,
-      margin: EdgeInsets.only(bottom: isTablet ? 16 : 12),
-      child: InkWell(
-        onTap:
-            () => AppNavigator.toMeasurementDetails(measurement: measurement),
+    return Container(
+      margin: EdgeInsets.only(bottom: isTablet ? 20 : 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: EdgeInsets.all(isTablet ? 20 : 16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: isTablet ? 30 : 25,
-                backgroundColor: Colors.indigo.shade100,
-                backgroundImage:
-                    customer.imagePath != null
-                        ? FileImage(File(customer.imagePath!)) as ImageProvider
-                        : null,
-                child:
-                    customer.imagePath == null
-                        ? Text(
-                          customer.name.isNotEmpty
-                              ? customer.name[0].toUpperCase()
-                              : "?",
-                          style: GoogleFonts.poppins(
-                            fontSize: isTablet ? 24 : 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.indigo.shade600,
-                          ),
-                        )
-                        : null,
-              ),
-              SizedBox(width: isTablet ? 16 : 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade100),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap:
+              () => AppNavigator.toMeasurementDetails(measurement: measurement),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: EdgeInsets.all(isTablet ? 24 : 20),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Avatar
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.grey.shade200, width: 2),
+                  ),
+                  child: CircleAvatar(
+                    radius: isTablet ? 30 : 25,
+                    backgroundColor: Colors.indigo.shade50,
+                    backgroundImage:
+                        customer.imagePath != null
+                            ? FileImage(File(customer.imagePath!))
+                            : null,
+                    child:
+                        customer.imagePath == null
+                            ? Icon(
+                              Icons.person,
+                              color: Colors.indigo.shade300,
+                              size: isTablet ? 30 : 24,
+                            )
+                            : null,
+                  ),
+                ),
+                SizedBox(width: isTablet ? 20 : 16),
+                // Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        measurementName,
+                        style: GoogleFonts.playfairDisplay(
+                          fontSize: isTablet ? 20 : 18,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        customer.name,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Date and Arrow
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      customer.name,
+                      "${_getMonth(date.month)} ${date.day}",
                       style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w600,
-                        fontSize: isTablet ? 18 : 16,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade400,
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Last updated: ${date.toLocal().toString().split(" ")[0]}",
-                      style: GoogleFonts.poppins(
-                        fontSize: isTablet ? 14 : 12,
-                        color: Colors.grey.shade600,
-                      ),
+                    const SizedBox(height: 8),
+                    const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 16,
+                      color: Colors.grey,
                     ),
                   ],
                 ),
-              ),
-              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  String _getMonth(int month) {
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    return months[month - 1];
   }
 }

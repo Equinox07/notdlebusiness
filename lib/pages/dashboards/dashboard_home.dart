@@ -253,7 +253,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                   _SectionTitle(text: "Upcoming Deadlines"),
                   TextButton(
                     onPressed: () {
-                      // Navigate to all orders or calendar
+                      AppNavigator.toDeadlines();
                     },
                     child: Text(
                       "View All",

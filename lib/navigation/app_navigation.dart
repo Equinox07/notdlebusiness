@@ -15,6 +15,7 @@ import 'package:notdle/screens/create_order_screen.dart';
 import 'package:notdle/screens/customer_detail_screen.dart';
 import 'package:notdle/screens/customer_measurement.dart';
 import 'package:notdle/screens/customers_screen.dart';
+import 'package:notdle/screens/deadline_screen.dart';
 import 'package:notdle/screens/invoices_screen.dart';
 import 'package:notdle/screens/login_page_screen.dart';
 import 'package:notdle/screens/main.dart';
@@ -80,6 +81,8 @@ class AppNavigator {
           );
         }
         return null;
+      case DeadlineScreen.tag:
+        return MaterialPageRoute(builder: (context) => const DeadlineScreen());
       default:
         return null;
     }
@@ -268,6 +271,10 @@ class AppNavigator {
 
   static void toSettings() {
     navigatorKey.currentState?.pushNamed('/settings');
+  }
+
+  static void toDeadlines() {
+    navigatorKey.currentState?.pushNamed(DeadlineScreen.tag);
   }
 
   static void back() {

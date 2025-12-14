@@ -60,7 +60,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     }
     // If you see "Order not found", it's likely this line is being reached.
     // Add a debug print to confirm if the fetch is failing.
-    debugPrint("Could not fetch details for order ID: $_orderId. 'getOrderWithDetails' returned null.");
+    debugPrint(
+      "Could not fetch details for order ID: $_orderId. 'getOrderWithDetails' returned null.",
+    );
     return null;
   }
 
@@ -92,7 +94,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             elevation: 1,
             actions: [
               // Only show the edit button if we have data to edit.
-              if (snapshot.connectionState == ConnectionState.done && snapshot.hasData)
+              if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.hasData)
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () {
@@ -111,24 +114,27 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             ],
           ),
           body: _buildBody(context, snapshot),
-          floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerFloat,
           floatingActionButton: _buildFab(context, snapshot),
         );
       },
     );
   }
 
-  Widget _buildBody(BuildContext context, AsyncSnapshot<_OrderDetailsData?> snapshot) {
+  Widget _buildBody(
+    BuildContext context,
+    AsyncSnapshot<_OrderDetailsData?> snapshot,
+  ) {
     if (snapshot.connectionState == ConnectionState.waiting) {
       return const Center(child: CircularProgressIndicator());
     } else if (snapshot.hasError) {
       // Added more detailed error logging for debugging.
-      debugPrint("FutureBuilder error: ${snapshot.error}\n${snapshot.stackTrace}");
+      debugPrint(
+        "FutureBuilder error: ${snapshot.error}\n${snapshot.stackTrace}",
+      );
       return Center(
-        child: Text(
-          "Error: ${snapshot.error}",
-          style: GoogleFonts.poppins(),
-        ),
+        child: Text("Error: ${snapshot.error}", style: GoogleFonts.poppins()),
       );
     } else if (!snapshot.hasData || snapshot.data == null) {
       return Center(
@@ -179,7 +185,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     );
   }
 
-  Widget _buildFab(BuildContext context, AsyncSnapshot<_OrderDetailsData?> snapshot) {
+  Widget _buildFab(
+    BuildContext context,
+    AsyncSnapshot<_OrderDetailsData?> snapshot,
+  ) {
     if (snapshot.connectionState == ConnectionState.waiting ||
         !snapshot.hasData ||
         snapshot.data == null) {
@@ -197,7 +206,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         // Navigate and await result to refresh if an invoice was created.
         final result = await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => CreateInvoiceScreen(order: orderDetails.order),
+            builder:
+                (context) => CreateInvoiceScreen(order: orderDetails.order),
           ),
         );
         // If the create invoice screen returns true, refresh the data.
@@ -218,7 +228,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 }
 
-
 // Helper widget to build section titles
 Widget _buildSectionTitle(String title) {
   return Text(
@@ -233,11 +242,11 @@ Widget _buildSectionTitle(String title) {
 
 // Helper widget to build the dropdowns
 Widget _buildDropdown(
-    String label,
-    String value,
-    List<String> items,
-    void Function(String?) onChanged,
-    ) {
+  String label,
+  String value,
+  List<String> items,
+  void Function(String?) onChanged,
+) {
   return DropdownButtonFormField<String>(
     decoration: InputDecoration(
       labelText: label,
@@ -258,9 +267,10 @@ Widget _buildDropdown(
       ),
     ),
     value: value,
-    items: items.map((item) {
-      return DropdownMenuItem<String>(value: item, child: Text(item));
-    }).toList(),
+    items:
+        items.map((item) {
+          return DropdownMenuItem<String>(value: item, child: Text(item));
+        }).toList(),
     onChanged: onChanged,
   );
 }
@@ -308,7 +318,7 @@ class _OrderSummaryCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              "Order ID: #${order.id}",
+              "Order No: #${order.orderNumber}",
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 color: Colors.white.withOpacity(0.8),
@@ -683,8 +693,10 @@ class _InfoRow extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style:
-            GoogleFonts.poppins(fontSize: 16, color: Colors.grey.shade700),
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              color: Colors.grey.shade700,
+            ),
           ),
         ),
       ],

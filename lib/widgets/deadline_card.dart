@@ -24,7 +24,7 @@ class DeadlineCard extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return const Center(child: Text("Error fetching deadline."));
+          return const SizedBox.shrink();
         }
         if (!snapshot.hasData || snapshot.data == null) {
           return const SizedBox.shrink(); // Hide if no deadlines
@@ -33,67 +33,139 @@ class DeadlineCard extends StatelessWidget {
         final order = snapshot.data!;
         final remainingDays = _getRemainingDays(order.dueDate!);
 
+        bool isUrgent = false;
+        if (remainingDays == "Overdue" ||
+            remainingDays == "Today" ||
+            remainingDays == "Tomorrow") {
+          isUrgent = true;
+        } else {
+          final days = int.tryParse(remainingDays);
+          if (days != null && days <= 3) {
+            isUrgent = true;
+          }
+        }
+
         return InkWell(
           onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
           child: Container(
-            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.red.shade50,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.red.shade200),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color:
+                      isUrgent
+                          ? Colors.red.withOpacity(0.1)
+                          : Colors.black.withOpacity(0.04),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+              border: Border.all(
+                color: isUrgent ? Colors.red.shade100 : Colors.grey.shade200,
+              ),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.watch_later_outlined,
-                  color: Colors.red.shade600,
-                  size: 32,
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Deadline",
-                        style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.red.shade800,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        order.title,
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.grey.shade800,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: IntrinsicHeight(
+                child: Row(
                   children: [
-                    Text(
-                      remainingDays,
-                      style: GoogleFonts.poppins(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red.shade600,
-                      ),
-                    ),
-                    Text(
-                      "days left",
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.red.shade400,
+                    if (isUrgent)
+                      Container(width: 6, color: Colors.red.shade500),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          isUrgent ? 14 : 20,
+                          20,
+                          20,
+                          20,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color:
+                                    isUrgent
+                                        ? Colors.red.shade50
+                                        : Colors.grey.shade50,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Icon(
+                                Icons.access_time_rounded,
+                                color:
+                                    isUrgent
+                                        ? Colors.red.shade400
+                                        : Colors.grey.shade600,
+                                size: 28,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Upcoming Deadline",
+                                    style: GoogleFonts.playfairDisplay(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    order.title,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 13,
+                                      color: Colors.grey.shade600,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  remainingDays,
+                                  style: GoogleFonts.playfairDisplay(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        isUrgent
+                                            ? Colors.red.shade600
+                                            : Colors.indigo.shade600,
+                                  ),
+                                ),
+                                Text(
+                                  remainingDays == "Today" ||
+                                          remainingDays == "Tomorrow" ||
+                                          remainingDays == "Overdue"
+                                      ? ""
+                                      : "days left",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11,
+                                    color:
+                                        isUrgent
+                                            ? Colors.red.shade400
+                                            : Colors.grey.shade500,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         );
@@ -105,8 +177,18 @@ class DeadlineCard extends StatelessWidget {
     try {
       final dueDate = DateFormat("yyyy-MM-dd").parse(dueDateString);
       final now = DateTime.now();
-      final difference = dueDate.difference(now);
-      return difference.inDays.toString();
+
+      // Normalize dates to midnight to ignore time component
+      final dateOnlyDue = DateTime(dueDate.year, dueDate.month, dueDate.day);
+      final dateOnlyNow = DateTime(now.year, now.month, now.day);
+
+      final difference = dateOnlyDue.difference(dateOnlyNow).inDays;
+
+      if (difference < 0) return "Overdue";
+      if (difference == 0) return "Today";
+      if (difference == 1) return "Tomorrow";
+
+      return difference.toString();
     } catch (e) {
       return "--";
     }

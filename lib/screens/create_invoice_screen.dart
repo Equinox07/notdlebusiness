@@ -136,7 +136,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                     label: "Payment Status",
                     value: _paymentStatus,
                     items:
-                        ["Pending", "Partial", "Full", "Paid"]
+                        ["Pending", "Partial", "Full", "Paid", "Unpaid"]
                             .map(
                               (status) => DropdownMenuItem(
                                 value: status,

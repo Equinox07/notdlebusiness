@@ -4,27 +4,30 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class ApiClient {
   final Dio _dio = Dio();
   final _storage = const FlutterSecureStorage();
-  static const String _baseUrl = 'https://unreprovable-jacquelynn-unconceived.ngrok-free.dev/api';
+  static const String _baseUrl = 'https://api.notdle.com/api';
+  // static const String _baseUrl = 'https://unreprovable-jacquelynn-unconceived.ngrok-free.dev/api';
 
   ApiClient() {
     _dio.options.baseUrl = _baseUrl;
-    _dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) async {
-        final token = await _storage.read(key: 'auth_token');
-        if (token != null) {
-          options.headers['Authorization'] = 'Bearer $token';
-        }
-        return handler.next(options);
-      },
-    ));
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final token = await _storage.read(key: 'auth_token');
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+          return handler.next(options);
+        },
+      ),
+    );
   }
 
   Future<Response> login(String email, String password) async {
     try {
-      final response = await _dio.post('/auth/login', data: {
-        'email': email,
-        'password': password,
-      });
+      final response = await _dio.post(
+        '/auth/login',
+        data: {'email': email, 'password': password},
+      );
       if (response.data != null && response.data['token'] != null) {
         await _storage.write(key: 'auth_token', value: response.data['token']);
       }
@@ -41,12 +44,15 @@ class ApiClient {
     required String password,
   }) async {
     try {
-      return await _dio.post('/auth/signup', data: {
-        'firstName': firstName,
-        'lastName': lastName,
-        'email': email,
-        'password': password,
-      });
+      return await _dio.post(
+        '/auth/signup',
+        data: {
+          'firstName': firstName,
+          'lastName': lastName,
+          'email': email,
+          'password': password,
+        },
+      );
     } catch (e) {
       throw Exception('Failed to signup: $e');
     }
@@ -59,10 +65,10 @@ class ApiClient {
   // Companies
   Future<Response> getAllCompanies({int page = 0, int size = 10}) async {
     try {
-      return await _dio.get('/companies', queryParameters: {
-        'page': page,
-        'size': size,
-      });
+      return await _dio.get(
+        '/companies',
+        queryParameters: {'page': page, 'size': size},
+      );
     } catch (e) {
       throw Exception('Failed to get companies: $e');
     }
@@ -84,7 +90,10 @@ class ApiClient {
     }
   }
 
-  Future<Response> updateCompany(String id, Map<String, dynamic> companyData) async {
+  Future<Response> updateCompany(
+    String id,
+    Map<String, dynamic> companyData,
+  ) async {
     try {
       return await _dio.put('/companies/$id', data: companyData);
     } catch (e) {
@@ -117,27 +126,37 @@ class ApiClient {
   }
 
   // Projects
-  Future<Response> getAllProjects(String companyId, {
+  Future<Response> getAllProjects(
+    String companyId, {
     String? status,
     String? clientId,
     int page = 0,
     int size = 10,
   }) async {
     try {
-      return await _dio.get('/companies/$companyId/projects', queryParameters: {
-        'status': status,
-        'clientId': clientId,
-        'page': page,
-        'size': size,
-      });
+      return await _dio.get(
+        '/companies/$companyId/projects',
+        queryParameters: {
+          'status': status,
+          'clientId': clientId,
+          'page': page,
+          'size': size,
+        },
+      );
     } catch (e) {
       throw Exception('Failed to get projects: $e');
     }
   }
 
-  Future<Response> createProject(String companyId, Map<String, dynamic> projectData) async {
+  Future<Response> createProject(
+    String companyId,
+    Map<String, dynamic> projectData,
+  ) async {
     try {
-      return await _dio.post('/companies/$companyId/projects', data: projectData);
+      return await _dio.post(
+        '/companies/$companyId/projects',
+        data: projectData,
+      );
     } catch (e) {
       throw Exception('Failed to create project: $e');
     }
@@ -151,9 +170,16 @@ class ApiClient {
     }
   }
 
-  Future<Response> updateProject(String companyId, String id, Map<String, dynamic> projectData) async {
+  Future<Response> updateProject(
+    String companyId,
+    String id,
+    Map<String, dynamic> projectData,
+  ) async {
     try {
-      return await _dio.put('/companies/$companyId/projects/$id', data: projectData);
+      return await _dio.put(
+        '/companies/$companyId/projects/$id',
+        data: projectData,
+      );
     } catch (e) {
       throw Exception('Failed to update project: $e');
     }
@@ -167,21 +193,31 @@ class ApiClient {
     }
   }
 
-  Future<Response> updateProjectStatus(String companyId, String id, String status) async {
+  Future<Response> updateProjectStatus(
+    String companyId,
+    String id,
+    String status,
+  ) async {
     try {
-      return await _dio.post('/companies/$companyId/projects/$id/status/$status');
+      return await _dio.post(
+        '/companies/$companyId/projects/$id/status/$status',
+      );
     } catch (e) {
       throw Exception('Failed to update project status: $e');
     }
   }
 
-  Future<Response> searchProjects(String companyId, String title, {int page = 0, int size = 10}) async {
+  Future<Response> searchProjects(
+    String companyId,
+    String title, {
+    int page = 0,
+    int size = 10,
+  }) async {
     try {
-      return await _dio.get('/companies/$companyId/projects/search', queryParameters: {
-        'title': title,
-        'page': page,
-        'size': size,
-      });
+      return await _dio.get(
+        '/companies/$companyId/projects/search',
+        queryParameters: {'title': title, 'page': page, 'size': size},
+      );
     } catch (e) {
       throw Exception('Failed to search projects: $e');
     }
@@ -195,30 +231,41 @@ class ApiClient {
     }
   }
 
-  Future<Response> getProjectsDueBetween(String companyId, String startDate, String endDate) async {
+  Future<Response> getProjectsDueBetween(
+    String companyId,
+    String startDate,
+    String endDate,
+  ) async {
     try {
-      return await _dio.get('/companies/$companyId/projects/due-between', queryParameters: {
-        'startDate': startDate,
-        'endDate': endDate,
-      });
+      return await _dio.get(
+        '/companies/$companyId/projects/due-between',
+        queryParameters: {'startDate': startDate, 'endDate': endDate},
+      );
     } catch (e) {
       throw Exception('Failed to get projects due between: $e');
     }
   }
 
   // Clients
-  Future<Response> getAllClients(String companyId, {int page = 0, int size = 10}) async {
+  Future<Response> getAllClients(
+    String companyId, {
+    int page = 0,
+    int size = 10,
+  }) async {
     try {
-      return await _dio.get('/companies/$companyId/clients', queryParameters: {
-        'page': page,
-        'size': size,
-      });
+      return await _dio.get(
+        '/companies/$companyId/clients',
+        queryParameters: {'page': page, 'size': size},
+      );
     } catch (e) {
       throw Exception('Failed to get clients: $e');
     }
   }
 
-  Future<Response> createClient(String companyId, Map<String, dynamic> clientData) async {
+  Future<Response> createClient(
+    String companyId,
+    Map<String, dynamic> clientData,
+  ) async {
     try {
       return await _dio.post('/companies/$companyId/clients', data: clientData);
     } catch (e) {
@@ -234,9 +281,16 @@ class ApiClient {
     }
   }
 
-  Future<Response> updateClient(String companyId, String id, Map<String, dynamic> clientData) async {
+  Future<Response> updateClient(
+    String companyId,
+    String id,
+    Map<String, dynamic> clientData,
+  ) async {
     try {
-      return await _dio.put('/companies/$companyId/clients/$id', data: clientData);
+      return await _dio.put(
+        '/companies/$companyId/clients/$id',
+        data: clientData,
+      );
     } catch (e) {
       throw Exception('Failed to update client: $e');
     }
@@ -250,40 +304,54 @@ class ApiClient {
     }
   }
 
-  Future<Response> searchClients(String companyId, String name, {int page = 0, int size = 10}) async {
+  Future<Response> searchClients(
+    String companyId,
+    String name, {
+    int page = 0,
+    int size = 10,
+  }) async {
     try {
-      return await _dio.get('/companies/$companyId/clients/search', queryParameters: {
-        'name': name,
-        'page': page,
-        'size': size,
-      });
+      return await _dio.get(
+        '/companies/$companyId/clients/search',
+        queryParameters: {'name': name, 'page': page, 'size': size},
+      );
     } catch (e) {
       throw Exception('Failed to search clients: $e');
     }
   }
 
   // Invoices
-  Future<Response> getAllInvoices(String companyId, {
+  Future<Response> getAllInvoices(
+    String companyId, {
     String? status,
     String? clientId,
     int page = 0,
     int size = 10,
   }) async {
     try {
-      return await _dio.get('/companies/$companyId/invoices', queryParameters: {
-        'status': status,
-        'clientId': clientId,
-        'page': page,
-        'size': size,
-      });
+      return await _dio.get(
+        '/companies/$companyId/invoices',
+        queryParameters: {
+          'status': status,
+          'clientId': clientId,
+          'page': page,
+          'size': size,
+        },
+      );
     } catch (e) {
       throw Exception('Failed to get invoices: $e');
     }
   }
 
-  Future<Response> createInvoice(String companyId, Map<String, dynamic> invoiceData) async {
+  Future<Response> createInvoice(
+    String companyId,
+    Map<String, dynamic> invoiceData,
+  ) async {
     try {
-      return await _dio.post('/companies/$companyId/invoices', data: invoiceData);
+      return await _dio.post(
+        '/companies/$companyId/invoices',
+        data: invoiceData,
+      );
     } catch (e) {
       throw Exception('Failed to create invoice: $e');
     }
@@ -297,9 +365,16 @@ class ApiClient {
     }
   }
 
-  Future<Response> updateInvoice(String companyId, String id, Map<String, dynamic> invoiceData) async {
+  Future<Response> updateInvoice(
+    String companyId,
+    String id,
+    Map<String, dynamic> invoiceData,
+  ) async {
     try {
-      return await _dio.put('/companies/$companyId/invoices/$id', data: invoiceData);
+      return await _dio.put(
+        '/companies/$companyId/invoices/$id',
+        data: invoiceData,
+      );
     } catch (e) {
       throw Exception('Failed to update invoice: $e');
     }
@@ -313,38 +388,59 @@ class ApiClient {
     }
   }
 
-  Future<Response> updateInvoiceStatus(String companyId, String id, String status) async {
+  Future<Response> updateInvoiceStatus(
+    String companyId,
+    String id,
+    String status,
+  ) async {
     try {
-      return await _dio.post('/companies/$companyId/invoices/$id/status/$status');
+      return await _dio.post(
+        '/companies/$companyId/invoices/$id/status/$status',
+      );
     } catch (e) {
       throw Exception('Failed to update invoice status: $e');
     }
   }
 
-  Future<Response> addPayment(String companyId, String id, Map<String, dynamic> paymentData) async {
+  Future<Response> addPayment(
+    String companyId,
+    String id,
+    Map<String, dynamic> paymentData,
+  ) async {
     try {
-      return await _dio.post('/companies/$companyId/invoices/$id/payments', data: paymentData);
+      return await _dio.post(
+        '/companies/$companyId/invoices/$id/payments',
+        data: paymentData,
+      );
     } catch (e) {
       throw Exception('Failed to add payment: $e');
     }
   }
 
-  Future<Response> getUpcomingDueInvoices(String companyId, String endDate) async {
+  Future<Response> getUpcomingDueInvoices(
+    String companyId,
+    String endDate,
+  ) async {
     try {
-      return await _dio.get('/companies/$companyId/invoices/upcoming-due', queryParameters: {
-        'endDate': endDate,
-      });
+      return await _dio.get(
+        '/companies/$companyId/invoices/upcoming-due',
+        queryParameters: {'endDate': endDate},
+      );
     } catch (e) {
       throw Exception('Failed to get upcoming due invoices: $e');
     }
   }
 
-  Future<Response> calculateInvoiceRevenue(String companyId, String startDate, String endDate) async {
+  Future<Response> calculateInvoiceRevenue(
+    String companyId,
+    String startDate,
+    String endDate,
+  ) async {
     try {
-      return await _dio.get('/companies/$companyId/invoices/revenue', queryParameters: {
-        'startDate': startDate,
-        'endDate': endDate,
-      });
+      return await _dio.get(
+        '/companies/$companyId/invoices/revenue',
+        queryParameters: {'startDate': startDate, 'endDate': endDate},
+      );
     } catch (e) {
       throw Exception('Failed to calculate invoice revenue: $e');
     }
@@ -366,45 +462,61 @@ class ApiClient {
     }
   }
 
-  Future<Response> getInvoiceByNumber(String companyId, String invoiceNumber) async {
+  Future<Response> getInvoiceByNumber(
+    String companyId,
+    String invoiceNumber,
+  ) async {
     try {
-      return await _dio.get('/companies/$companyId/invoices/by-number/$invoiceNumber');
+      return await _dio.get(
+        '/companies/$companyId/invoices/by-number/$invoiceNumber',
+      );
     } catch (e) {
       throw Exception('Failed to get invoice by number: $e');
     }
   }
 
-  Future<Response> getInvoicesByDateRange(String companyId, String startDate, String endDate) async {
+  Future<Response> getInvoicesByDateRange(
+    String companyId,
+    String startDate,
+    String endDate,
+  ) async {
     try {
-      return await _dio.get('/companies/$companyId/invoices/by-date-range', queryParameters: {
-        'startDate': startDate,
-        'endDate': endDate,
-      });
+      return await _dio.get(
+        '/companies/$companyId/invoices/by-date-range',
+        queryParameters: {'startDate': startDate, 'endDate': endDate},
+      );
     } catch (e) {
       throw Exception('Failed to get invoices by date range: $e');
     }
   }
 
   // Orders
-  Future<Response> getAllOrders(String companyId, {
+  Future<Response> getAllOrders(
+    String companyId, {
     String? status,
     String? clientId,
     int page = 0,
     int size = 10,
   }) async {
     try {
-      return await _dio.get('/companies/$companyId/orders', queryParameters: {
-        'status': status,
-        'clientId': clientId,
-        'page': page,
-        'size': size,
-      });
+      return await _dio.get(
+        '/companies/$companyId/orders',
+        queryParameters: {
+          'status': status,
+          'clientId': clientId,
+          'page': page,
+          'size': size,
+        },
+      );
     } catch (e) {
       throw Exception('Failed to get orders: $e');
     }
   }
 
-  Future<Response> createOrder(String companyId, Map<String, dynamic> orderData) async {
+  Future<Response> createOrder(
+    String companyId,
+    Map<String, dynamic> orderData,
+  ) async {
     try {
       return await _dio.post('/companies/$companyId/orders', data: orderData);
     } catch (e) {
@@ -420,9 +532,16 @@ class ApiClient {
     }
   }
 
-  Future<Response> updateOrder(String companyId, String id, Map<String, dynamic> orderData) async {
+  Future<Response> updateOrder(
+    String companyId,
+    String id,
+    Map<String, dynamic> orderData,
+  ) async {
     try {
-      return await _dio.put('/companies/$companyId/orders/$id', data: orderData);
+      return await _dio.put(
+        '/companies/$companyId/orders/$id',
+        data: orderData,
+      );
     } catch (e) {
       throw Exception('Failed to update order: $e');
     }
@@ -436,7 +555,11 @@ class ApiClient {
     }
   }
 
-  Future<Response> updateOrderStatus(String companyId, String id, String status) async {
+  Future<Response> updateOrderStatus(
+    String companyId,
+    String id,
+    String status,
+  ) async {
     try {
       return await _dio.post('/companies/$companyId/orders/$id/status/$status');
     } catch (e) {
@@ -444,51 +567,80 @@ class ApiClient {
     }
   }
 
-  Future<Response> addOrderItem(String companyId, String orderId, Map<String, dynamic> itemData) async {
+  Future<Response> addOrderItem(
+    String companyId,
+    String orderId,
+    Map<String, dynamic> itemData,
+  ) async {
     try {
-      return await _dio.post('/companies/$companyId/orders/$orderId/items', data: itemData);
+      return await _dio.post(
+        '/companies/$companyId/orders/$orderId/items',
+        data: itemData,
+      );
     } catch (e) {
       throw Exception('Failed to add order item: $e');
     }
   }
 
-  Future<Response> removeOrderItem(String companyId, String orderId, String itemId) async {
+  Future<Response> removeOrderItem(
+    String companyId,
+    String orderId,
+    String itemId,
+  ) async {
     try {
-      return await _dio.delete('/companies/$companyId/orders/$orderId/items/$itemId');
+      return await _dio.delete(
+        '/companies/$companyId/orders/$orderId/items/$itemId',
+      );
     } catch (e) {
       throw Exception('Failed to remove order item: $e');
     }
   }
 
-  Future<Response> searchOrders(String companyId, String orderNumber, {int page = 0, int size = 10}) async {
+  Future<Response> searchOrders(
+    String companyId,
+    String orderNumber, {
+    int page = 0,
+    int size = 10,
+  }) async {
     try {
-      return await _dio.get('/companies/$companyId/orders/search', queryParameters: {
-        'orderNumber': orderNumber,
-        'page': page,
-        'size': size,
-      });
+      return await _dio.get(
+        '/companies/$companyId/orders/search',
+        queryParameters: {
+          'orderNumber': orderNumber,
+          'page': page,
+          'size': size,
+        },
+      );
     } catch (e) {
       throw Exception('Failed to search orders: $e');
     }
   }
 
-  Future<Response> calculateOrderRevenue(String companyId, String startDate, String endDate) async {
+  Future<Response> calculateOrderRevenue(
+    String companyId,
+    String startDate,
+    String endDate,
+  ) async {
     try {
-      return await _dio.get('/companies/$companyId/orders/revenue', queryParameters: {
-        'startDate': startDate,
-        'endDate': endDate,
-      });
+      return await _dio.get(
+        '/companies/$companyId/orders/revenue',
+        queryParameters: {'startDate': startDate, 'endDate': endDate},
+      );
     } catch (e) {
       throw Exception('Failed to calculate order revenue: $e');
     }
   }
 
-  Future<Response> getOrdersByDateRange(String companyId, String startDate, String endDate) async {
+  Future<Response> getOrdersByDateRange(
+    String companyId,
+    String startDate,
+    String endDate,
+  ) async {
     try {
-      return await _dio.get('/companies/$companyId/orders/by-date-range', queryParameters: {
-        'startDate': startDate,
-        'endDate': endDate,
-      });
+      return await _dio.get(
+        '/companies/$companyId/orders/by-date-range',
+        queryParameters: {'startDate': startDate, 'endDate': endDate},
+      );
     } catch (e) {
       throw Exception('Failed to get orders by date range: $e');
     }
@@ -503,7 +655,10 @@ class ApiClient {
     }
   }
 
-  Future<Response> updateMeasurement(String id, Map<String, dynamic> measurementData) async {
+  Future<Response> updateMeasurement(
+    String id,
+    Map<String, dynamic> measurementData,
+  ) async {
     try {
       return await _dio.put('/v1/measurements/$id', data: measurementData);
     } catch (e) {
@@ -519,7 +674,9 @@ class ApiClient {
     }
   }
 
-  Future<Response> createMeasurement(Map<String, dynamic> measurementData) async {
+  Future<Response> createMeasurement(
+    Map<String, dynamic> measurementData,
+  ) async {
     try {
       return await _dio.post('/v1/measurements', data: measurementData);
     } catch (e) {
@@ -529,10 +686,10 @@ class ApiClient {
 
   Future<Response> searchMeasurements(String clientId, String query) async {
     try {
-      return await _dio.get('/v1/measurements/search', queryParameters: {
-        'clientId': clientId,
-        'query': query,
-      });
+      return await _dio.get(
+        '/v1/measurements/search',
+        queryParameters: {'clientId': clientId, 'query': query},
+      );
     } catch (e) {
       throw Exception('Failed to search measurements: $e');
     }
@@ -546,7 +703,10 @@ class ApiClient {
     }
   }
 
-  Future<Response> deleteMeasurementForClient(String id, String clientId) async {
+  Future<Response> deleteMeasurementForClient(
+    String id,
+    String clientId,
+  ) async {
     try {
       return await _dio.delete('/v1/measurements/$id/client/$clientId');
     } catch (e) {
@@ -564,9 +724,10 @@ class ApiClient {
 
   Future<Response> searchCompanyMeasurements(String id, String query) async {
     try {
-      return await _dio.get('/companies/$id/measurements/search', queryParameters: {
-        'query': query,
-      });
+      return await _dio.get(
+        '/companies/$id/measurements/search',
+        queryParameters: {'query': query},
+      );
     } catch (e) {
       throw Exception('Failed to search company measurements: $e');
     }
@@ -581,13 +742,16 @@ class ApiClient {
   }
 
   // Users
-  Future<Response> getAllUsers({String? companyId, int page = 0, int size = 10}) async {
+  Future<Response> getAllUsers({
+    String? companyId,
+    int page = 0,
+    int size = 10,
+  }) async {
     try {
-      return await _dio.get('/users', queryParameters: {
-        'companyId': companyId,
-        'page': page,
-        'size': size,
-      });
+      return await _dio.get(
+        '/users',
+        queryParameters: {'companyId': companyId, 'page': page, 'size': size},
+      );
     } catch (e) {
       throw Exception('Failed to get users: $e');
     }
@@ -643,9 +807,10 @@ class ApiClient {
 
   Future<Response> changePassword(String id, String newPassword) async {
     try {
-      return await _dio.post('/users/$id/change-password', queryParameters: {
-        'newPassword': newPassword,
-      });
+      return await _dio.post(
+        '/users/$id/change-password',
+        queryParameters: {'newPassword': newPassword},
+      );
     } catch (e) {
       throw Exception('Failed to change password: $e');
     }

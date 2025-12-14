@@ -8,13 +8,15 @@ import 'package:notdle/models/company.dart';
 
 class ApiService {
   // static const String _baseUrl = 'http://localhost:8080/api';
-  static const String _baseUrl = 'https://unreprovable-jacquelynn-unconceived.ngrok-free.dev/api';
+  static const String _baseUrl = 'https://api.notdle.com/api';
+  // static const String _baseUrl = 'https://unreprovable-jacquelynn-unconceived.ngrok-free.dev/api';
   final _storage = const FlutterSecureStorage();
   static final ApiService _instance = ApiService._internal();
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   factory ApiService() => _instance;
-  
+
   ApiService._internal();
 
   // Get headers with authorization
@@ -62,10 +64,13 @@ class ApiService {
       if (response.statusCode == 200) {
         final userData = json.decode(response.body);
         final user = User.fromJson(userData);
-        
+
         // Store user data in secure storage
-        await _storage.write(key: 'user_data', value: json.encode(user.toJson()));
-        
+        await _storage.write(
+          key: 'user_data',
+          value: json.encode(user.toJson()),
+        );
+
         return user;
       } else {
         throw Exception('Failed to fetch user data: ${response.statusCode}');
@@ -124,7 +129,9 @@ class ApiService {
   }
 
   // Register a new company
-  Future<Map<String, dynamic>> registerCompany(Map<String, dynamic> companyData) async {
+  Future<Map<String, dynamic>> registerCompany(
+    Map<String, dynamic> companyData,
+  ) async {
     try {
       final headers = await _getHeaders();
       final response = await http.post(
@@ -137,9 +144,9 @@ class ApiService {
         return json.decode(response.body);
       } else if (response.statusCode == 401) {
         // Clear all user data and tokens
-        await _storage.deleteAll();  // Clear all stored data
-        await clearUserData();      // Clear any additional user data
-        
+        await _storage.deleteAll(); // Clear all stored data
+        await clearUserData(); // Clear any additional user data
+
         // Navigate to login screen if we have a valid context
         if (navigatorKey.currentContext != null) {
           if (navigatorKey.currentState != null) {
@@ -148,10 +155,9 @@ class ApiService {
               (route) => false,
             );
           } else {
-            Navigator.of(navigatorKey.currentContext!).pushNamedAndRemoveUntil(
-              '/login',
-              (route) => false,
-            );
+            Navigator.of(
+              navigatorKey.currentContext!,
+            ).pushNamedAndRemoveUntil('/login', (route) => false);
           }
         }
         throw Exception('Session expired. Please login again.');
@@ -171,10 +177,7 @@ class ApiService {
     final response = await http.post(
       Uri.parse('$_baseUrl/auth/login'),
       headers: await _getHeaders(),
-      body: json.encode({
-        'email': email,
-        'password': password,
-      }),
+      body: json.encode({'email': email, 'password': password}),
     );
 
     final data = _handleResponse(response);
@@ -217,18 +220,18 @@ class ApiService {
   }
 
   // Generic CRUD operations
-  Future<dynamic> get(String endpoint, {Map<String, dynamic>? queryParams}) async {
+  Future<dynamic> get(
+    String endpoint, {
+    Map<String, dynamic>? queryParams,
+  }) async {
     final uri = Uri.parse('$_baseUrl$endpoint').replace(
-      queryParameters: queryParams?.map((key, value) => 
-        MapEntry(key, value.toString()),
+      queryParameters: queryParams?.map(
+        (key, value) => MapEntry(key, value.toString()),
       ),
     );
-    
-    final response = await http.get(
-      uri,
-      headers: await _getHeaders(),
-    );
-    
+
+    final response = await http.get(uri, headers: await _getHeaders());
+
     return _handleResponse(response);
   }
 
@@ -238,7 +241,7 @@ class ApiService {
       headers: await _getHeaders(),
       body: json.encode(body),
     );
-    
+
     return _handleResponse(response);
   }
 
@@ -248,7 +251,7 @@ class ApiService {
       headers: await _getHeaders(),
       body: json.encode(body),
     );
-    
+
     return _handleResponse(response);
   }
 
@@ -257,70 +260,83 @@ class ApiService {
       Uri.parse('$_baseUrl$endpoint'),
       headers: await _getHeaders(),
     );
-    
+
     _handleResponse(response);
   }
 
   // Specific API endpoints
   // Companies
   Future<dynamic> getCompanies({int page = 0, int size = 10}) async {
-    return get('/companies', queryParams: {
-      'page': page,
-      'size': size,
-    });
+    return get('/companies', queryParams: {'page': page, 'size': size});
   }
 
   // Projects
-  Future<dynamic> getCompanyProjects(String companyId, {
-    int page = 0, 
+  Future<dynamic> getCompanyProjects(
+    String companyId, {
+    int page = 0,
     int size = 10,
     String? status,
     String? clientId,
   }) async {
-    return get('/companies/$companyId/projects', queryParams: {
-      'page': page,
-      'size': size,
-      if (status != null) 'status': status,
-      if (clientId != null) 'clientId': clientId,
-    });
+    return get(
+      '/companies/$companyId/projects',
+      queryParams: {
+        'page': page,
+        'size': size,
+        if (status != null) 'status': status,
+        if (clientId != null) 'clientId': clientId,
+      },
+    );
   }
 
   // Clients
-  Future<dynamic> getClients(String companyId, {int page = 0, int size = 10}) async {
-    return get('/companies/$companyId/clients', queryParams: {
-      'page': page,
-      'size': size,
-    });
+  Future<dynamic> getClients(
+    String companyId, {
+    int page = 0,
+    int size = 10,
+  }) async {
+    return get(
+      '/companies/$companyId/clients',
+      queryParams: {'page': page, 'size': size},
+    );
   }
 
   // Invoices
-  Future<dynamic> getInvoices(String companyId, {
+  Future<dynamic> getInvoices(
+    String companyId, {
     int page = 0,
     int size = 10,
     String? status,
     String? clientId,
   }) async {
-    return get('/companies/$companyId/invoices', queryParams: {
-      'page': page,
-      'size': size,
-      if (status != null) 'status': status,
-      if (clientId != null) 'clientId': clientId,
-    });
+    return get(
+      '/companies/$companyId/invoices',
+      queryParams: {
+        'page': page,
+        'size': size,
+        if (status != null) 'status': status,
+        if (clientId != null) 'clientId': clientId,
+      },
+    );
   }
 
   // Orders
-  Future<dynamic> getOrders(String companyId, {
+  Future<dynamic> getOrders(
+    String companyId, {
     int page = 0,
     int size = 10,
     String? status,
     String? clientId,
   }) async {
-    return get('/companies/$companyId/orders', queryParams: {
-      'page': page,
-      'size': size,
-      if (status != null) 'status': status,
-      if (clientId != null) 'clientId': clientId,
-    });
+    return get(
+      '/companies/$companyId/orders',
+      queryParams: {
+        'page': page,
+        'size': size,
+        if (status != null) 'status': status,
+        if (clientId != null) 'clientId': clientId,
+      },
+    );
   }
 
   // Measurements
@@ -328,19 +344,24 @@ class ApiService {
     return get('/companies/$companyId/measurements');
   }
 
-  Future<dynamic> createMeasurement(String companyId, Map<String, dynamic> data) async {
+  Future<dynamic> createMeasurement(
+    String companyId,
+    Map<String, dynamic> data,
+  ) async {
     return post('/v1/measurements', data);
   }
 
   // Search
-  Future<dynamic> search(String companyId, String resource, String query, {
+  Future<dynamic> search(
+    String companyId,
+    String resource,
+    String query, {
     int page = 0,
     int size = 10,
   }) async {
-    return get('/companies/$companyId/$resource/search', queryParams: {
-      'query': query,
-      'page': page,
-      'size': size,
-    });
+    return get(
+      '/companies/$companyId/$resource/search',
+      queryParams: {'query': query, 'page': page, 'size': size},
+    );
   }
 }

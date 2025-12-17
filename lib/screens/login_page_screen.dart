@@ -2,9 +2,6 @@
 //LoginPageScreen
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:notdle/models/company.dart';
-import 'package:notdle/navigation/app_navigation.dart';
-import 'package:notdle/pages/signup_page.dart';
 import 'package:notdle/screens/company_registration_screen.dart';
 import 'package:notdle/screens/signup_screen.dart';
 import 'package:notdle/services/api_service.dart';
@@ -87,9 +84,7 @@ class _LoginScreenState extends State<LoginPageScreen> {
             context: context,
             barrierDismissible: false,
             builder: (BuildContext context) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
+              return const Center(child: CircularProgressIndicator());
             },
           );
         }
@@ -99,27 +94,29 @@ class _LoginScreenState extends State<LoginPageScreen> {
           _emailController.text,
           _passwordController.text,
         );
-        
+
         // Get fresh user data from the server
         await _apiService.getCurrentUser();
 
         // Get stored user data
         final user = await _apiService.getStoredUser();
-        
+
         if (user == null) {
           throw Exception('Failed to load user data');
         }
-        
+
         // Check if user has a company and companyId is not null
         if (user.hasCompany && user.companyId != null) {
           try {
             // Fetch company data
-            final companyData = await _apiService.getCompanyById(user.companyId!);
+            final companyData = await _apiService.getCompanyById(
+              user.companyId!,
+            );
             // final company = Company.fromMap(companyData);
-            
+
             // Save company data to session
             await SessionManager.saveCompany(companyData);
-            
+
             // Close loading dialog
             if (mounted) {
               Navigator.of(context).pop();
@@ -133,7 +130,9 @@ class _LoginScreenState extends State<LoginPageScreen> {
               // Show error but still allow login (company data might not be critical)
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Logged in, but failed to load company data: ${e.toString()}'),
+                  content: Text(
+                    'Logged in, but failed to load company data: ${e.toString()}',
+                  ),
                   backgroundColor: Colors.orange,
                 ),
               );
@@ -146,7 +145,9 @@ class _LoginScreenState extends State<LoginPageScreen> {
           if (mounted) {
             Navigator.of(context).pop();
             // Navigate to company registration if no company
-            Navigator.of(context).pushReplacementNamed(CompanyRegistrationScreen.tag);
+            Navigator.of(
+              context,
+            ).pushReplacementNamed(CompanyRegistrationScreen.tag);
           }
         }
       } catch (e) {
@@ -173,10 +174,7 @@ class _LoginScreenState extends State<LoginPageScreen> {
     final logoWidget = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Image.asset(
-          'assets/images/logo.png',
-          width: isTablet ? 40 : 32,
-        ),
+        Image.asset('assets/images/logo.png', width: isTablet ? 40 : 32),
         const SizedBox(width: 12),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,9 +233,7 @@ class _LoginScreenState extends State<LoginPageScreen> {
               ),
             ),
             // Semi-transparent overlay
-            Container(
-              color: Colors.black.withOpacity(0.5),
-            ),
+            Container(color: Colors.black.withOpacity(0.5)),
             // Content
             Center(
               child: SingleChildScrollView(
@@ -250,86 +246,87 @@ class _LoginScreenState extends State<LoginPageScreen> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                    const SizedBox(height: 20),
-                    Text(
-                      "Welcome back!",
-                      style: GoogleFonts.poppins(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Login to your account to continue.",
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        color: Colors.white.withOpacity(0.9),
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    _buildInputField(
-                      label: "Email",
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildInputField(
-                      label: "Password",
-                      controller: _passwordController,
-                      isPassword: true,
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: login,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.indigo.shade600,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Text(
-                          "Login",
-                          style: GoogleFonts.poppins(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
+                        const SizedBox(height: 20),
                         Text(
-                          "Don't have an account? ",
+                          "Welcome back!",
                           style: GoogleFonts.poppins(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
                             color: Colors.white,
-                            fontSize: 14,
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => const SignupScreenPage(),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Login to your account to continue.",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            color: Colors.white.withOpacity(0.9),
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        _buildInputField(
+                          label: "Email",
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildInputField(
+                          label: "Password",
+                          controller: _passwordController,
+                          isPassword: true,
+                        ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: login,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.indigo.shade600,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            );
-                          },
-                          child: Text(
-                            "Register",
-                            style: GoogleFonts.poppins(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
+                            ),
+                            child: Text(
+                              "Login",
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Don't have an account? ",
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => const SignupScreenPage(),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                "Register",
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(height: 40),
                       ],
                     ),

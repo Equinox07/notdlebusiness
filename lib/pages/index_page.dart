@@ -18,8 +18,9 @@ import 'package:notdle/screens/orders_screen.dart';
 import 'package:notdle/pages/signup_page.dart';
 import 'package:notdle/screens/profile_screen.dart';
 import 'package:notdle/screens/settings_screen.dart';
+import 'package:notdle/screens/onboarding_screen.dart';
 import 'package:notdle/services/api_service.dart';
-import 'package:notdle/services/session_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class IndexPage extends StatelessWidget {
   const IndexPage({super.key});
@@ -53,6 +54,7 @@ class IndexPage extends StatelessWidget {
         CompanyServicesScreen.tag: (context) => CompanyServicesScreen(),
         SettingsScreen.tag: (context) => const SettingsScreen(),
         DataPage.tag: (context) => const DataPage(),
+        OnboardingScreen.tag: (context) => const OnboardingScreen(),
         // CreateOrderScreen.tag: (context) => const CreateOrderScreen(),
         // OrderDetailsScreen.tag: (context) => const OrderDetailsScreen(),
       },
@@ -65,6 +67,14 @@ class _StartupScreen extends StatelessWidget {
 
   Future<Widget> _determineInitialRoute() async {
     try {
+      // Check if onboarding has been seen
+      final prefs = await SharedPreferences.getInstance();
+      final seenOnboarding = prefs.getBool('seenOnboarding') ?? false;
+
+      if (!seenOnboarding) {
+        return const OnboardingScreen();
+      }
+
       // Check if we have a stored user
       final user = await _apiService.getStoredUser();
 

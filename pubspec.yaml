@@ -94,6 +94,9 @@ flutter:
     - assets/images/app_icon.png
     - assets/splash_screen.png
     - assets/db/app_database.db
+    - assets/images/onboarding_digital_solution.png
+    - assets/images/onboarding_workflow.png
+    - assets/images/onboarding_fashion_tool.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

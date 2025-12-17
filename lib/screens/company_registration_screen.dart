@@ -222,7 +222,7 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
                 Text(
                   "Tell us about your business.",
                   style: GoogleFonts.poppins(
-                    fontSize: 16,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.indigo.shade800,
                   ),

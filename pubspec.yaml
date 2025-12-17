@@ -42,6 +42,7 @@ dependencies:
   flutter_native_splash: any
   loader_overlay: ^5.0.0
   json_annotation: ^4.9.0
+  equatable: ^2.0.5
 
 dev_dependencies:
   flutter_test:

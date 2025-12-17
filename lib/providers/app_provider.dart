@@ -8,9 +8,15 @@ import 'package:notdle/models/dao/measurement_dao.dart';
 import 'package:notdle/models/dao/order_dao.dart';
 import 'package:notdle/models/measurement.dart';
 import 'package:notdle/models/order.dart';
+import 'package:notdle/models/dao/project_dao.dart';
+import 'package:notdle/models/project_model.dart';
+import 'package:notdle/models/repository/project_repository.dart';
+import 'package:notdle/providers/project_provider.dart';
+import 'package:notdle/services/api_service.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:floor/floor.dart';
 
 // import '../data/app_database.dart'; // Your Floor database
 // import '../data/order_dao.dart';
@@ -22,26 +28,50 @@ class AppProvider extends ChangeNotifier {
   CustomerDao get customerDao => _db.customerDao;
   OrderDao get orderDao => _db.orderDao;
   MeasurementDao get measurementDao => _db.measurementDao;
+  ProjectDao get projectDao => _db.projectDao;
 
+  // Providers
+  late final ProjectProvider _projectProvider;
+  ProjectProvider get projectProvider => _projectProvider;
 
-  Future<void> init() async {
-    // 1. Get the documents directory path
-    final documentsDir = await getApplicationDocumentsDirectory();
-    final dbPath = p.join(documentsDir.path, 'app_database.db');
+  Future<void> init([AppDatabase? db]) async {
+    if (db != null) {
+      _db = db;
+    } else {
+      // 1. Get the documents directory path
+      final documentsDir = await getApplicationDocumentsDirectory();
+      final dbPath = p.join(documentsDir.path, 'app_database.db');
 
-    // // 2. Check if DB already exists; if not, copy from assets
-    // final dbFile = File(dbPath);
-    // if (!await dbFile.exists()) {
-    //   print('[AppProvider] Copying pre-populated database from assets...');
-    //   final byteData = await rootBundle.load('assets/db/app_database.db');
-    //   await dbFile.writeAsBytes(
-    //     byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
-    //     flush: true,
-    //   );
-    // }
+      // // 2. Check if DB already exists; if not, copy from assets
+      // final dbFile = File(dbPath);
+      // if (!await dbFile.exists()) {
+      //   print('[AppProvider] Copying pre-populated database from assets...');
+      //   final byteData = await rootBundle.load('assets/db/app_database.db');
+      //   await dbFile.writeAsBytes(
+      //     byteData.buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+      //     flush: true,
+      //   );
+      // }
 
-    // 3. Initialize Floor with the copied database
-    _db = await $FloorAppDatabase.databaseBuilder(dbPath).build();
+      // 3. Initialize Floor with the copied database
+      final migration1to2 = Migration(1, 2, (database) async {
+        await database.execute(
+          'ALTER TABLE company ADD COLUMN currency TEXT NOT NULL DEFAULT "GHS"',
+        );
+      });
+
+      final migration2to3 = Migration(2, 3, (database) async {
+        await database.execute(
+          'ALTER TABLE company ADD COLUMN country TEXT NOT NULL DEFAULT "Ghana"',
+        );
+      });
+
+      _db =
+          await $FloorAppDatabase.databaseBuilder(dbPath).addMigrations([
+            migration1to2,
+            migration2to3,
+          ]).build();
+    }
 
     // Seed Company
     final existingCompany = await companyDao.getCompany();
@@ -58,6 +88,8 @@ class AppProvider extends ChangeNotifier {
         countryCode: 'US',
         imagePath: null,
         logoUrl: null,
+        currency: 'USD',
+        country: 'United States',
       );
       await companyDao.insertCompany(company);
     }
@@ -93,20 +125,23 @@ class AppProvider extends ChangeNotifier {
 
       await orderDao.insertOrder(newOrder);
 
-
       final measurement = Measurement(
         customerId: newCustomer.id!,
-        measurementValues: {
-          'waist': 34.0,
-          'chest': 40.0,
-          'inseam': 32.5,
-        },
-        createdDate: DateTime.now(), name: '',
+        measurementValues: {'waist': 34.0, 'chest': 40.0, 'inseam': 32.5},
+        createdDate: DateTime.now(),
+        name: '',
       );
 
       await measurementDao.insertMeasurement(measurement);
-
     }
+
+    // Initialize providers
+    _projectProvider = ProjectProvider(
+      projectRepository: ProjectRepository(
+        localDataSource: _db.projectDao,
+        apiService: ApiService(), // You might want to inject this properly
+      ),
+    );
 
     notifyListeners();
   }

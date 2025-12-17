@@ -300,13 +300,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Navigator.of(context).pushNamed(SettingsScreen.tag);
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 10),
         _buildActionButton(
           context,
           icon: Icons.logout,
           label: "Logout",
           isDestructive: true,
           onTap: () => _handleLogout(context),
+        ),
+        const SizedBox(height: 10),
+        _buildActionButton(
+          context,
+          icon: Icons.delete_forever,
+          label: "Delete Account",
+          isDestructive: true,
+          onTap: () => _showDeleteConfirmationDialog(context),
         ),
       ],
     );
@@ -387,6 +395,75 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error during logout: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder:
+          (ctx) => AlertDialog(
+            title: Text(
+              'Delete Account',
+              style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+            ),
+            content: Text(
+              'Are you sure you want to delete your account? This action cannot be undone.',
+              style: GoogleFonts.poppins(),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: Text(
+                  'Cancel',
+                  style: GoogleFonts.poppins(color: Colors.grey),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  _handleDeleteAccount(context);
+                },
+                child: Text(
+                  'Delete',
+                  style: GoogleFonts.poppins(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
+    );
+  }
+
+  Future<void> _handleDeleteAccount(BuildContext context) async {
+    final apiProvider = Provider.of<ApiProvider>(context, listen: false);
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => const Center(child: CircularProgressIndicator()),
+      );
+
+      await apiProvider.apiService.deleteAccount();
+      await SessionManager.clearSession();
+
+      if (context.mounted) {
+        // Remove loading indicator
+        Navigator.of(context).pop();
+        // Navigate to login
+        AppNavigator.toLogin2();
+      }
+    } catch (e) {
+      if (context.mounted) {
+        // Remove loading indicator
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error deleting account: $e'),
             backgroundColor: Colors.red,
           ),
         );

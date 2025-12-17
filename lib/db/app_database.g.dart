@@ -82,13 +82,15 @@ class _$AppDatabase extends AppDatabase {
 
   InvoiceDao? _invoiceDaoInstance;
 
+  ProjectDao? _projectDaoInstance;
+
   Future<sqflite.Database> open(
     String path,
     List<Migration> migrations, [
     Callback? callback,
   ]) async {
     final databaseOptions = sqflite.OpenDatabaseOptions(
-      version: 1,
+      version: 4,
       onConfigure: (database) async {
         await database.execute('PRAGMA foreign_keys = ON');
         await callback?.onConfigure?.call(database);
@@ -104,7 +106,7 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `company` (`id` TEXT NOT NULL, `businessName` TEXT NOT NULL, `ownerName` TEXT NOT NULL, `email` TEXT NOT NULL, `mobile` TEXT NOT NULL, `yearsOfExperience` INTEGER NOT NULL, `registrationNumber` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `address` TEXT NOT NULL, `logoUrl` TEXT, `imagePath` TEXT, `active` INTEGER NOT NULL, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `company` (`id` TEXT NOT NULL, `businessName` TEXT NOT NULL, `ownerName` TEXT NOT NULL, `email` TEXT NOT NULL, `mobile` TEXT NOT NULL, `yearsOfExperience` INTEGER NOT NULL, `registrationNumber` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `address` TEXT NOT NULL, `logoUrl` TEXT, `imagePath` TEXT, `active` INTEGER NOT NULL, `currency` TEXT NOT NULL, `country` TEXT NOT NULL, PRIMARY KEY (`id`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `customers` (`id` TEXT, `name` TEXT NOT NULL, `phone` TEXT NOT NULL, `email` TEXT, `lastVisit` INTEGER NOT NULL, `gender` TEXT NOT NULL, `address` TEXT, `imagePath` TEXT, `profileImageUrl` TEXT, `createdDate` INTEGER NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, PRIMARY KEY (`id`))');
         await database.execute(
@@ -119,6 +121,8 @@ class _$AppDatabase extends AppDatabase {
             'CREATE TABLE IF NOT EXISTS `order_items` (`id` TEXT NOT NULL, `orderId` TEXT NOT NULL, `productName` TEXT NOT NULL, `productDescription` TEXT, `quantity` INTEGER NOT NULL, `unitPrice` REAL NOT NULL, `taxRate` REAL, `amount` REAL NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, FOREIGN KEY (`orderId`) REFERENCES `orders` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`id`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `invoice_items` (`id` TEXT NOT NULL, `invoiceId` TEXT NOT NULL, `description` TEXT NOT NULL, `quantity` INTEGER NOT NULL, `unitPrice` REAL NOT NULL, `taxRate` REAL, `amount` REAL NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, FOREIGN KEY (`invoiceId`) REFERENCES `invoices` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`id`))');
+        await database.execute(
+            'CREATE TABLE IF NOT EXISTS `projects` (`id` TEXT NOT NULL, `company_id` TEXT NOT NULL, `client_id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `status` INTEGER NOT NULL, `start_date` INTEGER, `deadline` INTEGER, `completed_date` INTEGER, `budget` REAL NOT NULL, `spent` REAL NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `is_synced` INTEGER NOT NULL, `sync_date` INTEGER, PRIMARY KEY (`id`))');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -151,6 +155,11 @@ class _$AppDatabase extends AppDatabase {
   InvoiceDao get invoiceDao {
     return _invoiceDaoInstance ??= _$InvoiceDao(database, changeListener);
   }
+
+  @override
+  ProjectDao get projectDao {
+    return _projectDaoInstance ??= _$ProjectDao(database, changeListener);
+  }
 }
 
 class _$CompanyDao extends CompanyDao {
@@ -173,7 +182,9 @@ class _$CompanyDao extends CompanyDao {
                   'address': item.address,
                   'logoUrl': item.logoUrl,
                   'imagePath': item.imagePath,
-                  'active': item.active ? 1 : 0
+                  'active': item.active ? 1 : 0,
+                  'currency': item.currency,
+                  'country': item.country
                 }),
         _companyUpdateAdapter = UpdateAdapter(
             database,
@@ -191,7 +202,9 @@ class _$CompanyDao extends CompanyDao {
                   'address': item.address,
                   'logoUrl': item.logoUrl,
                   'imagePath': item.imagePath,
-                  'active': item.active ? 1 : 0
+                  'active': item.active ? 1 : 0,
+                  'currency': item.currency,
+                  'country': item.country
                 });
 
   final sqflite.DatabaseExecutor database;
@@ -219,7 +232,9 @@ class _$CompanyDao extends CompanyDao {
             address: row['address'] as String,
             logoUrl: row['logoUrl'] as String?,
             imagePath: row['imagePath'] as String?,
-            active: (row['active'] as int) != 0));
+            active: (row['active'] as int) != 0,
+            currency: row['currency'] as String,
+            country: row['country'] as String));
   }
 
   @override
@@ -237,7 +252,9 @@ class _$CompanyDao extends CompanyDao {
             address: row['address'] as String,
             logoUrl: row['logoUrl'] as String?,
             imagePath: row['imagePath'] as String?,
-            active: (row['active'] as int) != 0));
+            active: (row['active'] as int) != 0,
+            currency: row['currency'] as String,
+            country: row['country'] as String));
   }
 
   @override
@@ -255,7 +272,9 @@ class _$CompanyDao extends CompanyDao {
             address: row['address'] as String,
             logoUrl: row['logoUrl'] as String?,
             imagePath: row['imagePath'] as String?,
-            active: (row['active'] as int) != 0),
+            active: (row['active'] as int) != 0,
+            currency: row['currency'] as String,
+            country: row['country'] as String),
         arguments: [id]);
   }
 
@@ -274,7 +293,9 @@ class _$CompanyDao extends CompanyDao {
             address: row['address'] as String,
             logoUrl: row['logoUrl'] as String?,
             imagePath: row['imagePath'] as String?,
-            active: (row['active'] as int) != 0),
+            active: (row['active'] as int) != 0,
+            currency: row['currency'] as String,
+            country: row['country'] as String),
         arguments: [email]);
   }
 
@@ -294,7 +315,9 @@ class _$CompanyDao extends CompanyDao {
             address: row['address'] as String,
             logoUrl: row['logoUrl'] as String?,
             imagePath: row['imagePath'] as String?,
-            active: (row['active'] as int) != 0),
+            active: (row['active'] as int) != 0,
+            currency: row['currency'] as String,
+            country: row['country'] as String),
         arguments: [mobile]);
   }
 
@@ -317,7 +340,9 @@ class _$CompanyDao extends CompanyDao {
             address: row['address'] as String,
             logoUrl: row['logoUrl'] as String?,
             imagePath: row['imagePath'] as String?,
-            active: (row['active'] as int) != 0),
+            active: (row['active'] as int) != 0,
+            currency: row['currency'] as String,
+            country: row['country'] as String),
         arguments: [mobile, password]);
   }
 
@@ -1318,6 +1343,262 @@ class _$InvoiceDao extends InvoiceDao {
   @override
   Future<void> deleteInvoice(Invoice invoice) async {
     await _invoiceDeletionAdapter.delete(invoice);
+  }
+}
+
+class _$ProjectDao extends ProjectDao {
+  _$ProjectDao(
+    this.database,
+    this.changeListener,
+  )   : _queryAdapter = QueryAdapter(database),
+        _projectInsertionAdapter = InsertionAdapter(
+            database,
+            'projects',
+            (Project item) => <String, Object?>{
+                  'id': item.id,
+                  'company_id': item.companyId,
+                  'client_id': item.clientId,
+                  'title': item.title,
+                  'description': item.description,
+                  'status': item.status.index,
+                  'start_date': _dateTimeNullConvertor.encode(item.startDate),
+                  'deadline': _dateTimeNullConvertor.encode(item.deadline),
+                  'completed_date':
+                      _dateTimeNullConvertor.encode(item.completedDate),
+                  'budget': item.budget,
+                  'spent': item.spent,
+                  'created_at': _dateTimeConvertor.encode(item.createdAt),
+                  'updated_at': _dateTimeConvertor.encode(item.updatedAt),
+                  'is_synced': item.isSynced ? 1 : 0,
+                  'sync_date': _dateTimeNullConvertor.encode(item.syncDate)
+                }),
+        _projectUpdateAdapter = UpdateAdapter(
+            database,
+            'projects',
+            ['id'],
+            (Project item) => <String, Object?>{
+                  'id': item.id,
+                  'company_id': item.companyId,
+                  'client_id': item.clientId,
+                  'title': item.title,
+                  'description': item.description,
+                  'status': item.status.index,
+                  'start_date': _dateTimeNullConvertor.encode(item.startDate),
+                  'deadline': _dateTimeNullConvertor.encode(item.deadline),
+                  'completed_date':
+                      _dateTimeNullConvertor.encode(item.completedDate),
+                  'budget': item.budget,
+                  'spent': item.spent,
+                  'created_at': _dateTimeConvertor.encode(item.createdAt),
+                  'updated_at': _dateTimeConvertor.encode(item.updatedAt),
+                  'is_synced': item.isSynced ? 1 : 0,
+                  'sync_date': _dateTimeNullConvertor.encode(item.syncDate)
+                }),
+        _projectDeletionAdapter = DeletionAdapter(
+            database,
+            'projects',
+            ['id'],
+            (Project item) => <String, Object?>{
+                  'id': item.id,
+                  'company_id': item.companyId,
+                  'client_id': item.clientId,
+                  'title': item.title,
+                  'description': item.description,
+                  'status': item.status.index,
+                  'start_date': _dateTimeNullConvertor.encode(item.startDate),
+                  'deadline': _dateTimeNullConvertor.encode(item.deadline),
+                  'completed_date':
+                      _dateTimeNullConvertor.encode(item.completedDate),
+                  'budget': item.budget,
+                  'spent': item.spent,
+                  'created_at': _dateTimeConvertor.encode(item.createdAt),
+                  'updated_at': _dateTimeConvertor.encode(item.updatedAt),
+                  'is_synced': item.isSynced ? 1 : 0,
+                  'sync_date': _dateTimeNullConvertor.encode(item.syncDate)
+                });
+
+  final sqflite.DatabaseExecutor database;
+
+  final StreamController<String> changeListener;
+
+  final QueryAdapter _queryAdapter;
+
+  final InsertionAdapter<Project> _projectInsertionAdapter;
+
+  final UpdateAdapter<Project> _projectUpdateAdapter;
+
+  final DeletionAdapter<Project> _projectDeletionAdapter;
+
+  @override
+  Future<Project?> getProjectById(String id) async {
+    return _queryAdapter.query('SELECT * FROM projects WHERE id = ?1',
+        mapper: (Map<String, Object?> row) => Project(
+            id: row['id'] as String?,
+            companyId: row['company_id'] as String,
+            clientId: row['client_id'] as String,
+            title: row['title'] as String,
+            description: row['description'] as String?,
+            status: ProjectStatus.values[row['status'] as int],
+            startDate: _dateTimeNullConvertor.decode(row['start_date'] as int?),
+            deadline: _dateTimeNullConvertor.decode(row['deadline'] as int?),
+            completedDate:
+                _dateTimeNullConvertor.decode(row['completed_date'] as int?),
+            budget: row['budget'] as double,
+            spent: row['spent'] as double,
+            createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?),
+            updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?),
+            isSynced: (row['is_synced'] as int) != 0,
+            syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?)),
+        arguments: [id]);
+  }
+
+  @override
+  Future<List<Project>> getProjectsByCompany(String companyId) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM projects WHERE company_id = ?1 ORDER BY updated_at DESC',
+        mapper: (Map<String, Object?> row) => Project(
+            id: row['id'] as String?,
+            companyId: row['company_id'] as String,
+            clientId: row['client_id'] as String,
+            title: row['title'] as String,
+            description: row['description'] as String?,
+            status: ProjectStatus.values[row['status'] as int],
+            startDate: _dateTimeNullConvertor.decode(row['start_date'] as int?),
+            deadline: _dateTimeNullConvertor.decode(row['deadline'] as int?),
+            completedDate:
+                _dateTimeNullConvertor.decode(row['completed_date'] as int?),
+            budget: row['budget'] as double,
+            spent: row['spent'] as double,
+            createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?),
+            updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?),
+            isSynced: (row['is_synced'] as int) != 0,
+            syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?)),
+        arguments: [companyId]);
+  }
+
+  @override
+  Future<List<Project>> searchProjects(
+    String companyId,
+    String query,
+  ) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM projects      WHERE company_id = ?1      AND (title LIKE \'%\' || ?2 || \'%\' OR description LIKE \'%\' || ?2 || \'%\')     ORDER BY updated_at DESC',
+        mapper: (Map<String, Object?> row) => Project(id: row['id'] as String?, companyId: row['company_id'] as String, clientId: row['client_id'] as String, title: row['title'] as String, description: row['description'] as String?, status: ProjectStatus.values[row['status'] as int], startDate: _dateTimeNullConvertor.decode(row['start_date'] as int?), deadline: _dateTimeNullConvertor.decode(row['deadline'] as int?), completedDate: _dateTimeNullConvertor.decode(row['completed_date'] as int?), budget: row['budget'] as double, spent: row['spent'] as double, createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?), updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?), isSynced: (row['is_synced'] as int) != 0, syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?)),
+        arguments: [companyId, query]);
+  }
+
+  @override
+  Future<List<Project>> getProjectsByStatus(
+    String companyId,
+    String status,
+  ) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM projects      WHERE company_id = ?1      AND status = ?2     ORDER BY updated_at DESC',
+        mapper: (Map<String, Object?> row) => Project(id: row['id'] as String?, companyId: row['company_id'] as String, clientId: row['client_id'] as String, title: row['title'] as String, description: row['description'] as String?, status: ProjectStatus.values[row['status'] as int], startDate: _dateTimeNullConvertor.decode(row['start_date'] as int?), deadline: _dateTimeNullConvertor.decode(row['deadline'] as int?), completedDate: _dateTimeNullConvertor.decode(row['completed_date'] as int?), budget: row['budget'] as double, spent: row['spent'] as double, createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?), updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?), isSynced: (row['is_synced'] as int) != 0, syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?)),
+        arguments: [companyId, status]);
+  }
+
+  @override
+  Future<List<Project>> getOverdueProjects(
+    String companyId,
+    DateTime date,
+  ) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM projects      WHERE company_id = ?1      AND deadline < ?2     AND status NOT IN (\'COMPLETED\', \'CANCELLED\')     ORDER BY deadline ASC',
+        mapper: (Map<String, Object?> row) => Project(id: row['id'] as String?, companyId: row['company_id'] as String, clientId: row['client_id'] as String, title: row['title'] as String, description: row['description'] as String?, status: ProjectStatus.values[row['status'] as int], startDate: _dateTimeNullConvertor.decode(row['start_date'] as int?), deadline: _dateTimeNullConvertor.decode(row['deadline'] as int?), completedDate: _dateTimeNullConvertor.decode(row['completed_date'] as int?), budget: row['budget'] as double, spent: row['spent'] as double, createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?), updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?), isSynced: (row['is_synced'] as int) != 0, syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?)),
+        arguments: [companyId, _dateTimeConvertor.encode(date)]);
+  }
+
+  @override
+  Future<List<Project>> getProjectsDueBetween(
+    String companyId,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM projects      WHERE company_id = ?1      AND deadline BETWEEN ?2 AND ?3     ORDER BY deadline ASC',
+        mapper: (Map<String, Object?> row) => Project(
+            id: row['id'] as String?,
+            companyId: row['company_id'] as String,
+            clientId: row['client_id'] as String,
+            title: row['title'] as String,
+            description: row['description'] as String?,
+            status: ProjectStatus.values[row['status'] as int],
+            startDate: _dateTimeNullConvertor.decode(row['start_date'] as int?),
+            deadline: _dateTimeNullConvertor.decode(row['deadline'] as int?),
+            completedDate:
+                _dateTimeNullConvertor.decode(row['completed_date'] as int?),
+            budget: row['budget'] as double,
+            spent: row['spent'] as double,
+            createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?),
+            updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?),
+            isSynced: (row['is_synced'] as int) != 0,
+            syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?)),
+        arguments: [
+          companyId,
+          _dateTimeConvertor.encode(startDate),
+          _dateTimeConvertor.encode(endDate)
+        ]);
+  }
+
+  @override
+  Future<List<Project>> getProjectsByClient(String clientId) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM projects WHERE client_id = ?1 ORDER BY updated_at DESC',
+        mapper: (Map<String, Object?> row) => Project(
+            id: row['id'] as String?,
+            companyId: row['company_id'] as String,
+            clientId: row['client_id'] as String,
+            title: row['title'] as String,
+            description: row['description'] as String?,
+            status: ProjectStatus.values[row['status'] as int],
+            startDate: _dateTimeNullConvertor.decode(row['start_date'] as int?),
+            deadline: _dateTimeNullConvertor.decode(row['deadline'] as int?),
+            completedDate:
+                _dateTimeNullConvertor.decode(row['completed_date'] as int?),
+            budget: row['budget'] as double,
+            spent: row['spent'] as double,
+            createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?),
+            updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?),
+            isSynced: (row['is_synced'] as int) != 0,
+            syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?)),
+        arguments: [clientId]);
+  }
+
+  @override
+  Future<void> deleteProjectById(String id) async {
+    await _queryAdapter
+        .queryNoReturn('DELETE FROM projects WHERE id = ?1', arguments: [id]);
+  }
+
+  @override
+  Future<void> deleteProjectsByCompany(String companyId) async {
+    await _queryAdapter.queryNoReturn(
+        'DELETE FROM projects WHERE company_id = ?1',
+        arguments: [companyId]);
+  }
+
+  @override
+  Future<int?> countProjects(String companyId) async {
+    return _queryAdapter.query(
+        'SELECT COUNT(*) FROM projects WHERE company_id = ?1',
+        mapper: (Map<String, Object?> row) => row.values.first as int,
+        arguments: [companyId]);
+  }
+
+  @override
+  Future<void> insertProject(Project project) async {
+    await _projectInsertionAdapter.insert(project, OnConflictStrategy.abort);
+  }
+
+  @override
+  Future<void> updateProject(Project project) async {
+    await _projectUpdateAdapter.update(project, OnConflictStrategy.abort);
+  }
+
+  @override
+  Future<void> deleteProject(Project project) async {
+    await _projectDeletionAdapter.delete(project);
   }
 }
 

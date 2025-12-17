@@ -31,6 +31,7 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
   final _yearsOfExperienceController = TextEditingController();
   final _registrationNumberController = TextEditingController();
   String? _selectedCountryCode;
+  String? _selectedCountry;
 
   @override
   void dispose() {
@@ -81,6 +82,20 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
   Future<void> _registerCompanyProcess() async {
     final apiProvider = Provider.of<ApiProvider>(context, listen: false);
 
+    // Determine currency based on country code
+    String currency = 'GHS'; // Default to GHS
+    if (_selectedCountryCode == '+1') {
+      currency = 'USD';
+    } else if (_selectedCountryCode == '+44') {
+      currency = 'GBP';
+    } else if (_selectedCountryCode == '+233') {
+      currency = 'GHS';
+    } else if (_selectedCountryCode == '+234') {
+      currency = 'NGN';
+    } else if (_selectedCountryCode == '+91') {
+      currency = 'INR';
+    }
+
     // Create company data map for API
     final companyData = {
       'businessName': _businessNameController.text.trim(),
@@ -88,9 +103,14 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
       'mobile': _mobileController.text.trim(),
       'yearsOfExperience':
           int.tryParse(_yearsOfExperienceController.text.trim()) ?? 0,
-      'registrationNumber': _registrationNumberController.text.trim() ?? "N/A",
+      'registrationNumber':
+          _registrationNumberController.text.trim().isEmpty
+              ? "N/A"
+              : _registrationNumberController.text.trim(),
       'address': _addressController.text.trim(),
       'countryCode': _selectedCountryCode,
+      'currency': currency,
+      'country': _selectedCountry ?? 'Ghana',
     };
 
     try {
@@ -202,7 +222,7 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
                 Text(
                   "Tell us about your business.",
                   style: GoogleFonts.poppins(
-                    fontSize: 28,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.indigo.shade800,
                   ),
@@ -243,10 +263,19 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
                         onChanged: (CountryCode code) {
                           setState(() {
                             _selectedCountryCode = code.dialCode;
+                            _selectedCountry = code.name;
+                            debugPrint('Selected country: ${code.name}');
                           });
                         },
                         initialSelection: 'US',
-                        favorite: const ['+233', 'US', '+91'],
+                        favorite: const [
+                          '+233',
+                          'US',
+                          '+91',
+                          '+234',
+                          '+44',
+                          '+254',
+                        ],
                         showCountryOnly: true,
                         showOnlyCountryWhenClosed: false,
                         alignLeft: false,

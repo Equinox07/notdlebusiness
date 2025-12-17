@@ -2,9 +2,7 @@
 
 import 'package:floor/floor.dart';
 
-@Entity(
-  tableName: 'company'
-)
+@Entity(tableName: 'company')
 class Company {
   @PrimaryKey()
   final String id;
@@ -19,6 +17,8 @@ class Company {
   final String? logoUrl;
   final String? imagePath;
   final bool active;
+  final String currency;
+  final String country;
 
   Company({
     required this.id,
@@ -33,6 +33,8 @@ class Company {
     this.logoUrl,
     this.imagePath,
     this.active = true,
+    this.currency = 'GHS',
+    this.country = 'Ghana',
   });
 
   // Factory constructor to create a Company from a Map
@@ -50,6 +52,8 @@ class Company {
       logoUrl: map['logoUrl'] as String?,
       imagePath: map['imagePath'] as String?,
       active: map['active'] as bool? ?? true,
+      currency: map['currency'] as String? ?? 'GHS',
+      country: map['country'] as String? ?? 'Ghana',
     );
   }
 
@@ -68,6 +72,8 @@ class Company {
       'logoUrl': logoUrl,
       'imagePath': imagePath,
       'active': active,
+      'currency': currency,
+      'country': country,
     };
   }
 
@@ -84,6 +90,8 @@ class Company {
     String? logoUrl,
     String? imagePath,
     bool? active,
+    String? currency,
+    String? country,
   }) {
     return Company(
       id: id ?? this.id,
@@ -98,6 +106,8 @@ class Company {
       logoUrl: logoUrl ?? this.logoUrl,
       imagePath: imagePath ?? this.imagePath,
       active: active ?? this.active,
+      currency: currency ?? this.currency,
+      country: country ?? this.country,
     );
   }
 }

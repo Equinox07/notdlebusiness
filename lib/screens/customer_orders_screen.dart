@@ -7,6 +7,7 @@ import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/order.dart';
 import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/screens/order_details_screen.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 
 class CustomerOrdersScreen extends StatefulWidget {
@@ -35,8 +36,10 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
     if (mounted) {
       // We call the provider to fetch the data. The Consumer will handle the UI update.
       // We assert that customer.id is not null, as it's essential for this screen.
-      await Provider.of<OrderProvider>(context, listen: false)
-          .fetchOrdersForCustomer(widget.customer.id!);
+      await Provider.of<OrderProvider>(
+        context,
+        listen: false,
+      ).fetchOrdersForCustomer(widget.customer.id!);
     }
   }
 
@@ -44,14 +47,7 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
-      appBar: AppBar(
-        title: Text(
-          "${widget.customer.name}'s Orders",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 1,
-      ),
+      appBar: CustomAppBar(title: "${widget.customer.name}'s Orders"),
       // Use a Consumer to listen for changes in the OrderProvider
       body: Consumer<OrderProvider>(
         builder: (context, orderProvider, child) {
@@ -64,11 +60,18 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.inbox_outlined, size: 60, color: Colors.grey.shade400),
+                  Icon(
+                    Icons.inbox_outlined,
+                    size: 60,
+                    color: Colors.grey.shade400,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     "No Orders Found",
-                    style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600),
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   Text(
                     "This customer has no orders yet.",

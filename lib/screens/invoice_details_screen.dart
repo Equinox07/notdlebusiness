@@ -13,6 +13,7 @@ import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/services/session_manager.dart';
 import 'package:notdle/widgets/status_chip.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 // import 'package:notdle/widgets/status_chip.dart';
 
@@ -41,7 +42,6 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
   late Future<Company?> _companyFuture;
   // final DatabaseHelper _dbHelper = DatabaseHelper.instance;
 
-
   @override
   void initState() {
     super.initState();
@@ -54,11 +54,18 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
     //   widget.invoice.orderId,
     // );
 
-    final order = await Provider.of<OrderProvider>(context, listen: false).getOrderById(widget.invoice.orderId!);
-        // .get(widget.invoice.customerId);
+    final order = await Provider.of<OrderProvider>(
+      context,
+      listen: false,
+    ).getOrderById(widget.invoice.orderId!);
+    // .get(widget.invoice.customerId);
 
-    final customer = await Provider.of<CustomerProvider>(context, listen: false)
-        .getCustomerById(widget.invoice.customerId); //DatabaseHelper.instance.fetchCustomerById(widget.invoice.customerId,);
+    final customer = await Provider.of<CustomerProvider>(
+      context,
+      listen: false,
+    ).getCustomerById(
+      widget.invoice.customerId,
+    ); //DatabaseHelper.instance.fetchCustomerById(widget.invoice.customerId,);
 
     return _InvoiceDetailsData(
       invoice: widget.invoice,
@@ -71,14 +78,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: Text(
-          "Invoice Details",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 1,
-      ),
+      appBar: const CustomAppBar(title: "Invoice Details"),
       body: FutureBuilder<_InvoiceDetailsData>(
         future: _invoiceDetailsFuture,
         builder: (context, snapshot) {
@@ -147,12 +147,18 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
                 radius: 30,
                 backgroundColor: Colors.indigo,
                 // Conditionally load the image
-                backgroundImage: company.imagePath != null
-                    ? FileImage(File(company.imagePath!)) as ImageProvider
-                    : null,
-                child: company.imagePath == null
-                    ? const Icon(Icons.business, color: Colors.white, size: 30)
-                    : null,
+                backgroundImage:
+                    company.imagePath != null
+                        ? FileImage(File(company.imagePath!)) as ImageProvider
+                        : null,
+                child:
+                    company.imagePath == null
+                        ? const Icon(
+                          Icons.business,
+                          color: Colors.white,
+                          size: 30,
+                        )
+                        : null,
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -162,7 +168,9 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
                     Text(
                       company.businessName,
                       style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold, fontSize: 20),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -227,7 +235,6 @@ class _CustomerInfoCard extends StatelessWidget {
     );
   }
 }
-
 
 class _InvoiceHeaderCard extends StatelessWidget {
   final Invoice invoice;

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/service_model.dart';
 import 'package:notdle/screens/all_measurement_screen.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 // Your navigation destinations
 
 class ServicesScreen extends StatelessWidget {
@@ -50,19 +51,7 @@ class ServicesScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: Text(
-          "Services",
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w700,
-            color: Colors.black87,
-            fontSize: 24,
-          ),
-        ),
-        backgroundColor: Colors.grey.shade50,
-        elevation: 0,
-        centerTitle: false,
-      ),
+      appBar: const CustomAppBar(title: "Services"),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: GridView.builder(

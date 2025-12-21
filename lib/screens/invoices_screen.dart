@@ -7,6 +7,7 @@ import 'package:notdle/models/invoice.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/invoice_provider.dart';
 import 'package:notdle/screens/invoice_details_screen.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 
 // A new data class to hold the combined Invoice and Customer data.
@@ -40,8 +41,14 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
   // This method is now more efficient, fetching all data upfront.
   Future<List<_InvoiceWithCustomer>> _fetchInvoicesWithCustomers() async {
     if (!mounted) return [];
-    final invoiceProvider = Provider.of<InvoiceProvider>(context, listen: false);
-    final customerProvider = Provider.of<CustomerProvider>(context, listen: false);
+    final invoiceProvider = Provider.of<InvoiceProvider>(
+      context,
+      listen: false,
+    );
+    final customerProvider = Provider.of<CustomerProvider>(
+      context,
+      listen: false,
+    );
 
     // 1. Fetch all invoices
     await invoiceProvider.fetchInvoices();
@@ -51,7 +58,9 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
 
     // 2. For each invoice, fetch its customer and create the combined object.
     for (final invoice in invoices) {
-      final customer = await customerProvider.getCustomerById(invoice.customerId);
+      final customer = await customerProvider.getCustomerById(
+        invoice.customerId,
+      );
       detailedInvoices.add(
         _InvoiceWithCustomer(
           invoice: invoice,
@@ -75,14 +84,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
-      appBar: AppBar(
-        title: Text(
-          "Invoices",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 1,
-      ),
+      appBar: const CustomAppBar(title: "Invoices"),
       body: RefreshIndicator(
         onRefresh: () async => _refreshInvoices(),
         child: FutureBuilder<List<_InvoiceWithCustomer>>(
@@ -93,21 +95,25 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
             } else if (snapshot.hasError) {
               debugPrint("InvoicesScreen Error: ${snapshot.error}");
               return Center(
-                child: Text(
-                  "An error occurred.",
-                  style: GoogleFonts.poppins(),
-                ),
+                child: Text("An error occurred.", style: GoogleFonts.poppins()),
               );
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.receipt_long_outlined, size: 60, color: Colors.grey.shade400),
+                    Icon(
+                      Icons.receipt_long_outlined,
+                      size: 60,
+                      color: Colors.grey.shade400,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       "No Invoices Found",
-                      style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600),
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -131,7 +137,10 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                       // Await navigation and refresh if data might have changed.
                       await Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => InvoiceDetailsScreen(invoice: detailedInvoice.invoice),
+                          builder:
+                              (context) => InvoiceDetailsScreen(
+                                invoice: detailedInvoice.invoice,
+                              ),
                         ),
                       );
                       _refreshInvoices();
@@ -162,8 +171,11 @@ class InvoiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isOverdue = invoice.status != 'Paid' && invoice.date!.isBefore(DateTime.now());
-    final String formattedDueDate = DateFormat('MMM d, y').format(invoice.date!);
+    final bool isOverdue =
+        invoice.status != 'Paid' && invoice.date!.isBefore(DateTime.now());
+    final String formattedDueDate = DateFormat(
+      'MMM d, y',
+    ).format(invoice.date!);
 
     return Card(
       elevation: 1.5,
@@ -199,7 +211,11 @@ class InvoiceCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Icon(Icons.person_outline, size: 16, color: Colors.grey.shade600),
+                            Icon(
+                              Icons.person_outline,
+                              size: 16,
+                              color: Colors.grey.shade600,
+                            ),
                             const SizedBox(width: 6),
                             Text(
                               customerName,
@@ -238,15 +254,24 @@ class InvoiceCard extends StatelessWidget {
                       Icon(
                         Icons.calendar_today_outlined,
                         size: 14,
-                        color: isOverdue ? Colors.red.shade700 : Colors.grey.shade600,
+                        color:
+                            isOverdue
+                                ? Colors.red.shade700
+                                : Colors.grey.shade600,
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        isOverdue ? "Overdue: $formattedDueDate" : "Due: $formattedDueDate",
+                        isOverdue
+                            ? "Overdue: $formattedDueDate"
+                            : "Due: $formattedDueDate",
                         style: GoogleFonts.poppins(
                           fontSize: 13,
-                          color: isOverdue ? Colors.red.shade700 : Colors.grey.shade600,
-                          fontWeight: isOverdue ? FontWeight.bold : FontWeight.w500,
+                          color:
+                              isOverdue
+                                  ? Colors.red.shade700
+                                  : Colors.grey.shade600,
+                          fontWeight:
+                              isOverdue ? FontWeight.bold : FontWeight.w500,
                         ),
                       ),
                     ],

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:notdle/models/order.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/order_provider.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:notdle/widgets/deadline_card.dart';
 import 'package:provider/provider.dart';
 
@@ -49,20 +50,7 @@ class _DeadlineScreenState extends State<DeadlineScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: Text(
-          "Deadlines",
-          style: GoogleFonts.playfairDisplay(
-            fontWeight: FontWeight.w700,
-            color: Colors.black87,
-            fontSize: 24,
-          ),
-        ),
-        backgroundColor: Colors.grey.shade50,
-        elevation: 0,
-        centerTitle: false,
-        iconTheme: const IconThemeData(color: Colors.black87),
-      ),
+      appBar: const CustomAppBar(title: "Deadlines"),
       body: FutureBuilder<List<Order>>(
         future: _deadlinesFuture,
         builder: (context, snapshot) {

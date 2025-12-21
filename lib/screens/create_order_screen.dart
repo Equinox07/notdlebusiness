@@ -11,6 +11,7 @@ import 'package:notdle/providers/dashboard_provider.dart';
 import 'package:notdle/providers/invoice_provider.dart';
 import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/screens/invoice_details_screen.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -40,7 +41,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
   late Future<List<Customer>> _customersFuture;
 
-  static const List<String> _orderStatuses = ["Pending", "In Progress", "Completed", "Cancelled"];
+  static const List<String> _orderStatuses = [
+    "Pending",
+    "In Progress",
+    "Completed",
+    "Cancelled",
+  ];
   static const List<String> _paymentStatuses = ["Unpaid", "Partial", "Paid"];
 
   @override
@@ -54,14 +60,19 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   }
 
   Future<List<Customer>> _loadCustomers() async {
-    final customerProvider = Provider.of<CustomerProvider>(context, listen: false);
+    final customerProvider = Provider.of<CustomerProvider>(
+      context,
+      listen: false,
+    );
     await customerProvider.fetchCustomers();
     final customers = customerProvider.customers;
 
     // from the fetched list to ensure object equality for the Dropdown.
     if (widget.customer != null) {
       try {
-        _selectedCustomer = customers.firstWhere((c) => c.id == widget.customer!.id);
+        _selectedCustomer = customers.firstWhere(
+          (c) => c.id == widget.customer!.id,
+        );
       } catch (e) {
         // Handle case where the passed customer is not in the list, though this is unlikely.
         _selectedCustomer = null;
@@ -69,7 +80,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     }
 
     // Only pre-select the first customer if no customer was passed in and none is selected.
-    if (widget.customer == null && customers.isNotEmpty && _selectedCustomer == null) {
+    if (widget.customer == null &&
+        customers.isNotEmpty &&
+        _selectedCustomer == null) {
       setState(() {
         _selectedCustomer = customers.first;
       });
@@ -91,7 +104,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
               onPrimary: Colors.white,
               surface: Colors.white,
               onSurface: Colors.black87,
-            ), dialogTheme: DialogThemeData(backgroundColor: Colors.white),
+            ),
+            dialogTheme: DialogThemeData(backgroundColor: Colors.white),
           ),
           child: child!,
         );
@@ -112,7 +126,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
     if (_selectedCustomer == null || _selectedCustomer!.id == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please select a valid customer", style: GoogleFonts.poppins())),
+        SnackBar(
+          content: Text(
+            "Please select a valid customer",
+            style: GoogleFonts.poppins(),
+          ),
+        ),
       );
       return;
     }
@@ -124,7 +143,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       status: _status,
       paymentStatus: _paymentStatus,
       paymentAmount: double.tryParse(_paymentAmount ?? '0'),
-      dueDate: _dueDate != null ? DateFormat('yyyy-MM-dd').format(_dueDate!) : null,
+      dueDate:
+          _dueDate != null ? DateFormat('yyyy-MM-dd').format(_dueDate!) : null,
       notes: _notes ?? '', // Provide a default empty string
       createdDate: DateTime.now().toIso8601String(),
     );
@@ -138,7 +158,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: Text("Order Created", style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+          title: Text(
+            "Order Created",
+            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+          ),
           content: Text(
             "Would you like to generate an invoice for this order now?",
             style: GoogleFonts.poppins(),
@@ -149,21 +172,33 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 Navigator.of(dialogContext).pop(); // Close dialog
                 Navigator.of(context).pop(); // Go back to orders screen
               },
-              child: Text("Later", style: GoogleFonts.poppins(color: Colors.grey.shade600)),
+              child: Text(
+                "Later",
+                style: GoogleFonts.poppins(color: Colors.grey.shade600),
+              ),
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(dialogContext).pop(); // Close dialog before navigating
+                Navigator.of(
+                  dialogContext,
+                ).pop(); // Close dialog before navigating
                 _generateInvoice(newOrder);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.indigo.shade600,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              child: Text("Create Invoice", style: GoogleFonts.poppins(color: Colors.white)),
+              child: Text(
+                "Create Invoice",
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
             ),
           ],
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         );
       },
     );
@@ -181,7 +216,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       orderId: newOrder.id,
     );
 
-    await Provider.of<InvoiceProvider>(context, listen: false).addInvoice(newInvoice);
+    await Provider.of<InvoiceProvider>(
+      context,
+      listen: false,
+    ).addInvoice(newInvoice);
 
     if (!mounted) return;
 
@@ -196,11 +234,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
-      appBar: AppBar(
-        title: Text("Create New Order", style: GoogleFonts.poppins(fontWeight: FontWeight.w600)),
-        backgroundColor: Colors.white,
-        elevation: 1,
-      ),
+      appBar: const CustomAppBar(title: "Create New Order"),
       body: FutureBuilder<List<Customer>>(
         future: _customersFuture,
         builder: (context, snapshot) {
@@ -208,18 +242,27 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
+          if (snapshot.hasError ||
+              !snapshot.hasData ||
+              snapshot.data!.isEmpty) {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.people_alt_outlined, size: 60, color: Colors.grey),
+                    const Icon(
+                      Icons.people_alt_outlined,
+                      size: 60,
+                      color: Colors.grey,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       "No Customers Found",
-                      style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600),
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -241,7 +284,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _submitForm,
         backgroundColor: Colors.indigo.shade600,
-        label: Text("Create Order", style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white)),
+        label: Text(
+          "Create Order",
+          style: GoogleFonts.poppins(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
         icon: const Icon(Icons.add_shopping_cart, color: Colors.white),
       ),
     );
@@ -258,7 +307,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionHeader("Order Details", icon: Icons.shopping_bag_outlined),
+              _buildSectionHeader(
+                "Order Details",
+                icon: Icons.shopping_bag_outlined,
+              ),
               const SizedBox(height: 12),
               _buildCard(
                 children: [
@@ -272,54 +324,90 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                   _buildDropdownFormField<Customer>(
                     label: "Select Customer",
                     value: _selectedCustomer,
-                    items: customers.map((customer) => DropdownMenuItem(
-                      value: customer,
-                      child: Text(customer.name, style: GoogleFonts.poppins()),
-                    )).toList(),
+                    items:
+                        customers
+                            .map(
+                              (customer) => DropdownMenuItem(
+                                value: customer,
+                                child: Text(
+                                  customer.name,
+                                  style: GoogleFonts.poppins(),
+                                ),
+                              ),
+                            )
+                            .toList(),
                     // If a customer is passed via the widget, disable the dropdown.
-                    onChanged: widget.customer != null
-                        ? null
-                        : (customer) => setState(() => _selectedCustomer = customer),
-                    validator: (value) => value == null ? "Please select a customer" : null,
+                    onChanged:
+                        widget.customer != null
+                            ? null
+                            : (customer) =>
+                                setState(() => _selectedCustomer = customer),
+                    validator:
+                        (value) =>
+                            value == null ? "Please select a customer" : null,
                   ),
                   const SizedBox(height: 16),
                   _buildDatePickerField(),
                 ],
               ),
               const SizedBox(height: 24),
-              _buildSectionHeader("Status & Payment", icon: Icons.receipt_long_outlined),
+              _buildSectionHeader(
+                "Status & Payment",
+                icon: Icons.receipt_long_outlined,
+              ),
               const SizedBox(height: 12),
               _buildCard(
                 children: [
                   _buildDropdownFormField<String>(
                     label: "Order Status",
                     value: _status,
-                    items: _orderStatuses.map((status) => DropdownMenuItem(
-                      value: status,
-                      child: Text(status, style: GoogleFonts.poppins()),
-                    )).toList(),
+                    items:
+                        _orderStatuses
+                            .map(
+                              (status) => DropdownMenuItem(
+                                value: status,
+                                child: Text(
+                                  status,
+                                  style: GoogleFonts.poppins(),
+                                ),
+                              ),
+                            )
+                            .toList(),
                     onChanged: (value) => setState(() => _status = value!),
                   ),
                   const SizedBox(height: 16),
                   _buildDropdownFormField<String>(
                     label: "Payment Status",
                     value: _paymentStatus,
-                    items: _paymentStatuses.map((status) => DropdownMenuItem(
-                      value: status,
-                      child: Text(status, style: GoogleFonts.poppins()),
-                    )).toList(),
-                    onChanged: (value) => setState(() => _paymentStatus = value!),
+                    items:
+                        _paymentStatuses
+                            .map(
+                              (status) => DropdownMenuItem(
+                                value: status,
+                                child: Text(
+                                  status,
+                                  style: GoogleFonts.poppins(),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                    onChanged:
+                        (value) => setState(() => _paymentStatus = value!),
                   ),
                   if (_paymentStatus != "Unpaid") ...[
                     const SizedBox(height: 16),
                     _buildTextFormField(
                       label: "Amount Paid",
                       hint: "e.g., 250.00",
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       onSaved: (value) => _paymentAmount = value,
                       validator: (value) {
-                        if (value == null || value.isEmpty) return "Amount is required";
-                        if (double.tryParse(value) == null) return "Please enter a valid number";
+                        if (value == null || value.isEmpty)
+                          return "Amount is required";
+                        if (double.tryParse(value) == null)
+                          return "Please enter a valid number";
                         return null;
                       },
                     ),
@@ -327,7 +415,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 ],
               ),
               const SizedBox(height: 24),
-              _buildSectionHeader("Additional Notes", icon: Icons.description_outlined),
+              _buildSectionHeader(
+                "Additional Notes",
+                icon: Icons.description_outlined,
+              ),
               const SizedBox(height: 12),
               _buildCard(
                 children: [
@@ -355,7 +446,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         const SizedBox(width: 8),
         Text(
           title,
-          style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.grey.shade800),
+          style: GoogleFonts.poppins(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey.shade800,
+          ),
         ),
       ],
     );
@@ -400,14 +495,19 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.indigo.shade600, width: 2.0),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
       ),
       maxLines: maxLines,
       onSaved: onSaved,
-      validator: validator ?? (value) {
-        if (value == null || value.isEmpty) return "This field is required";
-        return null;
-      },
+      validator:
+          validator ??
+          (value) {
+            if (value == null || value.isEmpty) return "This field is required";
+            return null;
+          },
     );
   }
 
@@ -448,7 +548,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     return TextFormField(
       readOnly: true,
       controller: TextEditingController(
-        text: _dueDate != null ? DateFormat('MMMM d, yyyy').format(_dueDate!) : '',
+        text:
+            _dueDate != null
+                ? DateFormat('MMMM d, yyyy').format(_dueDate!)
+                : '',
       ),
       style: GoogleFonts.poppins(),
       decoration: InputDecoration(
@@ -465,8 +568,14 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.indigo.shade600, width: 2.0),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        suffixIcon: Icon(Icons.calendar_today_outlined, color: Colors.indigo.shade600),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        suffixIcon: Icon(
+          Icons.calendar_today_outlined,
+          color: Colors.indigo.shade600,
+        ),
       ),
       onTap: () => _selectDueDate(context),
       validator: (value) {

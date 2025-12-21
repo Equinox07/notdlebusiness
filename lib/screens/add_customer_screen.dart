@@ -8,6 +8,7 @@ import 'package:notdle/providers/customer_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
 import 'package:flutter/services.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:image_picker/image_picker.dart'; // Import image_picker
 import 'dart:io';
 
@@ -107,17 +108,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       },
       child: Scaffold(
         backgroundColor: Colors.grey.shade50, // Lighter background
-        appBar: AppBar(
-          title: Text(
-            "Add New Customer",
-            style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
-          backgroundColor: Colors.indigo,
-          elevation: 0,
-          iconTheme: const IconThemeData(color: Colors.white),
+        appBar: CustomAppBar(
+          title: "Add New Customer",
           actions: [
             IconButton(
               onPressed: () async {

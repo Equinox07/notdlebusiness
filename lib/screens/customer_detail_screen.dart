@@ -5,6 +5,7 @@ import 'package:notdle/models/customer.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/screens/create_order_screen.dart';
 import 'package:notdle/screens/customer_orders_screen.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CustomerDetailScreen extends StatelessWidget {
@@ -18,14 +19,7 @@ class CustomerDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: Text(
-          "Customer Details",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 1,
-      ),
+      appBar: const CustomAppBar(title: "Customer Details"),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -253,13 +247,16 @@ class _QuickActionsCard extends StatelessWidget {
                   icon: Icons.add_shopping_cart,
                   label: 'New Order',
                   color: Colors.green.shade600,
-                  onTap: () =>  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) => CreateOrderScreen(customer: customer),
-                    ),
-                  )
-                      //AppNavigator.toCreateOrder(customer: customer),
-                    // AppNavigator.toOrders(),
+                  onTap:
+                      () => Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder:
+                              (context) =>
+                                  CreateOrderScreen(customer: customer),
+                        ),
+                      ),
+                  //AppNavigator.toCreateOrder(customer: customer),
+                  // AppNavigator.toOrders(),
                 ),
               ),
             ],

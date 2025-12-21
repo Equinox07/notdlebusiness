@@ -8,6 +8,7 @@ import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/screens/create_order_screen.dart';
 import 'package:notdle/screens/order_details_screen.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 
 // A new data class to hold the combined Order and Customer data.
@@ -42,7 +43,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Future<List<_OrderWithCustomer>> _fetchOrdersWithCustomers() async {
     if (!mounted) return [];
     final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-    final customerProvider = Provider.of<CustomerProvider>(context, listen: false);
+    final customerProvider = Provider.of<CustomerProvider>(
+      context,
+      listen: false,
+    );
 
     // 1. Fetch all orders
     await orderProvider.fetchOrders();
@@ -76,14 +80,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
-      appBar: AppBar(
-        title: Text(
-          "Orders",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 1,
-      ),
+      appBar: const CustomAppBar(title: "Orders"),
       body: RefreshIndicator(
         onRefresh: () async => _refreshOrders(),
         child: FutureBuilder<List<_OrderWithCustomer>>(
@@ -103,11 +100,18 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.inbox_outlined, size: 60, color: Colors.grey.shade400),
+                    Icon(
+                      Icons.inbox_outlined,
+                      size: 60,
+                      color: Colors.grey.shade400,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       "No Orders Yet",
-                      style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.w600),
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -120,7 +124,12 @@ class _OrdersScreenState extends State<OrdersScreen> {
             } else {
               final orders = snapshot.data!;
               return ListView.builder(
-                padding: const EdgeInsets.fromLTRB(12, 16, 12, 80), // Add padding for FAB
+                padding: const EdgeInsets.fromLTRB(
+                  12,
+                  16,
+                  12,
+                  80,
+                ), // Add padding for FAB
                 itemCount: orders.length,
                 itemBuilder: (context, index) {
                   final detailedOrder = orders[index];
@@ -131,7 +140,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
                       // Await navigation and refresh if data might have changed.
                       await Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => OrderDetailsScreen(order: detailedOrder.order),
+                          builder:
+                              (context) => OrderDetailsScreen(
+                                order: detailedOrder.order,
+                              ),
                         ),
                       );
                       _refreshOrders();
@@ -217,7 +229,11 @@ class _OrderCard extends StatelessWidget {
               const SizedBox(height: 4),
               Row(
                 children: [
-                  Icon(Icons.person_outline, size: 16, color: Colors.grey.shade600),
+                  Icon(
+                    Icons.person_outline,
+                    size: 16,
+                    color: Colors.grey.shade600,
+                  ),
                   const SizedBox(width: 6),
                   Text(
                     customerName,

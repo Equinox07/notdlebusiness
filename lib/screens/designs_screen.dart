@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 
 class DesignsScreen extends StatefulWidget {
   const DesignsScreen({super.key});
@@ -20,7 +21,7 @@ class _DesignsScreenState extends State<DesignsScreen> {
     final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Designs")),
+      appBar: const CustomAppBar(title: "Designs"),
       body: GridView.builder(
         padding: const EdgeInsets.all(16),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -45,7 +46,9 @@ class _DesignsScreenState extends State<DesignsScreen> {
                 Text(
                   design["name"],
                   style: TextStyle(
-                      fontWeight: FontWeight.bold, color: design["color"]),
+                    fontWeight: FontWeight.bold,
+                    color: design["color"],
+                  ),
                 ),
               ],
             ),

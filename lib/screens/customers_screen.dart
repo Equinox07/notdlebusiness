@@ -5,6 +5,7 @@ import 'package:notdle/models/customer.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/screens/add_customer_screen.dart';
 import 'package:notdle/screens/customer_detail_screen.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 
 class CustomersScreen extends StatefulWidget {
@@ -76,14 +77,7 @@ class _CustomersScreenState extends State<CustomersScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: Text(
-          "Customers",
-          style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 1,
-      ),
+      appBar: const CustomAppBar(title: "Customers"),
       body: Column(
         children: [
           // 🔍 Search bar

@@ -6,6 +6,7 @@ import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
 import 'package:notdle/providers/notification_provider.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:notdle/widgets/deadline_card.dart';
 import 'package:provider/provider.dart';
 
@@ -40,19 +41,9 @@ class _DashboardHomeState extends State<DashboardHome> {
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: Text(
-          "Dashboard",
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w700,
-            color: Colors.black87,
-            fontSize: 24,
-          ),
-        ),
+      appBar: CustomAppBar(
+        title: "Dashboard",
         automaticallyImplyLeading: false,
-        backgroundColor: Colors.grey.shade50,
-        elevation: 0,
-        centerTitle: false,
         actions: [
           _NotificationBell(notificationProvider: notificationProvider),
           const SizedBox(width: 8),
@@ -318,7 +309,7 @@ class _NotificationBell extends StatelessWidget {
     return Stack(
       children: [
         IconButton(
-          icon: const Icon(Icons.notifications_outlined, color: Colors.black87),
+          icon: const Icon(Icons.notifications_outlined, color: Colors.white),
           onPressed: () => AppNavigator.toNotifications(),
         ),
         if (notificationProvider.unreadCount > 0)
@@ -357,12 +348,12 @@ class _ProfileIcon extends StatelessWidget {
       icon: Container(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.grey.shade300, width: 1.5),
+          border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
         ),
         child: CircleAvatar(
           radius: 16,
-          backgroundColor: Colors.white,
-          child: const Icon(Icons.person, color: Colors.black87, size: 20),
+          backgroundColor: Colors.white.withOpacity(0.2),
+          child: const Icon(Icons.person, color: Colors.white, size: 20),
         ),
       ),
       onPressed: () => AppNavigator.toProfile(),

@@ -7,6 +7,7 @@ import 'package:notdle/models/measurement.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/measurement_provider.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 
 // These are placeholder models and services.
@@ -271,16 +272,14 @@ class _CustomerMeasurementScreenState extends State<CustomerMeasurementScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          title: Row(
+        appBar: CustomAppBar(
+          titleWidget: Row(
             children: [
               GestureDetector(
                 onTap: _showImageSourceActionSheet,
                 child: CircleAvatar(
                   radius: 20,
-                  backgroundColor: Colors.indigo.shade100,
+                  backgroundColor: Colors.white.withOpacity(0.2),
                   backgroundImage:
                       _profileImage != null
                           ? FileImage(_profileImage!)
@@ -297,7 +296,7 @@ class _CustomerMeasurementScreenState extends State<CustomerMeasurementScreen> {
                             style: GoogleFonts.poppins(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.indigo,
+                              color: Colors.white,
                             ),
                           )
                           : null,
@@ -306,26 +305,41 @@ class _CustomerMeasurementScreenState extends State<CustomerMeasurementScreen> {
               const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     widget.customer.name,
                     style: GoogleFonts.poppins(
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
-                      color: Colors.black,
+                      color: Colors.white,
                     ),
                   ),
                   Text(
                     "${widget.customer.gender} • ${widget.customer.phone}",
                     style: GoogleFonts.poppins(
                       fontSize: 12,
-                      color: Colors.grey.shade600,
+                      color: Colors.white.withOpacity(0.8),
                     ),
                   ),
                 ],
               ),
             ],
           ),
+          actions: [
+            IconButton(
+              onPressed: _saveMeasurement,
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 20),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
         ),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.start,

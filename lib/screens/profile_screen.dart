@@ -11,6 +11,7 @@ import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/providers/api_provider.dart';
 import 'package:notdle/services/session_manager.dart';
 import 'package:notdle/screens/settings_screen.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -56,19 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        title: Text(
-          "My Profile",
-          style: GoogleFonts.poppins(
-            color: Colors.black87,
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
-        ),
-        centerTitle: true,
-      ),
+      appBar: const CustomAppBar(title: "My Profile", centerTitle: true),
       body: FutureBuilder<Company?>(
         future: _companyFuture,
         builder: (context, snapshot) {

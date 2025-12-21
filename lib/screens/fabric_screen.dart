@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 
 class FabricsScreen extends StatelessWidget {
   const FabricsScreen({super.key});
@@ -6,7 +7,7 @@ class FabricsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Fabrics")),
+      appBar: const CustomAppBar(title: "Fabrics"),
       body: const Center(child: Text("Fabric catalog here")),
     );
   }

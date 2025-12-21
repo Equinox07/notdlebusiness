@@ -8,6 +8,7 @@ import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
 import 'package:notdle/services/session_manager.dart';
 import 'package:notdle/widgets/deadline_card.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 
 class DashboardAppScreen extends StatefulWidget {
@@ -45,23 +46,15 @@ class _DashboardScreenState extends State<DashboardAppScreen> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'Dashboard',
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
+      appBar: CustomAppBar(
+        title: 'Dashboard',
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.black87),
-            onPressed: () {},
+            icon: const Icon(Icons.notifications_none, color: Colors.white),
+            onPressed: () => AppNavigator.toNotifications(),
           ),
           IconButton(
-            icon: const Icon(Icons.account_circle, color: Colors.black87),
+            icon: const Icon(Icons.account_circle, color: Colors.white),
             onPressed: () => AppNavigator.toProfile(),
           ),
         ],

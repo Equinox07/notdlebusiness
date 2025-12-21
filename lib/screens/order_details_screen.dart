@@ -9,6 +9,7 @@ import 'package:notdle/models/order.dart';
 import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/screens/create_invoice_screen.dart';
 import 'package:notdle/screens/update_order_modal.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 
 // Private data model to hold all fetched details
@@ -85,13 +86,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
         return Scaffold(
           backgroundColor: Colors.grey.shade100,
-          appBar: AppBar(
-            title: Text(
-              "Order Details",
-              style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-            ),
-            backgroundColor: Colors.white,
-            elevation: 1,
+          appBar: CustomAppBar(
+            title: "Order Details",
             actions: [
               // Only show the edit button if we have data to edit.
               if (snapshot.connectionState == ConnectionState.done &&

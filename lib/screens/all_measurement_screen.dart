@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/measurement.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/measurement_provider.dart';
+import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 // Assume this exists
 
@@ -87,19 +88,7 @@ class _AllMeasurementScreenState extends State<AllMeasurementScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        title: Text(
-          'Measurements',
-          style: GoogleFonts.playfairDisplay(
-            fontWeight: FontWeight.w700,
-            color: Colors.black87,
-            fontSize: 24,
-          ),
-        ),
-        backgroundColor: Colors.grey.shade50,
-        elevation: 0,
-        centerTitle: false,
-      ),
+      appBar: const CustomAppBar(title: 'Measurements'),
       body: Column(
         children: [
           // Search bar and count

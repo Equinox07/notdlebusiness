@@ -8,9 +8,9 @@ import 'package:notdle/models/company.dart';
 
 class ApiService {
   // static const String _baseUrl = 'http://localhost:8080/api';
-  static const String _baseUrl = 'https://api.notdle.com/api';
-  // static const String _baseUrl =
-  //     'https://unreprovable-jacquelynn-unconceived.ngrok-free.dev/api';
+  // static const String _baseUrl = 'https://api.notdle.com/api';
+  static const String _baseUrl =
+      'https://unreprovable-jacquelynn-unconceived.ngrok-free.dev/api';
   final _storage = const FlutterSecureStorage();
   static final ApiService _instance = ApiService._internal();
   static final GlobalKey<NavigatorState> navigatorKey =
@@ -242,7 +242,7 @@ class ApiService {
       headers: await _getHeaders(),
       body: json.encode(userData),
     );
-    
+
     final responseData = _handleResponse(response);
     return User.fromJson(responseData);
   }
@@ -250,7 +250,9 @@ class ApiService {
   // Change user password
   Future<void> changePassword(String userId, String newPassword) async {
     await http.post(
-      Uri.parse('$_baseUrl/users/$userId/change-password?newPassword=$newPassword'),
+      Uri.parse(
+        '$_baseUrl/users/$userId/change-password?newPassword=$newPassword',
+      ),
       headers: await _getHeaders(),
     );
   }
@@ -328,7 +330,7 @@ class ApiService {
 
   // Update company details
   Future<Map<String, dynamic>> updateCompany(
-    String companyId, 
+    String companyId,
     Map<String, dynamic> companyData,
   ) async {
     final response = await http.put(
@@ -356,14 +358,14 @@ class ApiService {
   }
 
   // Search companies
-  Future<dynamic> searchCompanies(String query, {int page = 0, int size = 10}) async {
+  Future<dynamic> searchCompanies(
+    String query, {
+    int page = 0,
+    int size = 10,
+  }) async {
     return get(
       '/companies/search',
-      queryParams: {
-        'query': query,
-        'page': page,
-        'size': size,
-      },
+      queryParams: {'query': query, 'page': page, 'size': size},
     );
   }
 
@@ -393,7 +395,7 @@ class ApiService {
 
   // Create a new project
   Future<dynamic> createProject(
-    String companyId, 
+    String companyId,
     Map<String, dynamic> projectData,
   ) async {
     return post('/companies/$companyId/projects', projectData);
@@ -401,8 +403,8 @@ class ApiService {
 
   // Update project details
   Future<dynamic> updateProject(
-    String companyId, 
-    String projectId, 
+    String companyId,
+    String projectId,
     Map<String, dynamic> projectData,
   ) async {
     final response = await http.put(
@@ -423,30 +425,23 @@ class ApiService {
 
   // Update project status
   Future<dynamic> updateProjectStatus(
-    String companyId, 
-    String projectId, 
+    String companyId,
+    String projectId,
     String status,
   ) async {
-    return post(
-      '/companies/$companyId/projects/$projectId/status/$status',
-      {},
-    );
+    return post('/companies/$companyId/projects/$projectId/status/$status', {});
   }
 
   // Search projects by title
   Future<dynamic> searchProjects(
-    String companyId, 
+    String companyId,
     String query, {
-    int page = 0, 
+    int page = 0,
     int size = 10,
   }) async {
     return get(
       '/companies/$companyId/projects/search',
-      queryParams: {
-        'title': query,
-        'page': page,
-        'size': size,
-      },
+      queryParams: {'title': query, 'page': page, 'size': size},
     );
   }
 
@@ -457,8 +452,8 @@ class ApiService {
 
   // Get projects due between dates
   Future<dynamic> getProjectsDueBetween(
-    String companyId, 
-    DateTime startDate, 
+    String companyId,
+    DateTime startDate,
     DateTime endDate,
   ) async {
     return get(
@@ -489,7 +484,7 @@ class ApiService {
 
   // Create a new client
   Future<dynamic> createClient(
-    String companyId, 
+    String companyId,
     Map<String, dynamic> clientData,
   ) async {
     return post('/companies/$companyId/clients', clientData);
@@ -497,8 +492,8 @@ class ApiService {
 
   // Update client details
   Future<dynamic> updateClient(
-    String companyId, 
-    String clientId, 
+    String companyId,
+    String clientId,
     Map<String, dynamic> clientData,
   ) async {
     final response = await http.put(
@@ -519,18 +514,14 @@ class ApiService {
 
   // Search clients by name
   Future<dynamic> searchClients(
-    String companyId, 
+    String companyId,
     String query, {
-    int page = 0, 
+    int page = 0,
     int size = 10,
   }) async {
     return get(
       '/companies/$companyId/clients/search',
-      queryParams: {
-        'name': query,
-        'page': page,
-        'size': size,
-      },
+      queryParams: {'name': query, 'page': page, 'size': size},
     );
   }
 
@@ -560,7 +551,7 @@ class ApiService {
 
   // Get invoice by invoice number
   Future<dynamic> getInvoiceByNumber(
-    String companyId, 
+    String companyId,
     String invoiceNumber,
   ) async {
     return get('/companies/$companyId/invoices/by-number/$invoiceNumber');
@@ -568,7 +559,7 @@ class ApiService {
 
   // Create a new invoice
   Future<dynamic> createInvoice(
-    String companyId, 
+    String companyId,
     Map<String, dynamic> invoiceData,
   ) async {
     return post('/companies/$companyId/invoices', invoiceData);
@@ -576,8 +567,8 @@ class ApiService {
 
   // Update invoice details
   Future<dynamic> updateInvoice(
-    String companyId, 
-    String invoiceId, 
+    String companyId,
+    String invoiceId,
     Map<String, dynamic> invoiceData,
   ) async {
     final response = await http.put(
@@ -598,19 +589,16 @@ class ApiService {
 
   // Update invoice status
   Future<dynamic> updateInvoiceStatus(
-    String companyId, 
-    String invoiceId, 
+    String companyId,
+    String invoiceId,
     String status,
   ) async {
-    return post(
-      '/companies/$companyId/invoices/$invoiceId/status/$status',
-      {},
-    );
+    return post('/companies/$companyId/invoices/$invoiceId/status/$status', {});
   }
 
   // Get upcoming due invoices
   Future<dynamic> getUpcomingDueInvoices(
-    String companyId, 
+    String companyId,
     DateTime endDate,
   ) async {
     return get(
@@ -628,16 +616,14 @@ class ApiService {
 
   // Get total overdue amount
   Future<num> getTotalOverdueAmount(String companyId) async {
-    final response = await get(
-      '/companies/$companyId/invoices/overdue-amount',
-    );
+    final response = await get('/companies/$companyId/invoices/overdue-amount');
     return response is num ? response : 0;
   }
 
   // Get invoices by date range
   Future<dynamic> getInvoicesByDateRange(
-    String companyId, 
-    DateTime startDate, 
+    String companyId,
+    DateTime startDate,
     DateTime endDate,
   ) async {
     return get(
@@ -651,8 +637,8 @@ class ApiService {
 
   // Calculate invoice revenue for a date range
   Future<num> calculateInvoiceRevenue(
-    String companyId, 
-    DateTime startDate, 
+    String companyId,
+    DateTime startDate,
     DateTime endDate,
   ) async {
     final response = await get(
@@ -691,7 +677,7 @@ class ApiService {
 
   // Create a new order
   Future<dynamic> createOrder(
-    String companyId, 
+    String companyId,
     Map<String, dynamic> orderData,
   ) async {
     return post('/companies/$companyId/orders', orderData);
@@ -699,8 +685,8 @@ class ApiService {
 
   // Update order details
   Future<dynamic> updateOrder(
-    String companyId, 
-    String orderId, 
+    String companyId,
+    String orderId,
     Map<String, dynamic> orderData,
   ) async {
     final response = await http.put(
@@ -721,60 +707,48 @@ class ApiService {
 
   // Update order status
   Future<dynamic> updateOrderStatus(
-    String companyId, 
-    String orderId, 
+    String companyId,
+    String orderId,
     String status,
   ) async {
-    return post(
-      '/companies/$companyId/orders/$orderId/status/$status',
-      {},
-    );
+    return post('/companies/$companyId/orders/$orderId/status/$status', {});
   }
 
   // Add item to order
   Future<dynamic> addOrderItem(
-    String companyId, 
-    String orderId, 
+    String companyId,
+    String orderId,
     Map<String, dynamic> itemData,
   ) async {
-    return post(
-      '/companies/$companyId/orders/$orderId/items',
-      itemData,
-    );
+    return post('/companies/$companyId/orders/$orderId/items', itemData);
   }
 
   // Remove item from order
   Future<dynamic> removeOrderItem(
-    String companyId, 
-    String orderId, 
+    String companyId,
+    String orderId,
     String itemId,
   ) async {
-    return delete(
-      '/companies/$companyId/orders/$orderId/items/$itemId',
-    );
+    return delete('/companies/$companyId/orders/$orderId/items/$itemId');
   }
 
   // Search orders by order number
   Future<dynamic> searchOrders(
-    String companyId, 
+    String companyId,
     String query, {
-    int page = 0, 
+    int page = 0,
     int size = 10,
   }) async {
     return get(
       '/companies/$companyId/orders/search',
-      queryParams: {
-        'orderNumber': query,
-        'page': page,
-        'size': size,
-      },
+      queryParams: {'orderNumber': query, 'page': page, 'size': size},
     );
   }
 
   // Calculate revenue for a date range
   Future<num> calculateOrderRevenue(
-    String companyId, 
-    DateTime startDate, 
+    String companyId,
+    DateTime startDate,
     DateTime endDate,
   ) async {
     final response = await get(
@@ -789,8 +763,8 @@ class ApiService {
 
   // Get orders by date range
   Future<dynamic> getOrdersByDateRange(
-    String companyId, 
-    DateTime startDate, 
+    String companyId,
+    DateTime startDate,
     DateTime endDate,
   ) async {
     return get(
@@ -803,14 +777,8 @@ class ApiService {
   }
 
   // Payments
-  Future<dynamic> getPayments({
-    int page = 0,
-    int size = 10,
-  }) async {
-    return get(
-      '/payments',
-      queryParams: {'page': page, 'size': size},
-    );
+  Future<dynamic> getPayments({int page = 0, int size = 10}) async {
+    return get('/payments', queryParams: {'page': page, 'size': size});
   }
 
   // Get payment by ID
@@ -825,7 +793,7 @@ class ApiService {
 
   // Update payment details
   Future<dynamic> updatePayment(
-    String paymentId, 
+    String paymentId,
     Map<String, dynamic> paymentData,
   ) async {
     final response = await http.put(
@@ -857,17 +825,13 @@ class ApiService {
   }) async {
     return get(
       '/payments',
-      queryParams: {
-        'companyId': companyId,
-        'page': page,
-        'size': size,
-      },
+      queryParams: {'companyId': companyId, 'page': page, 'size': size},
     );
   }
 
   // Get payments by date range
   Future<dynamic> getPaymentsByDateRange(
-    DateTime startDate, 
+    DateTime startDate,
     DateTime endDate, {
     String? companyId,
     int page = 0,
@@ -879,15 +843,12 @@ class ApiService {
       'page': page,
       'size': size,
     };
-    
+
     if (companyId != null) {
       params['companyId'] = companyId;
     }
-    
-    return get(
-      '/payments/by-date-range',
-      queryParams: params,
-    );
+
+    return get('/payments/by-date-range', queryParams: params);
   }
 
   // Measurements
@@ -909,13 +870,13 @@ class ApiService {
     // Ensure companyId is included in the measurement data
     final measurementData = Map<String, dynamic>.from(data);
     measurementData['companyId'] = companyId;
-    
+
     return post('/v1/measurements', measurementData);
   }
 
   // Update a measurement
   Future<dynamic> updateMeasurement(
-    String measurementId, 
+    String measurementId,
     Map<String, dynamic> data,
   ) async {
     final response = await http.put(
@@ -941,7 +902,7 @@ class ApiService {
 
   // Delete a specific measurement for a client
   Future<void> deleteClientMeasurement(
-    String measurementId, 
+    String measurementId,
     String clientId,
   ) async {
     await http.delete(

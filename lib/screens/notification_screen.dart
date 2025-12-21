@@ -29,9 +29,7 @@ class NotificationScreen extends StatelessWidget {
             },
             child: Text(
               'Mark all as read',
-              style: GoogleFonts.poppins(
-                color: Colors.indigo.shade600,
-              ),
+              style: GoogleFonts.poppins(color: Colors.indigo.shade600),
             ),
           ),
         ],
@@ -43,17 +41,40 @@ class NotificationScreen extends StatelessWidget {
 
           // Notification List
           Expanded(
-            child: ListView.separated(
-              itemCount: provider.filteredNotifications.length,
-              separatorBuilder: (context, index) => const Divider(
-                height: 1,
-                color: Colors.black12,
-              ),
-              itemBuilder: (context, index) {
-                final notification = provider.filteredNotifications[index];
-                return _buildNotificationTile(context, notification);
-              },
-            ),
+            child:
+                provider.filteredNotifications.isEmpty
+                    ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.notifications_off_outlined,
+                            size: 64,
+                            color: Colors.grey.shade400,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No notifications yet',
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                    : ListView.separated(
+                      itemCount: provider.filteredNotifications.length,
+                      separatorBuilder:
+                          (context, index) =>
+                              const Divider(height: 1, color: Colors.black12),
+                      itemBuilder: (context, index) {
+                        final notification =
+                            provider.filteredNotifications[index];
+                        return _buildNotificationTile(context, notification);
+                      },
+                    ),
           ),
         ],
       ),
@@ -61,43 +82,49 @@ class NotificationScreen extends StatelessWidget {
   }
 
   Widget _buildFilterChips(
-      BuildContext context, NotificationProvider provider) {
+    BuildContext context,
+    NotificationProvider provider,
+  ) {
     final filterOptions = ['All', 'Order', 'Invoice', 'Customer'];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: filterOptions.map((filter) {
-          final isSelected = provider.selectedFilter == filter;
-          return FilterChip(
-            label: Text(filter, style: GoogleFonts.poppins()),
-            selected: isSelected,
-            onSelected: (selected) {
-              if (selected) {
-                provider.setFilter(filter);
-              }
-            },
-            backgroundColor: Colors.grey.shade200,
-            selectedColor: Colors.indigo.shade100,
-            checkmarkColor: Colors.indigo.shade600,
-            labelStyle: GoogleFonts.poppins(
-              color: isSelected ? Colors.indigo.shade600 : Colors.black87,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: isSelected
-                  ? BorderSide(color: Colors.indigo.shade600)
-                  : BorderSide.none,
-            ),
-          );
-        }).toList(),
+        children:
+            filterOptions.map((filter) {
+              final isSelected = provider.selectedFilter == filter;
+              return FilterChip(
+                label: Text(filter, style: GoogleFonts.poppins()),
+                selected: isSelected,
+                onSelected: (selected) {
+                  if (selected) {
+                    provider.setFilter(filter);
+                  }
+                },
+                backgroundColor: Colors.grey.shade200,
+                selectedColor: Colors.indigo.shade100,
+                checkmarkColor: Colors.indigo.shade600,
+                labelStyle: GoogleFonts.poppins(
+                  color: isSelected ? Colors.indigo.shade600 : Colors.black87,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side:
+                      isSelected
+                          ? BorderSide(color: Colors.indigo.shade600)
+                          : BorderSide.none,
+                ),
+              );
+            }).toList(),
       ),
     );
   }
 
   Widget _buildNotificationTile(
-      BuildContext context, AppNotification notification) {
+    BuildContext context,
+    AppNotification notification,
+  ) {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
@@ -105,15 +132,14 @@ class NotificationScreen extends StatelessWidget {
       child: ListTile(
         onTap: () {
           // TODO: Navigate to the relevant screen (order details, etc.)
-          Provider.of<NotificationProvider>(context, listen: false)
-              .markAsRead(notification.id);
+          Provider.of<NotificationProvider>(
+            context,
+            listen: false,
+          ).markAsRead(notification.id);
         },
         leading: CircleAvatar(
           backgroundColor: _getIconColor(notification.type),
-          child: Icon(
-            _getIconForType(notification.type),
-            color: Colors.white,
-          ),
+          child: Icon(_getIconForType(notification.type), color: Colors.white),
         ),
         title: Text(
           notification.title,
@@ -124,16 +150,11 @@ class NotificationScreen extends StatelessWidget {
         ),
         subtitle: Text(
           notification.body,
-          style: GoogleFonts.poppins(
-            color: Colors.grey.shade600,
-          ),
+          style: GoogleFonts.poppins(color: Colors.grey.shade600),
         ),
         trailing: Text(
           _formatTimestamp(notification.timestamp),
-          style: GoogleFonts.poppins(
-            fontSize: 12,
-            color: Colors.grey.shade500,
-          ),
+          style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade500),
         ),
       ),
     );

@@ -228,6 +228,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                     _buildInputField(
                       controller: _nameController,
                       label: "Full Name",
+                      icon: Icons.person_outline_rounded,
                       validator:
                           (val) =>
                               val == null || val.isEmpty ? "Enter name" : null,
@@ -236,6 +237,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                     _buildInputField(
                       controller: _phoneController,
                       label: "Phone Number",
+                      icon: Icons.phone_outlined,
                       keyboardType: TextInputType.phone,
                       maxLength: 10,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -252,11 +254,12 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                     const SizedBox(height: 16),
                     _buildInputField(
                       controller: _emailController,
-                      label: "Email Address",
+                      label: "Email Address (Optional)",
+                      icon: Icons.email_outlined,
                       keyboardType: TextInputType.emailAddress,
                       validator: (val) {
                         if (val == null || val.isEmpty) {
-                          return "Enter email";
+                          return null; // Optional
                         }
                         if (!val.contains("@") || !val.contains(".")) {
                           return "Enter a valid email address";
@@ -270,6 +273,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                     _buildInputField(
                       controller: _addressController,
                       label: "Address",
+                      icon: Icons.location_on_outlined,
                       maxLines: 3,
                     ),
                   ],
@@ -287,6 +291,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   Widget _buildInputField({
     required String label,
     required TextEditingController controller,
+    IconData? icon,
     TextInputType keyboardType = TextInputType.text,
     int maxLines = 1,
     int? maxLength,
@@ -300,12 +305,17 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       maxLength: maxLength,
       inputFormatters: inputFormatters,
       style: GoogleFonts.poppins(
+        fontSize: 16,
         fontWeight: FontWeight.bold,
         color: Colors.black87,
       ),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: GoogleFonts.poppins(color: Colors.grey.shade600),
+        prefixIcon:
+            icon != null
+                ? Icon(icon, color: Colors.indigo.shade400, size: 22)
+                : null,
         filled: true,
         fillColor: Colors.grey.shade200,
         counterText: "",
@@ -332,6 +342,11 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       decoration: InputDecoration(
         labelText: "Gender",
         labelStyle: GoogleFonts.poppins(color: Colors.grey.shade600),
+        prefixIcon: Icon(
+          Icons.transgender,
+          color: Colors.indigo.shade400,
+          size: 22,
+        ),
         filled: true,
         fillColor: Colors.grey.shade200,
         border: OutlineInputBorder(
@@ -354,6 +369,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               child: Text(
                 value,
                 style: GoogleFonts.poppins(
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),

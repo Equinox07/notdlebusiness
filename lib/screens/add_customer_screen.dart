@@ -136,6 +136,17 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: Column(
               children: [
+                // Description
+                Text(
+                  "Enter customer details below to create a new profile.",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
                 // Image Picker Area
                 Center(
                   child: GestureDetector(
@@ -155,7 +166,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                             border: Border.all(color: Colors.white, width: 4),
                           ),
                           child: CircleAvatar(
-                            radius: 60,
+                            radius: 50,
                             backgroundColor: Colors.indigo.shade50,
                             backgroundImage:
                                 _profileImage != null
@@ -163,10 +174,25 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                                     : null,
                             child:
                                 _profileImage == null
-                                    ? Icon(
-                                      Icons.person_outline,
-                                      size: 50,
-                                      color: Colors.indigo.shade300,
+                                    ? Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.person_outline,
+                                          size: 32,
+                                          color: Colors.indigo.shade300,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          "Add Photo",
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 10,
+                                            color: Colors.indigo.shade300,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
                                     )
                                     : null,
                           ),
@@ -199,8 +225,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 32),
-
+                const SizedBox(height: 20),
                 // Form Fields Container
                 Container(
                   padding: const EdgeInsets.all(24),

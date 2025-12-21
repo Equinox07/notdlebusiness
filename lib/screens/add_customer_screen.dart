@@ -99,13 +99,13 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           title: Text(
             "Add New Customer",
             style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w700,
-              color: Colors.black87,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
             ),
           ),
-          backgroundColor: Colors.white,
-          elevation: 0, // Flat app bar for modern look
-          iconTheme: const IconThemeData(color: Colors.black87),
+          backgroundColor: Colors.indigo,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
           actions: [
             IconButton(
               onPressed: () async {
@@ -117,14 +117,10 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.indigo.shade50,
+                  color: Colors.white.withOpacity(0.2),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
-                  Icons.check,
-                  color: Colors.indigo.shade600,
-                  size: 20,
-                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 20),
               ),
             ),
             const SizedBox(width: 8),
@@ -227,78 +223,56 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 ),
                 const SizedBox(height: 20),
                 // Form Fields Container
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.shade100,
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      _buildTextFormField(
-                        controller: _nameController,
-                        label: "Full Name",
-                        icon: Icons.person_outline_rounded,
-                        validator:
-                            (val) =>
-                                val == null || val.isEmpty
-                                    ? "Enter name"
-                                    : null,
-                      ),
-                      const SizedBox(height: 20),
-                      _buildTextFormField(
-                        controller: _phoneController,
-                        label: "Phone Number",
-                        icon: Icons.phone_outlined,
-                        keyboardType: TextInputType.phone,
-                        maxLength: 10,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        validator: (val) {
-                          if (val == null || val.isEmpty) {
-                            return "Enter phone number";
-                          }
-                          if (val.length != 10) {
-                            return "Phone number must be 10 digits";
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      _buildTextFormField(
-                        controller: _emailController,
-                        label: "Email Address",
-                        icon: Icons.email_outlined,
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (val) {
-                          if (val == null || val.isEmpty) {
-                            return "Enter email";
-                          }
-                          if (!val.contains("@") || !val.contains(".")) {
-                            return "Enter a valid email address";
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      _buildGenderDropdown(),
-                      const SizedBox(height: 20),
-                      _buildTextFormField(
-                        controller: _addressController,
-                        label: "Address",
-                        icon: Icons.location_on_outlined,
-                        maxLines: 3,
-                      ),
-                    ],
-                  ),
+                Column(
+                  children: [
+                    _buildInputField(
+                      controller: _nameController,
+                      label: "Full Name",
+                      validator:
+                          (val) =>
+                              val == null || val.isEmpty ? "Enter name" : null,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildInputField(
+                      controller: _phoneController,
+                      label: "Phone Number",
+                      keyboardType: TextInputType.phone,
+                      maxLength: 10,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      validator: (val) {
+                        if (val == null || val.isEmpty) {
+                          return "Enter phone number";
+                        }
+                        if (val.length != 10) {
+                          return "Phone number must be 10 digits";
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildInputField(
+                      controller: _emailController,
+                      label: "Email Address",
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (val) {
+                        if (val == null || val.isEmpty) {
+                          return "Enter email";
+                        }
+                        if (!val.contains("@") || !val.contains(".")) {
+                          return "Enter a valid email address";
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    _buildGenderDropdown(),
+                    const SizedBox(height: 16),
+                    _buildInputField(
+                      controller: _addressController,
+                      label: "Address",
+                      maxLines: 3,
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 40),
               ],
@@ -310,10 +284,9 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     );
   }
 
-  Widget _buildTextFormField({
-    required TextEditingController controller,
+  Widget _buildInputField({
     required String label,
-    required IconData icon,
+    required TextEditingController controller,
     TextInputType keyboardType = TextInputType.text,
     int maxLines = 1,
     int? maxLength,
@@ -326,44 +299,30 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       maxLines: maxLines,
       maxLength: maxLength,
       inputFormatters: inputFormatters,
+      style: GoogleFonts.poppins(
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
+      ),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: GoogleFonts.poppins(
-          color: Colors.grey.shade500,
-          fontSize: 14,
-        ),
-        prefixIcon: Icon(icon, color: Colors.indigo.shade400, size: 22),
+        labelStyle: GoogleFonts.poppins(color: Colors.grey.shade600),
         filled: true,
-        fillColor: Colors.grey.shade50,
+        fillColor: Colors.grey.shade200,
+        counterText: "",
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade200),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.indigo.shade400, width: 1.5),
+          borderSide: BorderSide(color: Colors.indigo.shade600, width: 2),
         ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.red.shade200),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.red.shade400),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 16,
-          horizontal: 16,
-        ),
-        counterText: "",
       ),
       validator: validator,
-      style: GoogleFonts.poppins(fontSize: 15, color: Colors.black87),
-      cursorColor: Colors.indigo.shade600,
     );
   }
 
@@ -372,40 +331,20 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       value: _selectedGender,
       decoration: InputDecoration(
         labelText: "Gender",
-        labelStyle: GoogleFonts.poppins(
-          color: Colors.grey.shade500,
-          fontSize: 14,
-        ),
-        prefixIcon: Icon(
-          Icons.transgender,
-          color: Colors.indigo.shade400,
-          size: 22,
-        ),
+        labelStyle: GoogleFonts.poppins(color: Colors.grey.shade600),
         filled: true,
-        fillColor: Colors.grey.shade50,
+        fillColor: Colors.grey.shade200,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade200),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.indigo.shade400, width: 1.5),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.red.shade200),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.red.shade400),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 16,
-          horizontal: 16,
+          borderSide: BorderSide(color: Colors.indigo.shade600, width: 2),
         ),
       ),
       items:
@@ -414,7 +353,10 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               value: value,
               child: Text(
                 value,
-                style: GoogleFonts.poppins(fontSize: 15, color: Colors.black87),
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
               ),
             );
           }).toList(),
@@ -425,10 +367,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       },
       validator: (val) => val == null ? "Select gender" : null,
       dropdownColor: Colors.white,
-      icon: Icon(
-        Icons.keyboard_arrow_down_rounded,
-        color: Colors.indigo.shade400,
-      ),
+      icon: const Icon(Icons.keyboard_arrow_down_rounded),
       isExpanded: true,
     );
   }

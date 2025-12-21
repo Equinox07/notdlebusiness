@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/providers/customer_provider.dart';
@@ -251,11 +252,18 @@ class CustomerCard extends StatelessWidget {
               CircleAvatar(
                 radius: 24,
                 backgroundColor: Colors.indigo.shade100,
-                child: Icon(
-                  Icons.person,
-                  color: Colors.indigo.shade600,
-                  size: 24,
-                ),
+                backgroundImage:
+                    customer.imagePath != null
+                        ? FileImage(File(customer.imagePath!))
+                        : null,
+                child:
+                    customer.imagePath == null
+                        ? Icon(
+                          Icons.person,
+                          color: Colors.indigo.shade600,
+                          size: 24,
+                        )
+                        : null,
               ),
               const SizedBox(width: 16),
 

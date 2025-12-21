@@ -11,7 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart'; // Import image_picker
 import 'dart:io';
 
-import 'package:uuid/uuid.dart'; // For File
+import 'package:uuid/uuid.dart';
+import 'package:notdle/utils/image_utils.dart';
 
 class AddCustomerScreen extends StatefulWidget {
   const AddCustomerScreen({super.key});
@@ -60,8 +61,19 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       return null;
     }
 
+    final customerId = const Uuid().v4();
+    String? savedImagePath;
+
+    if (_profileImage != null) {
+      savedImagePath = await ImageUtils.saveImagePermanently(
+        _profileImage!.path,
+        'customer',
+        customerId,
+      );
+    }
+
     final newCustomer = Customer(
-      id: Uuid().v4(),
+      id: customerId,
       name: _nameController.text.trim(),
       gender: _selectedGender!,
       phone: _phoneController.text.trim(),
@@ -69,7 +81,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       address: _addressController.text.trim(),
       lastVisit: DateTime.now(),
       createdDate: DateTime.now(),
-      imagePath: _profileImage?.path, // Save image path if available
+      imagePath: savedImagePath, // Save permanent image path if available
     );
 
     // final savedCustomer = await DatabaseHelper.instance.insertCustomer(

@@ -8,6 +8,7 @@ import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/measurement_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:notdle/utils/image_utils.dart';
 
 // These are placeholder models and services.
 // Make sure to use your actual file paths.
@@ -104,14 +105,23 @@ class _CustomerMeasurementScreenState
   Future<void> _pickImage(ImageSource source) async {
     final picked = await _picker.pickImage(source: source);
     if (picked != null) {
-      setState(() {
-        _profileImage = File(picked.path);
-        widget.customer.imagePath = picked.path;
-      });
-      // await DatabaseHelper.instance.updateCustomer(widget.customer);
+      final savedPath = await ImageUtils.saveImagePermanently(
+        picked.path,
+        'customer',
+        widget.customer.id ?? 'temp',
+      );
+      if (savedPath != null) {
+        setState(() {
+          _profileImage = File(savedPath);
+          widget.customer.imagePath = savedPath;
+        });
 
-      if(mounted){
-        await Provider.of<CustomerProvider>(context, listen: false).updateCustomer(widget.customer);
+        if (mounted) {
+          await Provider.of<CustomerProvider>(
+            context,
+            listen: false,
+          ).updateCustomer(widget.customer);
+        }
       }
     }
   }
@@ -160,7 +170,10 @@ class _CustomerMeasurementScreenState
     );
 
     // final saved = await DatabaseHelper.instance.insertMeasurement(measurement);
-    final savedCustomer = await Provider.of<MeasurementProvider>(context, listen: false).addMeasurement(measurement);
+    final savedCustomer = await Provider.of<MeasurementProvider>(
+      context,
+      listen: false,
+    ).addMeasurement(measurement);
 
     if (!mounted) return;
     ScaffoldMessenger.of(

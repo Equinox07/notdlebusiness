@@ -197,12 +197,19 @@ class AppNavigator {
     // }
   }
 
-  static void toMeasurement2({Customer? customer}) {
+  static void toMeasurement2({Customer? customer, bool replacement = false}) {
     if (customer != null) {
-      navigatorKey.currentState?.pushNamed(
-        CustomerMeasurementScreen.tag,
-        arguments: customer,
-      );
+      if (replacement) {
+        navigatorKey.currentState?.pushReplacementNamed(
+          CustomerMeasurementScreen.tag,
+          arguments: customer,
+        );
+      } else {
+        navigatorKey.currentState?.pushNamed(
+          CustomerMeasurementScreen.tag,
+          arguments: customer,
+        );
+      }
     } else {
       navigatorKey.currentState?.pushReplacementNamed(AllMeasurementScreen.tag);
     }

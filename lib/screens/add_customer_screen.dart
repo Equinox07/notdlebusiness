@@ -436,7 +436,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
             onTap: () async {
               final saved = await _saveCustomer();
               if (saved != null) {
-                AppNavigator.toMeasurement2(customer: saved);
+                AppNavigator.toMeasurement2(customer: saved, replacement: true);
               }
             },
             borderRadius: BorderRadius.circular(16),

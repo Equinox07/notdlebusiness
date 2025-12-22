@@ -260,12 +260,23 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: CountryCodePicker(
-                        onChanged: (CountryCode code) {
-                          setState(() {
-                            _selectedCountryCode = code.dialCode;
-                            _selectedCountry = code.name;
-                            debugPrint('Selected country: ${code.name}');
-                          });
+                        onChanged: (CountryCode? code) {
+                          if (code != null) {
+                            setState(() {
+                              _selectedCountryCode = code.dialCode;
+                              _selectedCountry = code.name;
+                              debugPrint('Selected country: ${code.name}');
+                            });
+                          }
+                        },
+                        onInit: (CountryCode? code) {
+                          if (code != null) {
+                            setState(() {
+                              _selectedCountryCode = code.dialCode;
+                              _selectedCountry = code.name;
+                              debugPrint('Selected country: ${code.name}');
+                            });
+                          }
                         },
                         initialSelection: 'US',
                         favorite: const [

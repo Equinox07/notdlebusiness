@@ -378,7 +378,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final apiProvider = Provider.of<ApiProvider>(context, listen: false);
     try {
       await apiProvider.apiService.clearUserData();
-      await SessionManager.clearSession();
+      await apiProvider.apiService.logout();
+      // await SessionManager.clearSession();
       if (context.mounted) {
         AppNavigator.toLogin2();
       }

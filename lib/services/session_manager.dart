@@ -35,4 +35,9 @@ class SessionManager {
     await prefs.remove(_companyKey);
   }
 
+  static Future<bool> isCompanySessionValid() async {
+    final company = await getCompany();
+    return company != null && company.id.isNotEmpty;
+  }
+
 }

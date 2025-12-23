@@ -5,6 +5,7 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:notdle/models/company.dart';
 import 'package:notdle/pages/dashboards/dashboard_screen.dart';
 import 'package:notdle/providers/api_provider.dart';
+import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/services/session_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:country_code_picker/country_code_picker.dart';
@@ -22,7 +23,7 @@ class CompanyRegistrationScreen extends StatefulWidget {
 }
 
 class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
-  static const _loadingWidget = Center(child: CircularProgressIndicator());
+  // static const _loadingWidget = Center(child: CircularProgressIndicator());
 
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
@@ -82,6 +83,7 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
 
   Future<void> _registerCompanyProcess() async {
     final apiProvider = Provider.of<ApiProvider>(context, listen: false);
+    final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
 
     // Determine currency based on country code
     String currency = 'GHS'; // Default to GHS
@@ -131,6 +133,9 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
 
       // Save company to session
       await SessionManager.saveCompany(registeredCompany);
+
+      // Save company to local database
+      await companyProvider.registerCompany(registeredCompany);
 
       // Refresh current user data to update hasCompany status
       await apiProvider.apiService.getCurrentUser();
@@ -202,7 +207,7 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     return LoaderOverlay(
-      useDefaultLoading: true,
+      // useDefaultLoading: true,
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(

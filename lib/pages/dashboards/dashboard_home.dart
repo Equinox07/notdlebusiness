@@ -2,10 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:notdle/models/company.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
 import 'package:notdle/providers/notification_provider.dart';
+import 'package:notdle/services/session_manager.dart';
 import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:notdle/widgets/deadline_card.dart';
 import 'package:provider/provider.dart';
@@ -26,7 +28,51 @@ class _DashboardHomeState extends State<DashboardHome> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<DashBoardProvider>(context, listen: false).fetchCounts();
       Provider.of<CompanyProvider>(context, listen: false).fetchCompany();
+      _checkCompanySession();
     });
+  }
+
+  Future<void> _checkCompanySession() async {
+    final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
+    final sessionCompany = await SessionManager.getCompany();
+
+    if (sessionCompany != null && sessionCompany.id.isNotEmpty) {
+      final companyDao = companyProvider.companyDao;
+      final dbCompany = await companyDao.findCompanyById(sessionCompany.id);
+
+      if (dbCompany != null) {
+        if (dbCompany.id != sessionCompany.id) {
+           _showSessionMismatchDialog();
+        }
+      } else {
+         // If company not found in DB but exists in session, that's also a mismatch/issue
+         // But the prompt specifically mentions comparing IDs.
+         // If dbCompany is null, we can't compare IDs.
+         // Let's assume if dbCompany is found, we compare.
+      }
+    }
+  }
+
+  void _showSessionMismatchDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text("Session Mismatch"),
+        content: const Text("Your session data does not match the stored company data. Please log in again."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              // Clear session and navigate to login
+              SessionManager.clearSession();
+              Navigator.of(context).pop();
+              AppNavigator.toLogin2();
+            },
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

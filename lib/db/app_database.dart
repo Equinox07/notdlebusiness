@@ -51,4 +51,19 @@ abstract class AppDatabase extends FloorDatabase {
   MeasurementDao get measurementDao;
   InvoiceDao get invoiceDao;
   ProjectDao get projectDao;
+
+  Future<void> truncateAllTables() async {
+    await (database as sqflite.Database).transaction((txn) async {
+      await txn.execute('DELETE FROM invoice_items');
+      await txn.execute('DELETE FROM order_items');
+      await txn.execute('DELETE FROM payments');
+      await txn.execute('DELETE FROM invoices');
+      await txn.execute('DELETE FROM measurements');
+      await txn.execute('DELETE FROM orders');
+      await txn.execute('DELETE FROM projects');
+      await txn.execute('DELETE FROM customers');
+      await txn.execute('DELETE FROM company');
+      await txn.execute("DELETE FROM sqlite_sequence WHERE name='measurements'");
+    });
+  }
 }

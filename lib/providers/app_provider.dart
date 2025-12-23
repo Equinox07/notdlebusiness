@@ -34,6 +34,11 @@ class AppProvider extends ChangeNotifier {
   late final ProjectProvider _projectProvider;
   ProjectProvider get projectProvider => _projectProvider;
 
+  Future<void> truncateAllTables() async {
+    await _db.truncateAllTables();
+    notifyListeners();
+  }
+
   Future<void> init([AppDatabase? db]) async {
     if (db != null) {
       _db = db;

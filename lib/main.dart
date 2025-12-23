@@ -29,10 +29,17 @@ void main() async {
     );
   });
 
+  final migration3to4 = Migration(3, 4, (database) async {
+    await database.execute(
+      'ALTER TABLE company ADD COLUMN deviceId TEXT',
+    );
+  });
+
   final db =
       await $FloorAppDatabase.databaseBuilder('app_database').addMigrations([
         migration1to2,
         migration2to3,
+        migration3to4,
       ]).build();
 
   runApp(

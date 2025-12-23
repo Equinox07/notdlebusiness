@@ -9,6 +9,7 @@ import 'package:notdle/services/session_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:notdle/utils/helpers.dart';
 
 class CompanyRegistrationScreen extends StatefulWidget {
   const CompanyRegistrationScreen({super.key});
@@ -96,6 +97,9 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
       currency = 'INR';
     }
 
+    // Fetch device ID
+    final String deviceId = await getDeviceId();
+
     // Create company data map for API
     final companyData = {
       'businessName': _businessNameController.text.trim(),
@@ -111,6 +115,7 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
       'countryCode': _selectedCountryCode,
       'currency': currency,
       'country': _selectedCountry ?? 'Ghana',
+      'deviceId': deviceId,
     };
 
     try {

@@ -19,6 +19,7 @@ class Company {
   final bool active;
   final String currency;
   final String country;
+  final String? deviceId;
 
   Company({
     required this.id,
@@ -35,6 +36,7 @@ class Company {
     this.active = true,
     this.currency = 'GHS',
     this.country = 'Ghana',
+    this.deviceId,
   });
 
   // Factory constructor to create a Company from a Map
@@ -54,6 +56,7 @@ class Company {
       active: map['active'] as bool? ?? true,
       currency: map['currency'] as String? ?? 'GHS',
       country: map['country'] as String? ?? 'Ghana',
+      deviceId: map['deviceId'] as String?,
     );
   }
 
@@ -74,6 +77,7 @@ class Company {
       'active': active,
       'currency': currency,
       'country': country,
+      'deviceId': deviceId,
     };
   }
 
@@ -92,6 +96,7 @@ class Company {
     bool? active,
     String? currency,
     String? country,
+    String? deviceId,
   }) {
     return Company(
       id: id ?? this.id,
@@ -108,6 +113,7 @@ class Company {
       active: active ?? this.active,
       currency: currency ?? this.currency,
       country: country ?? this.country,
+      deviceId: deviceId ?? this.deviceId,
     );
   }
 }

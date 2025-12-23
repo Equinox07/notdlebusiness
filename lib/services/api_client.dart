@@ -4,9 +4,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class ApiClient {
   final Dio _dio = Dio();
   final _storage = const FlutterSecureStorage();
-  static const String _baseUrl = 'https://api.notdle.com/api';
-  // static const String _baseUrl =
-  //     'https://unreprovable-jacquelynn-unconceived.ngrok-free.dev/api';
+  // static const String _baseUrl = 'https://api.notdle.com/api';
+  static const String _baseUrl =
+      'https://unreprovable-jacquelynn-unconceived.ngrok-free.dev/api';
 
   ApiClient() {
     _dio.options.baseUrl = _baseUrl;

@@ -11,6 +11,7 @@ import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/providers/api_provider.dart';
 import 'package:notdle/services/session_manager.dart';
 import 'package:notdle/screens/settings_screen.dart';
+import 'package:notdle/utils/helpers.dart';
 import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 
@@ -26,6 +27,8 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late Future<Company?> _companyFuture;
   final ImagePicker _picker = ImagePicker();
+
+  late Future<String> deviceId = getDeviceId();
 
   @override
   void initState() {
@@ -397,7 +400,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder:
           (ctx) => AlertDialog(
             title: Text(
-              'Delete Account',
+              'Delete Account $deviceId[id]',
               style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
             ),
             content: Text(

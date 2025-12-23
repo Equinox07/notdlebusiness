@@ -271,11 +271,10 @@ class _CompanyRegistrationScreenState extends State<CompanyRegistrationScreen> {
                         },
                         onInit: (CountryCode? code) {
                           if (code != null) {
-                            setState(() {
-                              _selectedCountryCode = code.dialCode;
-                              _selectedCountry = code.name;
-                              debugPrint('Selected country: ${code.name}');
-                            });
+                            // Avoid calling setState during build; just assign initial values.
+                            _selectedCountryCode = code.dialCode;
+                            _selectedCountry = code.name;
+                            debugPrint('Selected country: ${code.name}');
                           }
                         },
                         initialSelection: 'US',

@@ -45,10 +45,7 @@ class _DashboardHomeState extends State<DashboardHome> {
            _showSessionMismatchDialog();
         }
       } else {
-         // If company not found in DB but exists in session, that's also a mismatch/issue
-         // But the prompt specifically mentions comparing IDs.
-         // If dbCompany is null, we can't compare IDs.
-         // Let's assume if dbCompany is found, we compare.
+         _showNoCompanyAccountDialog();
       }
     }
   }
@@ -69,6 +66,26 @@ class _DashboardHomeState extends State<DashboardHome> {
               AppNavigator.toLogin2();
             },
             child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showNoCompanyAccountDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text("No Company Account Found"),
+        content: const Text("No company account was found associated with this session. Please register a company to proceed."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              AppNavigator.toSignUp2();
+            },
+            child: const Text("Register"),
           ),
         ],
       ),

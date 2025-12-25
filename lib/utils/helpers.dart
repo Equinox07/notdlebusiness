@@ -2,6 +2,9 @@ import 'dart:math';
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
+// import 'package:device_imei/device_imei.dart';
+// import 'package:permission_handler/permission_handler.dart';
+
 String generateInvoiceNumber() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   final random = Random();
@@ -42,3 +45,15 @@ Future<String> getDeviceId() async {
   return "Unknown Device";
 }
 
+Future<String?> getDeviceImei() async {
+  String? imei;
+  // try {
+  //   var permission = await Permission.phone.request();
+  //   if (permission.isGranted) {
+  //     imei = await DeviceImei().getDeviceImei();
+  //   }
+  // } catch (e) {
+  //   debugPrint("Error getting IMEI: $e");
+  // }
+  return imei;
+}

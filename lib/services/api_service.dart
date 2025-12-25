@@ -193,11 +193,16 @@ class ApiService {
   }
 
   // Authentication
-  Future<Map<String, dynamic>> login(String email, String password) async {
+  Future<Map<String, dynamic>> login(String email, String password, {String? deviceImei}) async {
+    final body = {'email': email, 'password': password};
+    if (deviceImei != null) {
+      body['deviceId'] = deviceImei;
+    }
+    
     final response = await http.post(
       Uri.parse('$_baseUrl/auth/login'),
       headers: await _getHeaders(),
-      body: json.encode({'email': email, 'password': password}),
+      body: json.encode(body),
     );
 
     final data = _handleResponse(response);

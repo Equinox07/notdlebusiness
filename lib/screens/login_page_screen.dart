@@ -6,6 +6,7 @@ import 'package:notdle/screens/company_registration_screen.dart';
 import 'package:notdle/screens/signup_screen.dart';
 import 'package:notdle/services/api_service.dart';
 import 'package:notdle/services/session_manager.dart';
+import 'package:notdle/utils/helpers.dart';
 
 class LoginPageScreen extends StatefulWidget {
   const LoginPageScreen({super.key});
@@ -89,10 +90,19 @@ class _LoginScreenState extends State<LoginPageScreen> {
           );
         }
 
+        // Get device IMEI (optional)
+        String? deviceImei = await getDeviceImei();
+        
+        // If IMEI is null or empty, fallback to device ID
+        if (deviceImei == null || deviceImei.isEmpty) {
+          deviceImei = await getDeviceId();
+        }
+
         // Perform login
         final data = await _apiService.login(
           _emailController.text,
           _passwordController.text,
+          deviceImei: deviceImei,
         );
 
         // Get fresh user data from the server

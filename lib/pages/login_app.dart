@@ -224,7 +224,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 20),
                             Center(
                               child: GestureDetector(
-                                onTap: () => AppNavigator.toSignUp2(),
+                                onTap: () => AppNavigator.toRegisterCompany(),
 
                                 // Navigate to Sign Up
                                 child: RichText(

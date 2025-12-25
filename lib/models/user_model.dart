@@ -9,6 +9,7 @@ class User {
   final String role;
   final bool hasCompany;
   final String authProvider;
+  final String? deviceId;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -23,6 +24,7 @@ class User {
     this.role = 'ROLE_USER',
     this.hasCompany = false,
     this.authProvider = 'local',
+    this.deviceId,
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : createdAt = createdAt ?? DateTime.now(),
@@ -40,6 +42,7 @@ class User {
       role: json['role'] as String? ?? 'ROLE_USER',
       hasCompany: json['hasCompany'] as bool? ?? false,
       authProvider: json['authProvider'] as String? ?? 'local',
+      deviceId: json['deviceId'] as String?,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
           : null,
@@ -61,6 +64,7 @@ class User {
       'role': role,
       'hasCompany': hasCompany,
       'authProvider': authProvider,
+      if (deviceId != null) 'deviceId': deviceId,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
@@ -78,6 +82,7 @@ class User {
     String? role,
     bool? hasCompany,
     String? authProvider,
+    String? deviceId,
   }) {
     return User(
       id: id ?? this.id,
@@ -90,6 +95,7 @@ class User {
       role: role ?? this.role,
       hasCompany: hasCompany ?? this.hasCompany,
       authProvider: authProvider ?? this.authProvider,
+      deviceId: deviceId ?? this.deviceId,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );

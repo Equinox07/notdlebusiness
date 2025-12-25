@@ -138,7 +138,7 @@ class AppNavigator {
     );
   }
 
-  static void toSignUp2() {
+  static void toRegisterCompany() {
     navigatorKey.currentState?.pushNamedAndRemoveUntil(
       CompanyRegistrationScreen.tag,
       (route) => false,

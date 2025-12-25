@@ -401,7 +401,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder:
           (ctx) => AlertDialog(
             title: Text(
-              'Delete Account $deviceId[id]',
+              'Delete Account',
               style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
             ),
             content: Text(

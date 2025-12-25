@@ -115,6 +115,20 @@ class _LoginScreenState extends State<LoginPageScreen> {
           throw Exception('Failed to load user data');
         }
 
+        // Check device ID mismatch
+        if (user.deviceId != null && user.deviceId != deviceImei) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('New device detected. Please verify your identity.'),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
+          // You might want to trigger additional verification here
+          // For now, we proceed, but the notification is shown.
+        }
+
         // Check if user has a company and companyId is not null
         if (user.hasCompany && user.companyId != null) {
           try {

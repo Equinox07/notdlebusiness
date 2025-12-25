@@ -7,6 +7,9 @@ import 'package:notdle/screens/signup_screen.dart';
 import 'package:notdle/services/api_service.dart';
 import 'package:notdle/services/session_manager.dart';
 import 'package:notdle/utils/helpers.dart';
+import 'package:notdle/utils/session_helper.dart';
+import 'package:provider/provider.dart';
+import 'package:notdle/providers/company_provider.dart';
 
 class LoginPageScreen extends StatefulWidget {
   const LoginPageScreen({super.key});
@@ -116,7 +119,7 @@ class _LoginScreenState extends State<LoginPageScreen> {
         }
 
         // Check device ID mismatch
-        if (user.deviceId != null && user.deviceId != deviceImei) {
+        if (SessionHelper.isNewDevice(user, deviceImei)) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -131,38 +134,43 @@ class _LoginScreenState extends State<LoginPageScreen> {
 
         // Check if user has a company and companyId is not null
         if (user.hasCompany && user.companyId != null) {
-          try {
-            // Fetch company data
-            final companyData = await _apiService.getCompanyById(
-              user.companyId!,
-            );
-            // final company = Company.fromMap(companyData);
-
-            // Save company data to session
-            await SessionManager.saveCompany(companyData);
-
-            // Close loading dialog
-            if (mounted) {
-              Navigator.of(context).pop();
-              // Navigate to dashboard
-              Navigator.of(context).pushReplacementNamed('dashboard');
-            }
-          } catch (e) {
-            // Close loading dialog
-            if (mounted) {
-              Navigator.of(context).pop();
-              // Show error but still allow login (company data might not be critical)
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Logged in, but failed to load company data: ${e.toString()}',
-                  ),
-                  backgroundColor: Colors.orange,
-                ),
+          if (await SessionHelper.shouldSyncCompanyData(user, context)) {
+            try {
+              // Fetch company data
+              final companyData = await _apiService.getCompanyById(
+                user.companyId!,
               );
-              // Still navigate to dashboard even if company data fails
-              Navigator.of(context).pushReplacementNamed('dashboard');
+              // final company = Company.fromMap(companyData);
+
+              // Save company data to session
+              await SessionManager.saveCompany(companyData);
+
+              // Save company data to local DB
+              if (mounted) {
+                final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
+                await companyProvider.companyDao.insertCompany(companyData);
+              }
+
+            } catch (e) {
+              // Handle error fetching company data
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Logged in, but failed to load company data: ${e.toString()}',
+                    ),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+              }
             }
+          }
+
+          // Close loading dialog
+          if (mounted) {
+            Navigator.of(context).pop();
+            // Navigate to dashboard
+            Navigator.of(context).pushReplacementNamed('dashboard');
           }
         } else {
           // Close loading dialog

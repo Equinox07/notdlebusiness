@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:notdle/models/user_model.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/services/session_manager.dart';
@@ -63,5 +64,29 @@ class SessionHelper {
         ],
       ),
     );
+  }
+
+  static bool isNewDevice(User user, String? currentDeviceId) {
+    if (user.deviceId != null && currentDeviceId != null) {
+      return user.deviceId != currentDeviceId;
+    }
+    return false;
+  }
+
+  static Future<bool> shouldSyncCompanyData(User user, BuildContext context) async {
+    final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
+    final companyDao = companyProvider.companyDao;
+    
+    if (user.companyId != null) {
+      // Check if company exists in local DB
+      final dbCompany = await companyDao.findCompanyById(user.companyId!);
+      
+      // Check if company exists in session
+      final sessionCompany = await SessionManager.getCompany();
+      
+      // Sync if missing in either DB or Session
+      return dbCompany == null || sessionCompany == null || sessionCompany.id != user.companyId;
+    }
+    return false;
   }
 }

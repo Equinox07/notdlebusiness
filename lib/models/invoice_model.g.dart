@@ -8,6 +8,7 @@ part of 'invoice_model.dart';
 
 InvoiceDto _$InvoiceDtoFromJson(Map<String, dynamic> json) => InvoiceDto(
       id: json['id'] as String?,
+      externalId: json['externalId'] as String?,
       invoiceNumber: json['invoiceNumber'] as String,
       issueDate: DateTime.parse(json['issueDate'] as String),
       dueDate: DateTime.parse(json['dueDate'] as String),
@@ -29,6 +30,7 @@ InvoiceDto _$InvoiceDtoFromJson(Map<String, dynamic> json) => InvoiceDto(
 Map<String, dynamic> _$InvoiceDtoToJson(InvoiceDto instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'externalId': instance.externalId,
       'invoiceNumber': instance.invoiceNumber,
       'issueDate': instance.issueDate.toIso8601String(),
       'dueDate': instance.dueDate.toIso8601String(),
@@ -46,6 +48,7 @@ Map<String, dynamic> _$InvoiceDtoToJson(InvoiceDto instance) =>
 InvoiceItemDto _$InvoiceItemDtoFromJson(Map<String, dynamic> json) =>
     InvoiceItemDto(
       id: json['id'] as String?,
+      externalId: json['externalId'] as String?,
       description: json['description'] as String,
       quantity: (json['quantity'] as num).toInt(),
       unitPrice: (json['unitPrice'] as num).toDouble(),
@@ -57,6 +60,7 @@ InvoiceItemDto _$InvoiceItemDtoFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$InvoiceItemDtoToJson(InvoiceItemDto instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'externalId': instance.externalId,
       'description': instance.description,
       'quantity': instance.quantity,
       'unitPrice': instance.unitPrice,
@@ -67,6 +71,7 @@ Map<String, dynamic> _$InvoiceItemDtoToJson(InvoiceItemDto instance) =>
 
 PaymentDto _$PaymentDtoFromJson(Map<String, dynamic> json) => PaymentDto(
       id: json['id'] as String?,
+      externalId: json['externalId'] as String?,
       amount: (json['amount'] as num).toDouble(),
       paymentDate: DateTime.parse(json['paymentDate'] as String),
       referenceNumber: json['referenceNumber'] as String?,
@@ -79,6 +84,7 @@ PaymentDto _$PaymentDtoFromJson(Map<String, dynamic> json) => PaymentDto(
 Map<String, dynamic> _$PaymentDtoToJson(PaymentDto instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'externalId': instance.externalId,
       'amount': instance.amount,
       'paymentDate': instance.paymentDate.toIso8601String(),
       'referenceNumber': instance.referenceNumber,

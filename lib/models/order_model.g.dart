@@ -8,6 +8,7 @@ part of 'order_model.dart';
 
 OrderDto _$OrderDtoFromJson(Map<String, dynamic> json) => OrderDto(
       id: json['id'] as String?,
+      externalId: json['externalId'] as String?,
       orderNumber: json['orderNumber'] as String,
       orderDate: DateTime.parse(json['orderDate'] as String),
       expectedDeliveryDate:
@@ -26,6 +27,7 @@ OrderDto _$OrderDtoFromJson(Map<String, dynamic> json) => OrderDto(
 
 Map<String, dynamic> _$OrderDtoToJson(OrderDto instance) => <String, dynamic>{
       'id': instance.id,
+      'externalId': instance.externalId,
       'orderNumber': instance.orderNumber,
       'orderDate': instance.orderDate.toIso8601String(),
       'expectedDeliveryDate': instance.expectedDeliveryDate.toIso8601String(),
@@ -41,6 +43,7 @@ Map<String, dynamic> _$OrderDtoToJson(OrderDto instance) => <String, dynamic>{
 
 OrderItemDto _$OrderItemDtoFromJson(Map<String, dynamic> json) => OrderItemDto(
       id: json['id'] as String?,
+      externalId: json['externalId'] as String?,
       productName: json['productName'] as String,
       productDescription: json['productDescription'] as String?,
       quantity: (json['quantity'] as num).toInt(),
@@ -53,6 +56,7 @@ OrderItemDto _$OrderItemDtoFromJson(Map<String, dynamic> json) => OrderItemDto(
 Map<String, dynamic> _$OrderItemDtoToJson(OrderItemDto instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'externalId': instance.externalId,
       'productName': instance.productName,
       'productDescription': instance.productDescription,
       'quantity': instance.quantity,

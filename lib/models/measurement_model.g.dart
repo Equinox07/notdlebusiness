@@ -9,6 +9,7 @@ part of 'measurement_model.dart';
 CreateMeasurementRequestDto _$CreateMeasurementRequestDtoFromJson(
         Map<String, dynamic> json) =>
     CreateMeasurementRequestDto(
+      externalId: json['externalId'] as String?,
       name: json['name'] as String,
       measurementValues:
           (json['measurementValues'] as Map<String, dynamic>).map(
@@ -20,6 +21,7 @@ CreateMeasurementRequestDto _$CreateMeasurementRequestDtoFromJson(
 Map<String, dynamic> _$CreateMeasurementRequestDtoToJson(
         CreateMeasurementRequestDto instance) =>
     <String, dynamic>{
+      'externalId': instance.externalId,
       'name': instance.name,
       'measurementValues': instance.measurementValues,
       'clientId': instance.clientId,

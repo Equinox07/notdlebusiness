@@ -106,7 +106,7 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `company` (`id` TEXT NOT NULL, `businessName` TEXT NOT NULL, `ownerName` TEXT NOT NULL, `email` TEXT NOT NULL, `mobile` TEXT NOT NULL, `yearsOfExperience` INTEGER NOT NULL, `registrationNumber` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `address` TEXT NOT NULL, `logoUrl` TEXT, `imagePath` TEXT, `active` INTEGER NOT NULL, `currency` TEXT NOT NULL, `country` TEXT NOT NULL, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `company` (`id` TEXT NOT NULL, `businessName` TEXT NOT NULL, `ownerName` TEXT NOT NULL, `email` TEXT NOT NULL, `mobile` TEXT NOT NULL, `yearsOfExperience` INTEGER NOT NULL, `registrationNumber` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `address` TEXT NOT NULL, `logoUrl` TEXT, `imagePath` TEXT, `active` INTEGER NOT NULL, `currency` TEXT NOT NULL, `country` TEXT NOT NULL, `deviceId` TEXT, PRIMARY KEY (`id`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `customers` (`id` TEXT, `name` TEXT NOT NULL, `phone` TEXT NOT NULL, `email` TEXT, `lastVisit` INTEGER NOT NULL, `gender` TEXT NOT NULL, `address` TEXT, `imagePath` TEXT, `profileImageUrl` TEXT, `createdDate` INTEGER NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, PRIMARY KEY (`id`))');
         await database.execute(
@@ -184,7 +184,8 @@ class _$CompanyDao extends CompanyDao {
                   'imagePath': item.imagePath,
                   'active': item.active ? 1 : 0,
                   'currency': item.currency,
-                  'country': item.country
+                  'country': item.country,
+                  'deviceId': item.deviceId
                 }),
         _companyUpdateAdapter = UpdateAdapter(
             database,
@@ -204,7 +205,8 @@ class _$CompanyDao extends CompanyDao {
                   'imagePath': item.imagePath,
                   'active': item.active ? 1 : 0,
                   'currency': item.currency,
-                  'country': item.country
+                  'country': item.country,
+                  'deviceId': item.deviceId
                 });
 
   final sqflite.DatabaseExecutor database;
@@ -234,7 +236,8 @@ class _$CompanyDao extends CompanyDao {
             imagePath: row['imagePath'] as String?,
             active: (row['active'] as int) != 0,
             currency: row['currency'] as String,
-            country: row['country'] as String));
+            country: row['country'] as String,
+            deviceId: row['deviceId'] as String?));
   }
 
   @override
@@ -254,7 +257,8 @@ class _$CompanyDao extends CompanyDao {
             imagePath: row['imagePath'] as String?,
             active: (row['active'] as int) != 0,
             currency: row['currency'] as String,
-            country: row['country'] as String));
+            country: row['country'] as String,
+            deviceId: row['deviceId'] as String?));
   }
 
   @override
@@ -274,7 +278,8 @@ class _$CompanyDao extends CompanyDao {
             imagePath: row['imagePath'] as String?,
             active: (row['active'] as int) != 0,
             currency: row['currency'] as String,
-            country: row['country'] as String),
+            country: row['country'] as String,
+            deviceId: row['deviceId'] as String?),
         arguments: [id]);
   }
 
@@ -295,7 +300,8 @@ class _$CompanyDao extends CompanyDao {
             imagePath: row['imagePath'] as String?,
             active: (row['active'] as int) != 0,
             currency: row['currency'] as String,
-            country: row['country'] as String),
+            country: row['country'] as String,
+            deviceId: row['deviceId'] as String?),
         arguments: [email]);
   }
 
@@ -317,7 +323,8 @@ class _$CompanyDao extends CompanyDao {
             imagePath: row['imagePath'] as String?,
             active: (row['active'] as int) != 0,
             currency: row['currency'] as String,
-            country: row['country'] as String),
+            country: row['country'] as String,
+            deviceId: row['deviceId'] as String?),
         arguments: [mobile]);
   }
 
@@ -342,7 +349,8 @@ class _$CompanyDao extends CompanyDao {
             imagePath: row['imagePath'] as String?,
             active: (row['active'] as int) != 0,
             currency: row['currency'] as String,
-            country: row['country'] as String),
+            country: row['country'] as String,
+            deviceId: row['deviceId'] as String?),
         arguments: [mobile, password]);
   }
 

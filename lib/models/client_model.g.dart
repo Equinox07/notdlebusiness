@@ -8,6 +8,7 @@ part of 'client_model.dart';
 
 ClientDto _$ClientDtoFromJson(Map<String, dynamic> json) => ClientDto(
       id: json['id'] as String?,
+      externalId: json['externalId'] as String?,
       name: json['name'] as String,
       email: json['email'] as String,
       phoneNumber: json['phoneNumber'] as String,
@@ -23,6 +24,7 @@ ClientDto _$ClientDtoFromJson(Map<String, dynamic> json) => ClientDto(
 
 Map<String, dynamic> _$ClientDtoToJson(ClientDto instance) => <String, dynamic>{
       'id': instance.id,
+      'externalId': instance.externalId,
       'name': instance.name,
       'email': instance.email,
       'phoneNumber': instance.phoneNumber,

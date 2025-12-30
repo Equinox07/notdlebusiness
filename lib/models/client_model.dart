@@ -5,6 +5,7 @@ part 'client_model.g.dart';
 @JsonSerializable()
 class ClientDto {
   final String? id;
+  final String? externalId;
   final String name;
   final String email;
   final String phoneNumber;
@@ -15,6 +16,7 @@ class ClientDto {
 
   ClientDto({
     this.id,
+    this.externalId,
     required this.name,
     required this.email,
     required this.phoneNumber,

@@ -47,6 +47,8 @@ class SyncService {
       if (!customer.isSynced) { // Only sync unsynced items
         try {
           final clientDto = ClientDto(
+            id: customer.id,
+            externalId: customer.id,
             name: customer.name,
             email: customer.email!,
             phoneNumber: customer.phone,
@@ -73,6 +75,7 @@ class SyncService {
       if (!measurement.isSynced) { // Only sync unsynced items
         try {
           final measurementDto = CreateMeasurementRequestDto(
+            externalId: measurement.id.toString(),
             name: measurement.name,
             measurementValues: measurement.measurementValues,
             clientId: measurement.customerId,
@@ -101,6 +104,7 @@ class SyncService {
       if (!order.isSynced) { // Only sync unsynced items
         try {
           final orderDto = OrderDto(
+            externalId: order.id,
             orderNumber: order.orderNumber!,
             orderDate:  DateTime.parse(order.createdDate),
             expectedDeliveryDate: order.expectedDeliveryDate!,
@@ -112,6 +116,7 @@ class SyncService {
             companyId: _companyId!,
             clientId: order.customerId,
             items: order.items.map((item) => OrderItemDto(
+              externalId: item.id,
               productName: item.productName,
               productDescription: item.productDescription,
               quantity: item.quantity,
@@ -150,6 +155,7 @@ class SyncService {
       if (!invoice.isSynced) { // Only sync unsynced items
         try {
           final invoiceDto = InvoiceDto(
+            externalId: invoice.id,
             invoiceNumber: invoice.invoiceNumber!,
             issueDate: invoice.issueDate!,
             dueDate: invoice.dueDate!,
@@ -161,6 +167,7 @@ class SyncService {
             status: invoice.status,
             projectId: invoice.projectId!,
             items: invoice.items.map((item) => InvoiceItemDto(
+              externalId: item.id,
               description: item.description,
               quantity: item.quantity,
               unitPrice: item.unitPrice,
@@ -168,6 +175,7 @@ class SyncService {
               amount: item.amount,
             )).toList(),
             payments: invoice.payments.map((payment) => PaymentDto(
+              externalId: payment.id,
               amount: payment.amount,
               paymentDate: payment.paymentDate,
               referenceNumber: payment.referenceNumber,

@@ -4,11 +4,13 @@ part 'measurement_model.g.dart';
 
 @JsonSerializable()
 class CreateMeasurementRequestDto {
+  final String? externalId;
   final String name;
   final Map<String, double> measurementValues;
   final String clientId;
 
   CreateMeasurementRequestDto({
+    this.externalId,
     required this.name,
     required this.measurementValues,
     required this.clientId,

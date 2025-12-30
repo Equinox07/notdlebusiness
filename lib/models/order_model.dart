@@ -5,6 +5,7 @@ part 'order_model.g.dart';
 @JsonSerializable()
 class OrderDto {
   final String? id;
+  final String? externalId;
   final String orderNumber;
   final DateTime orderDate;
   final DateTime expectedDeliveryDate;
@@ -19,6 +20,7 @@ class OrderDto {
 
   OrderDto({
     this.id,
+    this.externalId,
     required this.orderNumber,
     required this.orderDate,
     required this.expectedDeliveryDate,
@@ -39,6 +41,7 @@ class OrderDto {
 @JsonSerializable()
 class OrderItemDto {
   final String? id;
+  final String? externalId;
   final String productName;
   final String? productDescription;
   final int quantity;
@@ -49,6 +52,7 @@ class OrderItemDto {
 
   OrderItemDto({
     this.id,
+    this.externalId,
     required this.productName,
     this.productDescription,
     required this.quantity,

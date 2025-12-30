@@ -5,6 +5,7 @@ part 'invoice_model.g.dart';
 @JsonSerializable()
 class InvoiceDto {
   final String? id;
+  final String? externalId;
   final String invoiceNumber;
   final DateTime issueDate;
   final DateTime dueDate;
@@ -20,6 +21,7 @@ class InvoiceDto {
 
   InvoiceDto({
     this.id,
+    this.externalId,
     required this.invoiceNumber,
     required this.issueDate,
     required this.dueDate,
@@ -41,6 +43,7 @@ class InvoiceDto {
 @JsonSerializable()
 class InvoiceItemDto {
   final String? id;
+  final String? externalId;
   final String description;
   final int quantity;
   final double unitPrice;
@@ -50,6 +53,7 @@ class InvoiceItemDto {
 
   InvoiceItemDto({
     this.id,
+    this.externalId,
     required this.description,
     required this.quantity,
     required this.unitPrice,
@@ -65,6 +69,7 @@ class InvoiceItemDto {
 @JsonSerializable()
 class PaymentDto {
   final String? id;
+  final String? externalId;
   final double amount;
   final DateTime paymentDate;
   final String? referenceNumber;
@@ -75,6 +80,7 @@ class PaymentDto {
 
   PaymentDto({
     this.id,
+    this.externalId,
     required this.amount,
     required this.paymentDate,
     this.referenceNumber,

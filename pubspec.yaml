@@ -4,7 +4,7 @@ description: "A fashion tech application"
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.0+3
+version: 1.1.0
 
 environment:
   sdk: ^3.7.2
@@ -46,6 +46,7 @@ dependencies:
   device_info_plus: ^12.3.0
   # device_imei: any
   permission_handler: ^11.3.1
+  package_info_plus: ^8.1.1
 
 dev_dependencies:
   flutter_test:

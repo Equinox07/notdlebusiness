@@ -13,6 +13,7 @@ import 'package:notdle/services/session_manager.dart';
 import 'package:notdle/screens/settings_screen.dart';
 import 'package:notdle/utils/helpers.dart';
 import 'package:notdle/widgets/custom_app_bar.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -93,6 +94,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _buildDetailsSection(company),
                 const SizedBox(height: 24),
                 _buildActionsSection(context),
+                const SizedBox(height: 32),
+                _buildVersionInfo(),
+                const SizedBox(height: 24),
               ],
             ),
           );
@@ -462,5 +466,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
       }
     }
+  }
+
+  Widget _buildVersionInfo() {
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final packageInfo = snapshot.data!;
+          return Center(
+            child: Text(
+              'Version ${packageInfo.version}+${packageInfo.buildNumber}',
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                color: Colors.grey.shade400,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
   }
 }

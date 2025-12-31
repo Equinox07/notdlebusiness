@@ -1,6 +1,7 @@
 // lib/models/company.dart
 
 import 'package:floor/floor.dart';
+import 'package:uuid/uuid.dart';
 
 @Entity(tableName: 'company')
 class Company {
@@ -22,7 +23,7 @@ class Company {
   final String? deviceId;
 
   Company({
-    required this.id,
+    String? id,
     required this.businessName,
     required this.ownerName,
     required this.email,
@@ -37,7 +38,7 @@ class Company {
     this.currency = 'GHS',
     this.country = 'Ghana',
     this.deviceId,
-  });
+  }) : id = id ?? const Uuid().v4();
 
   // Factory constructor to create a Company from a Map
   factory Company.fromMap(Map<String, dynamic> map) {

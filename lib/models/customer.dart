@@ -1,6 +1,7 @@
 // lib/models/customer.dart
 
 import 'package:floor/floor.dart';
+import 'package:uuid/uuid.dart';
 
 @Entity(tableName: 'customers')
 class Customer {
@@ -19,7 +20,7 @@ class Customer {
   final bool isSynced; // New field
 
   Customer({
-    this.id,
+    String? id,
     required this.name,
     required this.phone,
     this.email,
@@ -31,7 +32,7 @@ class Customer {
     required this.createdDate,
     this.syncDate, // Add to constructor
     this.isSynced = false, // Add to constructor with default value
-  });
+  }) : id = id ?? const Uuid().v4();
 
   Customer copyWith({
     String? id,

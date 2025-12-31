@@ -1,5 +1,3 @@
-
-
 import 'package:notdle/models/dao/measurement_dao.dart';
 import 'package:notdle/models/measurement.dart';
 
@@ -9,15 +7,15 @@ class MeasurementRepository {
   MeasurementRepository({required this.dao});
 
   Future<Measurement> addMeasurement(Measurement measurement) async {
-    final id = await dao.insertMeasurement(measurement);
-    return measurement.copyWith(id: id);
+    await dao.insertMeasurement(measurement);
+    return measurement;
   }
 
   Future<List<Measurement>> getCustomerMeasurements(String customerId) {
     return dao.getMeasurementsByCustomerId(customerId);
   }
 
-  Future<Measurement?> getMeasurementById(int id) {
+  Future<Measurement?> getMeasurementById(String id) {
     return dao.getMeasurementById(id);
   }
 

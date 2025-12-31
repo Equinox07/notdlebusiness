@@ -31,7 +31,7 @@ part 'app_database.g.dart'; // The file that will be generated
   DateTimeNullConvertor,
 ])
 @Database(
-  version: 4, // Increment version for schema changes
+  version: 5, // Increment version for schema changes
   entities: [
     Company,
     Customer,
@@ -63,7 +63,9 @@ abstract class AppDatabase extends FloorDatabase {
       await txn.execute('DELETE FROM projects');
       await txn.execute('DELETE FROM customers');
       await txn.execute('DELETE FROM company');
-      await txn.execute("DELETE FROM sqlite_sequence WHERE name='measurements'");
+      await txn.execute(
+        "DELETE FROM sqlite_sequence WHERE name='measurements'",
+      );
     });
   }
 }

@@ -90,7 +90,7 @@ class _$AppDatabase extends AppDatabase {
     Callback? callback,
   ]) async {
     final databaseOptions = sqflite.OpenDatabaseOptions(
-      version: 4,
+      version: 5,
       onConfigure: (database) async {
         await database.execute('PRAGMA foreign_keys = ON');
         await callback?.onConfigure?.call(database);
@@ -112,7 +112,7 @@ class _$AppDatabase extends AppDatabase {
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `orders` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `customerId` TEXT NOT NULL, `status` TEXT NOT NULL, `paymentStatus` TEXT NOT NULL, `paymentAmount` REAL, `dueDate` TEXT, `notes` TEXT, `createdDate` TEXT NOT NULL, `orderNumber` TEXT, `subtotal` REAL, `total` REAL, `tax` REAL, `expectedDeliveryDate` INTEGER, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `measurements` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `customerId` TEXT NOT NULL, `name` TEXT NOT NULL, `measurementValues` TEXT NOT NULL, `createdDate` INTEGER NOT NULL, `updatedDate` INTEGER, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION)');
+            'CREATE TABLE IF NOT EXISTS `measurements` (`id` TEXT NOT NULL, `customerId` TEXT NOT NULL, `name` TEXT NOT NULL, `measurementValues` TEXT NOT NULL, `createdDate` INTEGER NOT NULL, `updatedDate` INTEGER, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, PRIMARY KEY (`id`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `invoices` (`id` TEXT NOT NULL, `customerId` TEXT NOT NULL, `companyId` TEXT, `status` TEXT NOT NULL, `createdDate` TEXT, `updatedDate` TEXT, `invoiceNumber` TEXT, `issueDate` INTEGER, `dueDate` INTEGER, `notes` TEXT, `terms` TEXT, `subtotal` REAL, `tax` REAL, `total` REAL, `projectId` TEXT, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `title` TEXT, `date` INTEGER, `orderId` TEXT, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, FOREIGN KEY (`orderId`) REFERENCES `orders` (`id`) ON UPDATE NO ACTION ON DELETE SET NULL, PRIMARY KEY (`id`))');
         await database.execute(
@@ -223,7 +223,7 @@ class _$CompanyDao extends CompanyDao {
   Future<Company?> getCompany() async {
     return _queryAdapter.query('SELECT * FROM Company LIMIT 1',
         mapper: (Map<String, Object?> row) => Company(
-            id: row['id'] as String,
+            id: row['id'] as String?,
             businessName: row['businessName'] as String,
             ownerName: row['ownerName'] as String,
             email: row['email'] as String,
@@ -244,7 +244,7 @@ class _$CompanyDao extends CompanyDao {
   Future<List<Company>> findAllCompanies() async {
     return _queryAdapter.queryList('SELECT * FROM Company',
         mapper: (Map<String, Object?> row) => Company(
-            id: row['id'] as String,
+            id: row['id'] as String?,
             businessName: row['businessName'] as String,
             ownerName: row['ownerName'] as String,
             email: row['email'] as String,
@@ -265,7 +265,7 @@ class _$CompanyDao extends CompanyDao {
   Future<Company?> findCompanyById(String id) async {
     return _queryAdapter.query('SELECT * FROM Company WHERE id=?1',
         mapper: (Map<String, Object?> row) => Company(
-            id: row['id'] as String,
+            id: row['id'] as String?,
             businessName: row['businessName'] as String,
             ownerName: row['ownerName'] as String,
             email: row['email'] as String,
@@ -287,7 +287,7 @@ class _$CompanyDao extends CompanyDao {
   Future<Company?> getCompanyByEmail(String email) async {
     return _queryAdapter.query('SELECT * FROM company WHERE email = ?1 LIMIT 1',
         mapper: (Map<String, Object?> row) => Company(
-            id: row['id'] as String,
+            id: row['id'] as String?,
             businessName: row['businessName'] as String,
             ownerName: row['ownerName'] as String,
             email: row['email'] as String,
@@ -310,7 +310,7 @@ class _$CompanyDao extends CompanyDao {
     return _queryAdapter.query(
         'SELECT * FROM company WHERE mobile = ?1 LIMIT 1',
         mapper: (Map<String, Object?> row) => Company(
-            id: row['id'] as String,
+            id: row['id'] as String?,
             businessName: row['businessName'] as String,
             ownerName: row['ownerName'] as String,
             email: row['email'] as String,
@@ -336,7 +336,7 @@ class _$CompanyDao extends CompanyDao {
     return _queryAdapter.query(
         'SELECT * FROM company WHERE mobile = ?1 AND email= ?2 LIMIT 1',
         mapper: (Map<String, Object?> row) => Company(
-            id: row['id'] as String,
+            id: row['id'] as String?,
             businessName: row['businessName'] as String,
             ownerName: row['ownerName'] as String,
             email: row['email'] as String,
@@ -778,7 +778,7 @@ class _$OrderDao extends OrderDao {
     return _queryAdapter.query(
         'SELECT * FROM invoices WHERE orderId = ?1 LIMIT 1',
         mapper: (Map<String, Object?> row) => Invoice(
-            id: row['id'] as String,
+            id: row['id'] as String?,
             customerId: row['customerId'] as String,
             companyId: row['companyId'] as String?,
             status: row['status'] as String,
@@ -805,7 +805,7 @@ class _$OrderDao extends OrderDao {
   Future<List<Invoice>?> getInvoicesByOrderId(String orderId) async {
     return _queryAdapter.queryList('SELECT * FROM invoices WHERE orderId = ?1',
         mapper: (Map<String, Object?> row) => Invoice(
-            id: row['id'] as String,
+            id: row['id'] as String?,
             customerId: row['customerId'] as String,
             companyId: row['companyId'] as String?,
             status: row['status'] as String,
@@ -832,7 +832,7 @@ class _$OrderDao extends OrderDao {
   Future<Invoice?> getInvoiceByCustomerId(String customerId) async {
     return _queryAdapter.query('SELECT * FROM invoices WHERE customerId = ?1',
         mapper: (Map<String, Object?> row) => Invoice(
-            id: row['id'] as String,
+            id: row['id'] as String?,
             customerId: row['customerId'] as String,
             companyId: row['companyId'] as String?,
             status: row['status'] as String,
@@ -952,7 +952,7 @@ class _$MeasurementDao extends MeasurementDao {
     return _queryAdapter.queryList(
         'SELECT * FROM measurements ORDER BY createdDate ASC',
         mapper: (Map<String, Object?> row) => Measurement(
-            id: row['id'] as int?,
+            id: row['id'] as String?,
             customerId: row['customerId'] as String,
             name: row['name'] as String,
             measurementValues: _measurementMapConverter
@@ -968,7 +968,7 @@ class _$MeasurementDao extends MeasurementDao {
   Future<Measurement?> getById(String id) async {
     return _queryAdapter.query('SELECT * FROM measurements WHERE id = ?1',
         mapper: (Map<String, Object?> row) => Measurement(
-            id: row['id'] as int?,
+            id: row['id'] as String?,
             customerId: row['customerId'] as String,
             name: row['name'] as String,
             measurementValues: _measurementMapConverter
@@ -986,7 +986,7 @@ class _$MeasurementDao extends MeasurementDao {
       String customerId) async {
     return _queryAdapter.queryList(
         'SELECT * FROM measurements WHERE customerId = ?1 ORDER BY createdDate ASC',
-        mapper: (Map<String, Object?> row) => Measurement(id: row['id'] as int?, customerId: row['customerId'] as String, name: row['name'] as String, measurementValues: _measurementMapConverter.decode(row['measurementValues'] as String), createdDate: _dateTimeConvertor.decode(row['createdDate'] as int), updatedDate: _dateTimeNullConvertor.decode(row['updatedDate'] as int?), syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?), isSynced: (row['isSynced'] as int) != 0),
+        mapper: (Map<String, Object?> row) => Measurement(id: row['id'] as String?, customerId: row['customerId'] as String, name: row['name'] as String, measurementValues: _measurementMapConverter.decode(row['measurementValues'] as String), createdDate: _dateTimeConvertor.decode(row['createdDate'] as int), updatedDate: _dateTimeNullConvertor.decode(row['updatedDate'] as int?), syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?), isSynced: (row['isSynced'] as int) != 0),
         arguments: [customerId]);
   }
 
@@ -996,7 +996,7 @@ class _$MeasurementDao extends MeasurementDao {
     return _queryAdapter.queryList(
         'SELECT * FROM measurements WHERE customerId = ?1',
         mapper: (Map<String, Object?> row) => Measurement(
-            id: row['id'] as int?,
+            id: row['id'] as String?,
             customerId: row['customerId'] as String,
             name: row['name'] as String,
             measurementValues: _measurementMapConverter
@@ -1010,10 +1010,10 @@ class _$MeasurementDao extends MeasurementDao {
   }
 
   @override
-  Future<Measurement?> getMeasurementById(int id) async {
+  Future<Measurement?> getMeasurementById(String id) async {
     return _queryAdapter.query('SELECT * FROM measurements WHERE id = ?1',
         mapper: (Map<String, Object?> row) => Measurement(
-            id: row['id'] as int?,
+            id: row['id'] as String?,
             customerId: row['customerId'] as String,
             name: row['name'] as String,
             measurementValues: _measurementMapConverter
@@ -1218,7 +1218,7 @@ class _$InvoiceDao extends InvoiceDao {
   Future<List<Invoice>> getAllInvoices() async {
     return _queryAdapter.queryList('SELECT * FROM invoices',
         mapper: (Map<String, Object?> row) => Invoice(
-            id: row['id'] as String,
+            id: row['id'] as String?,
             customerId: row['customerId'] as String,
             companyId: row['companyId'] as String?,
             status: row['status'] as String,
@@ -1244,7 +1244,7 @@ class _$InvoiceDao extends InvoiceDao {
   Future<Invoice?> getInvoiceById(String id) async {
     return _queryAdapter.query('SELECT * FROM invoices WHERE id = ?1',
         mapper: (Map<String, Object?> row) => Invoice(
-            id: row['id'] as String,
+            id: row['id'] as String?,
             customerId: row['customerId'] as String,
             companyId: row['companyId'] as String?,
             status: row['status'] as String,

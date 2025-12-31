@@ -19,14 +19,12 @@ class MeasurementProvider extends ChangeNotifier {
 
   List<Measurement> get measurements => _measurements;
 
-
   Future<Measurement> addMeasurement(Measurement measurement) async {
     // final saved = await repository.addMeasurement(m);
     // _measurements.add(saved);
-    final id = await measurementDao.insertMeasurement(measurement);
+    await measurementDao.insertMeasurement(measurement);
     notifyListeners();
-    return measurement.copyWith(id: id);
-
+    return measurement;
   }
 
   Future<void> updateMeasurement(Measurement measurement) async {
@@ -41,7 +39,9 @@ class MeasurementProvider extends ChangeNotifier {
 
   Future<void> fetchMeasurementsWithCustomer(String customerId) async {
     try {
-      final measurements = await measurementDao.getMeasurementsForCustomer(customerId);
+      final measurements = await measurementDao.getMeasurementsForCustomer(
+        customerId,
+      );
       final customer = await customerDao.getCustomerById(customerId);
 
       if (customer != null) {
@@ -74,9 +74,7 @@ class MeasurementProvider extends ChangeNotifier {
     final measurements = await measurementDao.getAllMeasurements();
     final allCustomers = await customerDao.getAllCustomers();
 
-    final customerMap = {
-      for (final c in allCustomers) c.id: c
-    };
+    final customerMap = {for (final c in allCustomers) c.id: c};
 
     for (final m in measurements) {
       final customer = customerMap[m.customerId];
@@ -92,9 +90,7 @@ class MeasurementProvider extends ChangeNotifier {
     final measurements = await measurementDao.getAllMeasurements();
     final allCustomers = await customerDao.getAllCustomers();
 
-    final customerMap = {
-      for (final c in allCustomers) c.id: c
-    };
+    final customerMap = {for (final c in allCustomers) c.id: c};
 
     for (final m in measurements) {
       final customer = customerMap[m.customerId];
@@ -108,7 +104,6 @@ class MeasurementProvider extends ChangeNotifier {
 
     // return measurements;
   }
-
 
   // Future<List<Measurement>> getAllMeasurementWithCustomers() async {
   //   final measurements = await measurementDao.getAllMeasurements();
@@ -137,7 +132,6 @@ class MeasurementProvider extends ChangeNotifier {
   //
   //   return measurements;
   // }
-
 
   void clear() {
     _customerMeasurements = [];

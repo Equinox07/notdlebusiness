@@ -1,19 +1,28 @@
 // lib/models/invoice.dart
 import 'package:floor/floor.dart';
+import 'package:uuid/uuid.dart';
+
 import 'package:notdle/models/invoice_item.dart';
 import 'package:notdle/models/payment.dart'; // Import the Payment model
 import 'customer.dart';
 import 'order.dart';
 
 @Entity(
-    tableName: 'invoices',
-    foreignKeys: [
-      ForeignKey(childColumns: ['customerId'], parentColumns: ['id'],
-          entity: Customer,
-      onDelete: ForeignKeyAction.cascade),
-      ForeignKey(childColumns: ['orderId'], parentColumns: ['id'], entity: Order,
-          onDelete: ForeignKeyAction.setNull)
-    ]
+  tableName: 'invoices',
+  foreignKeys: [
+    ForeignKey(
+      childColumns: ['customerId'],
+      parentColumns: ['id'],
+      entity: Customer,
+      onDelete: ForeignKeyAction.cascade,
+    ),
+    ForeignKey(
+      childColumns: ['orderId'],
+      parentColumns: ['id'],
+      entity: Order,
+      onDelete: ForeignKeyAction.setNull,
+    ),
+  ],
 )
 class Invoice {
   @PrimaryKey()
@@ -44,7 +53,7 @@ class Invoice {
   final List<Payment> payments; // Add payments list
 
   Invoice({
-    required this.id,
+    String? id,
     required this.customerId,
     this.companyId, // Make optional in constructor
     required this.status,
@@ -66,7 +75,7 @@ class Invoice {
     this.title, // Add to constructor
     this.date, // Add to constructor
     this.orderId, // Add to constructor
-  });
+  }) : id = id ?? const Uuid().v4();
 
   Invoice copyWith({
     String? customerId,

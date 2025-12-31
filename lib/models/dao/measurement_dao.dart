@@ -1,17 +1,17 @@
-
 import 'package:floor/floor.dart';
 import 'package:notdle/models/measurement.dart';
 
 @dao
-abstract class MeasurementDao{
-
+abstract class MeasurementDao {
   @Query('SELECT * FROM measurements ORDER BY createdDate ASC')
   Future<List<Measurement>> getAllMeasurements();
 
   @Query('SELECT * FROM measurements WHERE id = :id')
   Future<Measurement?> getById(String id);
 
-  @Query('SELECT * FROM measurements WHERE customerId = :customerId ORDER BY createdDate ASC')
+  @Query(
+    'SELECT * FROM measurements WHERE customerId = :customerId ORDER BY createdDate ASC',
+  )
   Future<List<Measurement>> getMeasurementsForCustomer(String customerId);
 
   // @Insert(onConflict: OnConflictStrategy.replace)
@@ -23,7 +23,6 @@ abstract class MeasurementDao{
   // @delete
   // Future<void> deleteMeasurement(Measurement measurement);
 
-
   @Insert(onConflict: OnConflictStrategy.replace)
   Future<int> insertMeasurement(Measurement measurement);
 
@@ -31,7 +30,7 @@ abstract class MeasurementDao{
   Future<List<Measurement>> getMeasurementsByCustomerId(String customerId);
 
   @Query('SELECT * FROM measurements WHERE id = :id')
-  Future<Measurement?> getMeasurementById(int id);
+  Future<Measurement?> getMeasurementById(String id);
 
   @update
   Future<void> updateMeasurement(Measurement measurement);
@@ -41,5 +40,4 @@ abstract class MeasurementDao{
 
   @Query('DELETE FROM measurements WHERE customerId = :customerId')
   Future<void> deleteMeasurementsByCustomerId(String customerId);
-
 }

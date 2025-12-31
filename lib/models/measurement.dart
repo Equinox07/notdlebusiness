@@ -1,5 +1,7 @@
 import 'package:floor/floor.dart';
+import 'package:uuid/uuid.dart';
 import 'customer.dart';
+
 @Entity(
   tableName: 'measurements',
   foreignKeys: [
@@ -7,12 +9,12 @@ import 'customer.dart';
       childColumns: ['customerId'],
       parentColumns: ['id'],
       entity: Customer,
-    )
+    ),
   ],
 )
 class Measurement {
-  @PrimaryKey(autoGenerate: true)
-  final int? id;
+  @PrimaryKey()
+  final String id;
 
   final String customerId;
   final String name; // New name field
@@ -31,7 +33,7 @@ class Measurement {
   Customer? customer;
 
   Measurement({
-    this.id,
+    String? id,
     required this.customerId,
     required this.name, // Add name to constructor
     required this.measurementValues,
@@ -40,14 +42,14 @@ class Measurement {
     this.customer,
     this.syncDate, // Add to constructor
     this.isSynced = false, // Add to constructor with default value
-  });
+  }) : id = id ?? const Uuid().v4();
 
   void linkCustomer(Customer c) {
     customer = c;
   }
 
   Measurement copyWith({
-    int? id,
+    String? id,
     String? customerId,
     String? name, // Add name to copyWith
     Map<String, double>? measurementValues,

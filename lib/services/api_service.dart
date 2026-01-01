@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:notdle/models/user_model.dart';
 import 'package:notdle/models/company.dart';
+import 'package:notdle/models/app_version.dart';
 
 class ApiService {
   // static const String _baseUrl = 'http://localhost:8080/api';
@@ -193,12 +194,16 @@ class ApiService {
   }
 
   // Authentication
-  Future<Map<String, dynamic>> login(String email, String password, {String? deviceImei}) async {
+  Future<Map<String, dynamic>> login(
+    String email,
+    String password, {
+    String? deviceImei,
+  }) async {
     final body = {'email': email, 'password': password};
     if (deviceImei != null) {
       body['deviceId'] = deviceImei;
     }
-    
+
     final response = await http.post(
       Uri.parse('$_baseUrl/auth/login'),
       headers: await _getHeaders(),
@@ -934,5 +939,33 @@ class ApiService {
       '/companies/$companyId/$resource/search',
       queryParams: {'query': query, 'page': page, 'size': size},
     );
+  }
+
+  // App Versions
+  Future<AppVersionDto?> getLatestAppVersion(
+    String platform,
+    String packageName,
+  ) async {
+    try {
+      final headers = await _getHeaders();
+      headers['X-App-Package'] = packageName;
+
+      final response = await http.get(
+        Uri.parse('$_baseUrl/v1/app-versions/latest?platform=$platform'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return AppVersionDto.fromJson(data);
+      } else if (response.statusCode == 404) {
+        return null;
+      } else {
+        throw Exception('Failed to load app version: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error fetching app version: $e');
+      rethrow;
+    }
   }
 }

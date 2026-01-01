@@ -20,6 +20,9 @@ import 'package:notdle/screens/profile_screen.dart';
 import 'package:notdle/screens/settings_screen.dart';
 import 'package:notdle/screens/onboarding_screen.dart';
 import 'package:notdle/services/api_service.dart';
+import 'package:notdle/utils/version_helper.dart';
+import 'package:notdle/widgets/force_update_modal.dart';
+import 'package:notdle/models/app_version.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class IndexPage extends StatelessWidget {
@@ -67,6 +70,21 @@ class _StartupScreen extends StatelessWidget {
 
   Future<Widget> _determineInitialRoute() async {
     try {
+      // 1. Check for Force Update first
+      final updateInfo = await VersionHelper.checkUpdate();
+      if (updateInfo['shouldUpdate'] == true &&
+          updateInfo['forceUpdate'] == true) {
+        final latestInfo = updateInfo['latestVersion'] as AppVersionDto;
+        return Scaffold(
+          body: Center(
+            child: ForceUpdateModal(
+              latestVersion: latestInfo.version,
+              releaseNotes: latestInfo.releaseNotes,
+            ),
+          ),
+        );
+      }
+
       // Check if onboarding has been seen
       final prefs = await SharedPreferences.getInstance();
       final seenOnboarding = prefs.getBool('seenOnboarding') ?? false;

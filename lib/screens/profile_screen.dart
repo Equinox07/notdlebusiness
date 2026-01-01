@@ -474,9 +474,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final packageInfo = snapshot.data!;
+          final platform =
+              Platform.isAndroid
+                  ? 'Android'
+                  : (Platform.isIOS ? 'iOS' : Platform.operatingSystem);
           return Center(
             child: Text(
-              'Version ${packageInfo.version}+${packageInfo.buildNumber}',
+              '$platform - Version ${packageInfo.version}+${packageInfo.buildNumber}',
               style: GoogleFonts.poppins(
                 fontSize: 12,
                 color: Colors.grey.shade400,

@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:notdle/models/user_model.dart';
 import 'package:notdle/models/company.dart';
 import 'package:notdle/models/app_version.dart';
+import 'package:notdle/models/stats_model.dart';
 
 class ApiService {
   // static const String _baseUrl = 'http://localhost:8080/api';
@@ -967,5 +968,56 @@ class ApiService {
       debugPrint('Error fetching app version: $e');
       rethrow;
     }
+  }
+
+  // Statistics
+  Future<CompanyStatsResponse> getCompanyStats(String companyId) async {
+    final response = await get('/v1/stats/company/$companyId');
+    return CompanyStatsResponse.fromJson(response);
+  }
+
+  Future<StatsDto> getMeasurementStats(String companyId) async {
+    final response = await get('/v1/measurements/stats/$companyId');
+    return StatsDto.fromJson(response);
+  }
+
+  Future<StatsDto> getUserStats(String companyId) async {
+    final response = await get('/users/stats/$companyId');
+    return StatsDto.fromJson(response);
+  }
+
+  Future<StatsDto> getPaymentStats(String companyId) async {
+    final response = await get('/payments/stats/$companyId');
+    return StatsDto.fromJson(response);
+  }
+
+  Future<StatsDto> getCompanyUserStats(String companyId) async {
+    final response = await get('/companies/$companyId/users/stats');
+    return StatsDto.fromJson(response);
+  }
+
+  Future<StatsDto> getProjectStats(String companyId) async {
+    final response = await get('/companies/$companyId/projects/stats');
+    return StatsDto.fromJson(response);
+  }
+
+  Future<StatsDto> getOrderStats(String companyId) async {
+    final response = await get('/companies/$companyId/orders/stats');
+    return StatsDto.fromJson(response);
+  }
+
+  Future<StatsDto> getInvoiceStats(String companyId) async {
+    final response = await get('/companies/$companyId/invoices/stats');
+    return StatsDto.fromJson(response);
+  }
+
+  Future<StatsDto> getDeviceStats(String companyId) async {
+    final response = await get('/companies/$companyId/devices/stats');
+    return StatsDto.fromJson(response);
+  }
+
+  Future<StatsDto> getClientStats(String companyId) async {
+    final response = await get('/companies/$companyId/clients/stats');
+    return StatsDto.fromJson(response);
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
@@ -9,10 +10,10 @@ import 'package:notdle/models/app_version.dart';
 import 'package:notdle/models/stats_model.dart';
 
 class ApiService {
-  // static const String _baseUrl = 'http://localhost:8080/api';
-  // static const String _baseUrl = 'https://api.notdle.com/api';
-  static const String _baseUrl =
-      'https://unreprovable-jacquelynn-unconceived.ngrok-free.dev/api';
+  static final String _baseUrl =
+      kReleaseMode
+          ? 'https://api.notdle.com/api'
+          : 'https://unreprovable-jacquelynn-unconceived.ngrok-free.dev/api';
   final _storage = const FlutterSecureStorage();
   static final ApiService _instance = ApiService._internal();
   static final GlobalKey<NavigatorState> navigatorKey =

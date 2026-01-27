@@ -47,6 +47,8 @@ dependencies:
   # device_imei: any
   permission_handler: ^11.3.1
   package_info_plus: ^8.1.1
+  cloudinary_flutter: ^1.3.0
+  cloudinary_url_gen: ^1.3.0
 
 dev_dependencies:
   flutter_test:

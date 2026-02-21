@@ -107,6 +107,16 @@ class _DashboardHomeState extends State<DashboardHome> {
               ),
               const SizedBox(height: 32),
 
+              // Urgent Alerts Section
+              const _UrgentAlerts(
+                alerts: [
+                  '2 Orders Overdue',
+                  '1 Client has unpaid balance past 7 days',
+                  'Fabric stock low (Lace White)',
+                ],
+              ),
+              const SizedBox(height: 24),
+
               // Stats Overview (Horizontal Scrollable)
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -150,6 +160,10 @@ class _DashboardHomeState extends State<DashboardHome> {
                   ],
                 ),
               ),
+              const SizedBox(height: 32),
+
+              // Financial Overview Section
+              const _FinancialOverview(),
               const SizedBox(height: 32),
 
               // Production Status
@@ -239,12 +253,7 @@ class _DashboardHomeState extends State<DashboardHome> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => AppNavigator.toCreateNewOrder(),
-        backgroundColor: const Color(0xFF6200EE),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.add, color: Colors.white, size: 32),
-      ),
+      bottomNavigationBar: const _QuickActionsBar(),
     );
   }
 }
@@ -407,53 +416,6 @@ class _DashboardStatCard extends StatelessWidget {
   }
 }
 
-class _StatusCard extends StatelessWidget {
-  final int count;
-  final String label;
-  final Color color;
-  final Color textColor;
-
-  const _StatusCard({
-    required this.count,
-    required this.label,
-    required this.color,
-    required this.textColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        children: [
-          Text(
-            count.toString(),
-            style: GoogleFonts.poppins(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: textColor.withOpacity(0.8),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: GoogleFonts.poppins(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: textColor.withOpacity(0.6),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _DeadlineListItem extends StatelessWidget {
   final String name;
   final String item;
@@ -540,6 +502,343 @@ class _DeadlineListItem extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: statusTextColor,
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusCard extends StatelessWidget {
+  final int count;
+  final String label;
+  final Color color;
+  final Color textColor;
+
+  const _StatusCard({
+    required this.count,
+    required this.label,
+    required this.color,
+    required this.textColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Text(
+            count.toString(),
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: textColor.withOpacity(0.8),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: textColor.withOpacity(0.6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _UrgentAlerts extends StatelessWidget {
+  final List<String> alerts;
+
+  const _UrgentAlerts({required this.alerts});
+
+  @override
+  Widget build(BuildContext context) {
+    if (alerts.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.red.shade100),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.error_outline, color: Colors.red, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                "Urgent Alerts",
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red.shade900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...alerts.map(
+            (alert) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      alert,
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.red.shade800,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FinancialOverview extends StatelessWidget {
+  const _FinancialOverview();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "💰 Financial Overview",
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            TextButton(
+              onPressed: () {},
+              child: Text(
+                "View Full Analytics",
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF6200EE),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 1.6,
+          children: const [
+            _FinancialCard(
+              label: "Today's Income",
+              value: "\$0",
+              color: Colors.green,
+            ),
+            _FinancialCard(
+              label: "This Week",
+              value: "\$0",
+              color: Colors.blue,
+            ),
+            _FinancialCard(
+              label: "This Month",
+              value: "\$0",
+              color: Colors.orange,
+            ),
+            _FinancialCard(
+              label: "Pending Payments",
+              value: "\$0",
+              color: Colors.red,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _FinancialCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _FinancialCard({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickActionsBar extends StatelessWidget {
+  const _QuickActionsBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: ElevatedButton.icon(
+                onPressed: () => AppNavigator.toCreateNewOrder(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6200EE),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.add),
+                label: Text(
+                  "New Order",
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            _ActionButton(
+              icon: Icons.person_add_outlined,
+              label: "Client",
+              onTap: () {},
+            ),
+            const SizedBox(width: 8),
+            _ActionButton(
+              icon: Icons.receipt_long_outlined,
+              label: "Payment",
+              onTap: () {},
+            ),
+            const SizedBox(width: 8),
+            _ActionButton(
+              icon: Icons.calendar_month_outlined,
+              label: "Fitting",
+              onTap: () {},
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Colors.black87, size: 20),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],

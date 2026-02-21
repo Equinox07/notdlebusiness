@@ -43,7 +43,6 @@ class _DashboardHomeState extends State<DashboardHome> {
       appBar: AppBar(
         backgroundColor: Colors.grey.shade50,
         elevation: 0,
-        titleSpacing: 16,
         title: Row(
           children: [
             Container(
@@ -58,14 +57,51 @@ class _DashboardHomeState extends State<DashboardHome> {
                 size: 20,
               ),
             ),
-            const SizedBox(width: 10),
-            Text(
-              "StitchFlow",
-              style: GoogleFonts.poppins(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF311B92),
-              ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Good Morning, ${companyName.isNotEmpty ? companyName.split(' ')[0] : 'Sarah'}',
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Text(
+                      "StitchFlow",
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF311B92),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade100,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        "Basic",
+                        style: GoogleFonts.poppins(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber.shade900,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),
@@ -85,27 +121,7 @@ class _DashboardHomeState extends State<DashboardHome> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 32),
-
-              // Welcome Section
-              Text(
-                'Welcome back,',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  color: Colors.grey.shade600,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Good Morning, ${companyName.isNotEmpty ? companyName.split(' ')[0] : 'Sarah'}',
-                style: GoogleFonts.poppins(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 10),
 
               // Urgent Alerts Section
               const _UrgentAlerts(

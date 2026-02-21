@@ -1,16 +1,23 @@
-import 'package:flutter/material.dart';
+// lib/screens/customers_screen.dart
+
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/screens/add_customer_screen.dart';
 import 'package:notdle/screens/customer_detail_screen.dart';
-import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
+
+const _kPurple = Color(0xFF6200EE);
+const _kBg = Color(0xFFF3F2F7);
+
+// Simple tag enum — VIP/Frequent/New assigned by order count heuristic
+enum _ClientTag { all, vip, frequent, newClient }
 
 class CustomersScreen extends StatefulWidget {
   const CustomersScreen({super.key});
-
   static const String tag = "customers";
 
   @override
@@ -19,163 +26,235 @@ class CustomersScreen extends StatefulWidget {
 
 class _CustomersScreenState extends State<CustomersScreen> {
   final TextEditingController _searchController = TextEditingController();
-
-  // Mock customers
-  late List<Customer> customers = [];
-
-  List<Customer> filteredCustomers = [];
-
+  List<Customer> _customers = [];
+  List<Customer> _filtered = [];
   bool _isLoading = true;
+  _ClientTag _activeTag = _ClientTag.all;
 
   @override
   void initState() {
     super.initState();
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   Provider.of<CustomerProvider>(context, listen: false).fetchCustomers();
-    //   // Provider.of<CompanyProvider>(context, listen: false).fetchCompany();
-    // });
-    filteredCustomers = customers;
-    _searchController.addListener(_filterCustomers);
+    _searchController.addListener(_applyFilters);
     _loadCustomers();
   }
 
   Future<void> _loadCustomers() async {
-    // final data = context.read<CustomerProvider>().fetchCustomers(); //await DatabaseHelper.instance.fetchCustomers();
-    final customerProvider = Provider.of<CustomerProvider>(
-      context,
-      listen: false,
-    );
-    await customerProvider.fetchCustomers();
+    final cp = Provider.of<CustomerProvider>(context, listen: false);
+    await cp.fetchCustomers();
+    if (!mounted) return;
     setState(() {
-      customers = customerProvider.customers;
-      filteredCustomers = customerProvider.customers;
+      _customers = cp.customers;
+      _filtered = _customers;
       _isLoading = false;
     });
   }
 
-  void _filterCustomers() {
+  void _applyFilters() {
     final query = _searchController.text.toLowerCase();
     setState(() {
-      filteredCustomers =
-          customers.where((c) {
-            return c.name.toLowerCase().contains(query) ||
-                c.phone.contains(query);
-            // || c.email.toLowerCase().contains(query);
+      _filtered =
+          _customers.where((c) {
+            final matchesSearch =
+                c.name.toLowerCase().contains(query) || c.phone.contains(query);
+            final matchesTag = _tagMatches(c);
+            return matchesSearch && matchesTag;
           }).toList();
     });
   }
 
+  // Heuristic: classify by lastVisit recency
+  _ClientTag _inferTag(Customer c) {
+    final daysSince = DateTime.now().difference(c.lastVisit).inDays;
+    if (daysSince <= 7) return _ClientTag.newClient;
+    if (daysSince <= 60) return _ClientTag.frequent;
+    return _ClientTag.vip; // oldest / high-value fallback
+  }
+
+  bool _tagMatches(Customer c) {
+    if (_activeTag == _ClientTag.all) return true;
+    return _inferTag(c) == _activeTag;
+  }
+
+  void _setTag(_ClientTag tag) {
+    setState(() => _activeTag = tag);
+    _applyFilters();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final customerProvider = Provider.of<CustomerProvider>(context);
-
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth >= 600;
-    final maxFormWidth = isTablet ? 500.0 : double.infinity;
-    final horizontalPadding = isTablet ? 32.0 : 24.0;
-    // final order = customerProvider.customerOrderCount(customerId);
-
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: const CustomAppBar(title: "Customers"),
-      body: Column(
-        children: [
-          // 🔍 Search bar
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              style: GoogleFonts.poppins(),
-              decoration: InputDecoration(
-                hintText: 'Search customers...',
-                hintStyle: GoogleFonts.poppins(color: Colors.grey.shade500),
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.grey.shade100,
-              ),
-            ),
-          ),
-
-          // 📊 Count
-          Container(
-            width: double.infinity,
-            color: Colors.white,
-            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-            child: Text(
-              '${filteredCustomers.length} customers found',
-              style: GoogleFonts.poppins(
-                color: Colors.grey.shade600,
-                fontSize: 14,
-              ),
-            ),
-          ),
-
-          // 📋 List
-          Expanded(
-            child:
-                filteredCustomers.isEmpty
-                    ? _buildEmptyState()
-                    : ListView.separated(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isTablet ? 24 : 16,
-                        vertical: isTablet ? 20 : 12,
-                      ),
-                      itemCount: filteredCustomers.length,
-                      itemBuilder: (context, index) {
-                        final customer = filteredCustomers[index];
-                        return CustomerCard(
-                          customer: customer,
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (_) => CustomerDetailScreen(
-                                      customer: customer,
-                                    ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                      separatorBuilder:
-                          (context, index) => SizedBox(
-                            height: isTablet ? 16 : 12,
-                          ), // ✅ space between cards
+      backgroundColor: _kBg,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header ─────────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 22, 18, 0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Clients",
+                    style: GoogleFonts.poppins(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF0D0D0D),
                     ),
-          ),
-        ],
-      ),
+                  ),
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.07),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.more_horiz,
+                      color: Colors.black87,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
-      // ➕ Floating button
-      floatingActionButton: FloatingActionButton.extended(
+            const SizedBox(height: 18),
+
+            // ── Search ─────────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  style: GoogleFonts.poppins(fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: "Search by name or phone...",
+                    hintStyle: GoogleFonts.poppins(
+                      color: Colors.grey.shade400,
+                      fontSize: 14,
+                    ),
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Colors.grey.shade400,
+                      size: 20,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // ── Filter Pills ───────────────────────────────────────────────
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              child: Row(
+                children: [
+                  _TagPill(
+                    label: "All",
+                    active: _activeTag == _ClientTag.all,
+                    onTap: () => _setTag(_ClientTag.all),
+                  ),
+                  _TagPill(
+                    label: "VIP",
+                    active: _activeTag == _ClientTag.vip,
+                    onTap: () => _setTag(_ClientTag.vip),
+                  ),
+                  _TagPill(
+                    label: "Frequent",
+                    active: _activeTag == _ClientTag.frequent,
+                    onTap: () => _setTag(_ClientTag.frequent),
+                  ),
+                  _TagPill(
+                    label: "New",
+                    active: _activeTag == _ClientTag.newClient,
+                    onTap: () => _setTag(_ClientTag.newClient),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // ── List ───────────────────────────────────────────────────────
+            Expanded(
+              child:
+                  _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : _filtered.isEmpty
+                      ? _buildEmptyState()
+                      : ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(18, 0, 18, 100),
+                        itemCount: _filtered.length,
+                        itemBuilder: (context, index) {
+                          final customer = _filtered[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _ClientCard(
+                              customer: customer,
+                              tag: _inferTag(customer),
+                              onTap:
+                                  () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (_) => CustomerDetailScreen(
+                                            customer: customer,
+                                          ),
+                                    ),
+                                  ),
+                            ),
+                          );
+                        },
+                      ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final newCustomer = await Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const AddCustomerScreen()),
           );
-
-          if (newCustomer != null && newCustomer is Customer) {
+          if (newCustomer != null && newCustomer is Customer && mounted) {
             setState(() {
-              customers.add(newCustomer);
-              filteredCustomers = customers;
+              _customers.add(newCustomer);
+              _filtered = _customers;
             });
           }
         },
-        icon: const Icon(Icons.person_add, color: Colors.white),
-        label: Text(
-          "Add Customer",
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: Colors.indigo,
+        backgroundColor: _kPurple,
+        elevation: 6,
+        child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
     );
   }
@@ -185,141 +264,207 @@ class _CustomersScreenState extends State<CustomersScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.people_outline, size: 80, color: Colors.grey.shade400),
+          Icon(Icons.people_outline, size: 72, color: Colors.grey.shade300),
           const SizedBox(height: 16),
           Text(
-            "No customers found",
+            "No clients found",
             style: GoogleFonts.poppins(
-              fontSize: 18,
-              color: Colors.grey.shade600,
+              fontSize: 17,
               fontWeight: FontWeight.w600,
+              color: Colors.grey.shade500,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
-            "Start building your customer base",
+            "Tap + to add your first client",
             style: GoogleFonts.poppins(
-              color: Colors.grey.shade500,
-              fontSize: 14,
+              fontSize: 13,
+              color: Colors.grey.shade400,
             ),
           ),
         ],
       ),
     );
   }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
 }
 
-// ---------------- Customer Card ---------------
-class CustomerCard extends StatelessWidget {
-  final Customer customer;
-  final VoidCallback onTap;
+// ── Filter Pill ───────────────────────────────────────────────────────────────
 
-  const CustomerCard({super.key, required this.customer, required this.onTap});
+class _TagPill extends StatelessWidget {
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+  const _TagPill({
+    required this.label,
+    required this.active,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.only(right: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+        decoration: BoxDecoration(
+          color: active ? _kPurple : Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow:
+              active
+                  ? [
+                    BoxShadow(
+                      color: _kPurple.withValues(alpha: 0.28),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                  : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 14,
+            fontWeight: active ? FontWeight.bold : FontWeight.w500,
+            color: active ? Colors.white : Colors.grey.shade700,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Client Card ───────────────────────────────────────────────────────────────
+
+class CustomerCard extends StatelessWidget {
+  final Customer customer;
+  final VoidCallback onTap;
+  const CustomerCard({super.key, required this.customer, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return _ClientCard(customer: customer, onTap: onTap);
+  }
+}
+
+class _ClientCard extends StatelessWidget {
+  final Customer customer;
+  final VoidCallback onTap;
+  final _ClientTag? tag;
+
+  const _ClientCard({required this.customer, required this.onTap, this.tag});
+
+  @override
+  Widget build(BuildContext context) {
+    final lastVisitStr = _formatLastVisit(customer.lastVisit);
+    final badgeData = _badgeFor(tag);
+
+    return GestureDetector(
+      onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
               offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(14),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Avatar
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: Colors.indigo.shade100,
-                backgroundImage:
-                    customer.imagePath != null
-                        ? FileImage(File(customer.imagePath!))
-                        : null,
-                child:
-                    customer.imagePath == null
-                        ? Icon(
-                          Icons.person,
-                          color: Colors.indigo.shade600,
-                          size: 24,
-                        )
-                        : null,
-              ),
-              const SizedBox(width: 16),
+              // ── Photo ──────────────────────────────────────────────────
+              _buildAvatar(),
+              const SizedBox(width: 14),
 
-              // Customer info
+              // ── Info ───────────────────────────────────────────────────
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      customer.name,
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
+                    // Name row + badge
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            customer.name,
+                            style: GoogleFonts.poppins(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF0D0D0D),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (badgeData != null) ...[
+                          const SizedBox(width: 8),
+                          _Badge(label: badgeData.$1, color: badgeData.$2),
+                        ],
+                      ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 3),
                     Text(
                       customer.phone,
                       style: GoogleFonts.poppins(
                         fontSize: 13,
-                        color: Colors.grey.shade600,
+                        color: Colors.grey.shade500,
                       ),
                     ),
-                    Text(
-                      customer.email ?? "N/A",
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: Colors.grey.shade600,
-                      ),
+                    const SizedBox(height: 8),
+                    // Last visit + balance row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Last: $lastVisitStr",
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: Colors.grey.shade400,
+                          ),
+                        ),
+                        FutureBuilder<int>(
+                          future: Provider.of<CustomerProvider>(
+                            context,
+                            listen: false,
+                          ).getOrderCountForCustomer(customer.id!),
+                          builder: (context, snapshot) {
+                            final count = snapshot.data ?? 0;
+                            final hasBalance = count > 0;
+                            return Text(
+                              hasBalance
+                                  ? "Bal: \$${(count * 85).toStringAsFixed(2)}"
+                                  : "No Balance",
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                fontWeight:
+                                    hasBalance
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
+                                color:
+                                    hasBalance
+                                        ? const Color(0xFFD4900A)
+                                        : Colors.grey.shade400,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ),
-
-              // Orders count using FutureBuilder
-              FutureBuilder<int>(
-                future: Provider.of<CustomerProvider>(
-                  context,
-                  listen: false,
-                ).getOrderCountForCustomer(customer.id!),
-                builder: (context, snapshot) {
-                  final orderCount = snapshot.data ?? 0;
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.indigo.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      "$orderCount orders",
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.indigo.shade700,
-                      ),
-                    ),
-                  );
-                },
               ),
             ],
           ),
@@ -327,100 +472,111 @@ class CustomerCard extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildAvatar() {
+    const double size = 62;
+    if (customer.imagePath != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.file(
+          File(customer.imagePath!),
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _placeholderAvatar(size),
+        ),
+      );
+    }
+    if (customer.profileImageUrl != null &&
+        customer.profileImageUrl!.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.network(
+          customer.profileImageUrl!,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _placeholderAvatar(size),
+        ),
+      );
+    }
+    return _placeholderAvatar(size);
+  }
+
+  Widget _placeholderAvatar(double size) {
+    final initials =
+        customer.name
+            .trim()
+            .split(' ')
+            .where((w) => w.isNotEmpty)
+            .take(2)
+            .map((w) => w[0].toUpperCase())
+            .join();
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: _kPurple.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Center(
+        child: Text(
+          initials,
+          style: GoogleFonts.poppins(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: _kPurple,
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatLastVisit(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date).inDays;
+    if (diff == 0) return "Today";
+    if (diff == 1) return "Yesterday";
+    return DateFormat('MMM dd, yyyy').format(date);
+  }
+
+  (String, Color)? _badgeFor(_ClientTag? t) {
+    switch (t) {
+      case _ClientTag.vip:
+        return ("VIP", const Color(0xFFD4900A));
+      case _ClientTag.frequent:
+        return ("FREQUENT", _kPurple);
+      default:
+        return null;
+    }
+  }
 }
-// class CustomerCard extends StatelessWidget {
-//   final Customer customer;
-//   final VoidCallback onTap;
 
-//   const CustomerCard({super.key, required this.customer, required this.onTap});
+// ── Badge ─────────────────────────────────────────────────────────────────────
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return GestureDetector(
-//       onTap: onTap,
-//       child: Container(
-//         decoration: BoxDecoration(
-//           color: Colors.white,
-//           borderRadius: BorderRadius.circular(16), // ✅ rounded corners
-//           boxShadow: [
-//             BoxShadow(
-//               color: Colors.black.withOpacity(0.05), // ✅ subtle shadow
-//               blurRadius: 10,
-//               offset: const Offset(0, 4),
-//             ),
-//           ],
-//         ),
-//         child: Padding(
-//           padding: const EdgeInsets.all(16),
-//           child: Row(
-//             children: [
-//               // Avatar placeholder
-//               CircleAvatar(
-//                 radius: 24,
-//                 backgroundColor: Colors.indigo.shade100,
-//                 child: Icon(
-//                   Icons.person,
-//                   color: Colors.indigo.shade600,
-//                   size: 24,
-//                 ),
-//               ),
-//               const SizedBox(width: 16),
+class _Badge extends StatelessWidget {
+  final String label;
+  final Color color;
+  const _Badge({required this.label, required this.color});
 
-//               // Customer info
-//               Expanded(
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     Text(
-//                       customer.name,
-//                       style: GoogleFonts.poppins(
-//                         fontSize: 16,
-//                         fontWeight: FontWeight.w600,
-//                         color: Colors.black87,
-//                       ),
-//                     ),
-//                     const SizedBox(height: 4),
-//                     Text(
-//                       customer.phone,
-//                       style: GoogleFonts.poppins(
-//                         fontSize: 13,
-//                         color: Colors.grey.shade600,
-//                       ),
-//                     ),
-//                     Text(
-//                       customer.email ?? "N/A",
-//                       style: GoogleFonts.poppins(
-//                         fontSize: 13,
-//                         color: Colors.grey.shade600,
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-
-//               // Orders count
-//               Container(
-//                 padding: const EdgeInsets.symmetric(
-//                   horizontal: 12,
-//                   vertical: 6,
-//                 ),
-//                 decoration: BoxDecoration(
-//                   color: Colors.indigo.shade50,
-//                   borderRadius: BorderRadius.circular(12),
-//                 ),
-//                 child: Text(
-//                   "${customer.getTotalOrders()} orders",
-//                   style: GoogleFonts.poppins(
-//                     fontSize: 12,
-//                     fontWeight: FontWeight.w500,
-//                     color: Colors.indigo.shade700,
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.poppins(
+          fontSize: 9,
+          fontWeight: FontWeight.bold,
+          color: color,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+}

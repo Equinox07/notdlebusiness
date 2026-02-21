@@ -40,77 +40,81 @@ class _DashboardHomeState extends State<DashboardHome> {
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      appBar: AppBar(
-        backgroundColor: Colors.grey.shade50,
-        elevation: 0,
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: const Color(0xFF6200EE),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.polyline_outlined,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Good Morning, ${companyName.isNotEmpty ? companyName.split(' ')[0] : 'Sarah'}',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(80),
+        child: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          flexibleSpace: const _AbstractAppBarBackground(),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6200EE),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                Row(
-                  children: [
-                    Text(
-                      "StitchFlow",
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF311B92),
-                      ),
+                child: const Icon(
+                  Icons.polyline_outlined,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Good Morning, ${companyName.isNotEmpty ? companyName.split(' ')[0] : 'Sarah'}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
-                    const SizedBox(width: 4),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.shade100,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        "Basic",
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        "Notdle Designer",
                         style: GoogleFonts.poppins(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.amber.shade900,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF311B92),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                      const SizedBox(width: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade100,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          "Basic",
+                          style: GoogleFonts.poppins(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.amber.shade900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            _NotificationBell(notificationProvider: notificationProvider),
+            const SizedBox(width: 8),
+            const _ProfileIcon(),
+            const SizedBox(width: 12),
           ],
         ),
-        actions: [
-          _NotificationBell(notificationProvider: notificationProvider),
-          const SizedBox(width: 8),
-          const _ProfileIcon(),
-          const SizedBox(width: 12),
-        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -275,6 +279,107 @@ class _DashboardHomeState extends State<DashboardHome> {
 }
 
 // ➡️ Reusable Widgets
+
+class _AbstractAppBarBackground extends StatelessWidget {
+  const _AbstractAppBarBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            const Color(0xFF6200EE).withOpacity(0.05),
+            Colors.grey.shade50,
+          ],
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -50,
+            top: -20,
+            child: _AbstractBlob(
+              color: const Color(0xFF6200EE).withOpacity(0.03),
+              size: 150,
+            ),
+          ),
+          Positioned(
+            left: -30,
+            bottom: -40,
+            child: _AbstractBlob(
+              color: Colors.amber.withOpacity(0.02),
+              size: 120,
+            ),
+          ),
+          CustomPaint(size: Size.infinite, painter: _AppBarPatternPainter()),
+        ],
+      ),
+    );
+  }
+}
+
+class _AbstractBlob extends StatelessWidget {
+  final Color color;
+  final double size;
+
+  const _AbstractBlob({required this.color, required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    );
+  }
+}
+
+class _AppBarPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint =
+        Paint()
+          ..color = const Color(0xFF6200EE).withOpacity(0.05)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.0;
+
+    final path = Path();
+    // Subtle organic wave mimicking thread
+    path.moveTo(0, size.height * 0.7);
+    path.quadraticBezierTo(
+      size.width * 0.25,
+      size.height * 0.4,
+      size.width * 0.5,
+      size.height * 0.7,
+    );
+    path.quadraticBezierTo(
+      size.width * 0.75,
+      size.height * 1.0,
+      size.width,
+      size.height * 0.7,
+    );
+
+    canvas.drawPath(path, paint);
+
+    // Another intersecting curve
+    final path2 = Path();
+    path2.moveTo(size.width * 0.1, 0);
+    path2.quadraticBezierTo(
+      size.width * 0.4,
+      size.height * 0.5,
+      size.width * 0.1,
+      size.height,
+    );
+    canvas.drawPath(path2, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
 
 class _NotificationBell extends StatelessWidget {
   final NotificationProvider notificationProvider;

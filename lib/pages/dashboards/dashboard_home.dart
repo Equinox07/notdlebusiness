@@ -7,8 +7,6 @@ import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
 import 'package:notdle/providers/notification_provider.dart';
 import 'package:notdle/utils/session_helper.dart';
-import 'package:notdle/widgets/custom_app_bar.dart';
-import 'package:notdle/widgets/deadline_card.dart';
 import 'package:provider/provider.dart';
 
 class DashboardHome extends StatefulWidget {
@@ -36,264 +34,216 @@ class _DashboardHomeState extends State<DashboardHome> {
     final dashboardProvider = Provider.of<DashBoardProvider>(context);
     final notificationProvider = Provider.of<NotificationProvider>(context);
     final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
-    final order = dashboardProvider.soonestDueOrder;
     final companyProvider = Provider.of<CompanyProvider>(context);
 
     final companyName = companyProvider.company?.businessName ?? '';
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      appBar: CustomAppBar(
-        title: "Dashboard",
-        automaticallyImplyLeading: false,
+      appBar: AppBar(
+        backgroundColor: Colors.grey.shade50,
+        elevation: 0,
+        titleSpacing: 16,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6200EE),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.polyline_outlined,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              "StitchFlow",
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF311B92),
+              ),
+            ),
+          ],
+        ),
         actions: [
           _NotificationBell(notificationProvider: notificationProvider),
           const SizedBox(width: 8),
           const _ProfileIcon(),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
         ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(isTablet ? 24 : 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: isTablet ? 24 : 16,
+            vertical: 16,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 32),
+
               // Welcome Section
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.indigo.shade600, Colors.indigo.shade900],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.indigo.shade200.withOpacity(0.5),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+              Text(
+                'Welcome back,',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  color: Colors.grey.shade600,
+                  fontWeight: FontWeight.w400,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Good Morning, ${companyName.isNotEmpty ? companyName.split(' ')[0] : 'Sarah'}',
+                style: GoogleFonts.poppins(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Stats Overview (Horizontal Scrollable)
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: 'Welcome back, ',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white.withOpacity(0.9),
-                                  ),
-                                ),
-                                TextSpan(
-                                  text:
-                                      companyName.isNotEmpty
-                                          ? companyName
-                                          : 'Your Business',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Icon(
-                            Icons.auto_graph,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                        ),
-                      ],
+                    _DashboardStatCard(
+                      title: 'Active Orders',
+                      value: dashboardProvider.orderCount.toString(),
+                      subtext: '${dashboardProvider.orderCount} due this week',
+                      icon: Icons.settings, // Sewing machine closest match
+                      color: Colors.purple,
                     ),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.info_outline,
-                            color: Colors.white70,
-                            size: 14,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            "Here's your daily overview",
-                            style: GoogleFonts.poppins(
-                              fontSize: 11,
-                              color: Colors.white.withOpacity(0.9),
-                            ),
-                          ),
-                        ],
-                      ),
+                    const _DashboardStatCard(
+                      title: 'Upcoming Deadlines',
+                      value: '0',
+                      subtext: 'Next due in 2 days',
+                      icon: Icons.calendar_today_outlined,
+                      color: Colors.orange,
+                    ),
+                    const _DashboardStatCard(
+                      title: 'Revenue (This Month)',
+                      value: '\$0',
+                      subtext: '+0% from last month',
+                      icon: Icons.attach_money,
+                      color: Colors.green,
+                    ),
+                    const _DashboardStatCard(
+                      title: 'Outstanding Payments',
+                      value: '\$0 unpaid',
+                      subtext: '0 clients pending',
+                      icon: Icons.payment,
+                      color: Colors.red,
+                    ),
+                    const _DashboardStatCard(
+                      title: 'Appointments Today',
+                      value: '0 fittings',
+                      subtext: '0 consultation',
+                      icon: Icons.event,
+                      color: Colors.blue,
                     ),
                   ],
                 ),
               ),
-
               const SizedBox(height: 32),
 
-              // Insight Cards Section
-              _SectionTitle(text: "Overview"),
-              const SizedBox(height: 16),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 4,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: isTablet ? 4 : 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 1.1,
-                ),
-                itemBuilder: (context, index) {
-                  switch (index) {
-                    case 0:
-                      return _InsightCard(
-                        title: 'Active Orders',
-                        count: dashboardProvider.orderCount,
-                        icon: Icons.shopping_bag_outlined,
-                        color: Colors.blue,
-                      );
-                    case 1:
-                      return _InsightCard(
-                        title: 'Customers',
-                        count: dashboardProvider.customerCount,
-                        icon: Icons.people_outline,
-                        color: Colors.green,
-                      );
-                    case 2:
-                      return _InsightCard(
-                        title: 'Pending Invoices',
-                        count: 0, // Replace with actual data if available
-                        icon: Icons.receipt_long_outlined,
-                        color: Colors.orange,
-                      );
-                    case 3:
-                      return _InsightCard(
-                        title: 'Designs',
-                        count: 0, // Replace with actual data if available
-                        icon: Icons.palette_outlined,
-                        color: Colors.purple,
-                      );
-                    default:
-                      return const SizedBox.shrink();
-                  }
-                },
-              ),
-
-              const SizedBox(height: 32),
-
-              // Quick Actions Section
-              _SectionTitle(text: "Quick Actions"),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _ActionCard(
-                      title: 'New Client',
-                      icon: Icons.person_add_alt_1_rounded,
-                      color: Colors.teal,
-                      onTap: () => AppNavigator.toAddCustomer(),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: _ActionCard(
-                      title: 'New Order',
-                      icon: Icons.add_shopping_cart_rounded,
-                      color: Colors.indigo,
-                      onTap: () => AppNavigator.toCreateNewOrder(),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 32),
-
-              // Deadlines Section
+              // Production Status
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _SectionTitle(text: "Upcoming Deadlines"),
+                  _SectionTitle(text: "Production Status"),
                   TextButton(
-                    onPressed: () {
-                      AppNavigator.toDeadlines();
-                    },
+                    onPressed: () {},
                     child: Text(
                       "View All",
                       style: GoogleFonts.poppins(
-                        fontSize: 13,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.indigo,
+                        color: const Color(0xFF6200EE),
                       ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              if (order != null)
-                DeadlineCard(orderFuture: Future.value(order), onTap: () {})
-              else
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade200),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(
-                        Icons.event_available,
-                        size: 48,
-                        color: Colors.grey.shade300,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        'No upcoming deadlines',
-                        style: GoogleFonts.poppins(
-                          fontSize: 15,
-                          color: Colors.grey.shade500,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _StatusCard(
+                      count: 3,
+                      label: "DESIGN",
+                      color: Colors.purple.shade50,
+                      textColor: Colors.purple,
+                    ),
+                    _StatusCard(
+                      count: 5,
+                      label: "CUTTING",
+                      color: Colors.indigo.shade50,
+                      textColor: Colors.indigo,
+                    ),
+                    _StatusCard(
+                      count: 2,
+                      label: "SEWING",
+                      color: Colors.orange.shade50,
+                      textColor: Colors.orange,
+                    ),
+                    _StatusCard(
+                      count: 1,
+                      label: "FINISHING",
+                      color: Colors.green.shade50,
+                      textColor: Colors.green,
+                    ),
+                  ],
                 ),
-              const SizedBox(height: 24),
+              ),
+              const SizedBox(height: 32),
+
+              // Upcoming Deadlines Section
+              _SectionTitle(text: "Upcoming Deadlines"),
+              const SizedBox(height: 16),
+              _DeadlineListItem(
+                name: "Elena Rossi",
+                item: "Silk Gala Gown",
+                dueText: "Due in 2d",
+                status: "SEWING",
+                statusColor: Colors.orange.shade100,
+                statusTextColor: Colors.orange.shade800,
+                icon: Icons.checkroom,
+              ),
+              _DeadlineListItem(
+                name: "Marcus J.",
+                item: "Bespoke Suit",
+                dueText: "Due in 5d",
+                status: "FITTING",
+                statusColor: Colors.purple.shade100,
+                statusTextColor: Colors.purple.shade800,
+                icon: Icons.checkroom,
+              ),
+              _DeadlineListItem(
+                name: "Sophia Chen",
+                item: "Cocktail Dress",
+                dueText: "Due Tomorrow",
+                status: "READY",
+                statusColor: Colors.green.shade100,
+                statusTextColor: Colors.green.shade800,
+                icon: Icons.check_circle_outline,
+              ),
+              const SizedBox(height: 80), // Padding for FAB
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => AppNavigator.toCreateNewOrder(),
+        backgroundColor: const Color(0xFF6200EE),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: const Icon(Icons.add, color: Colors.white, size: 32),
       ),
     );
   }
@@ -311,7 +261,7 @@ class _NotificationBell extends StatelessWidget {
     return Stack(
       children: [
         IconButton(
-          icon: const Icon(Icons.notifications_outlined, color: Colors.white),
+          icon: const Icon(Icons.notifications_outlined, color: Colors.black87),
           onPressed: () => AppNavigator.toNotifications(),
         ),
         if (notificationProvider.unreadCount > 0)
@@ -353,9 +303,9 @@ class _ProfileIcon extends StatelessWidget {
           border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
         ),
         child: CircleAvatar(
-          radius: 16,
-          backgroundColor: Colors.white.withOpacity(0.2),
-          child: const Icon(Icons.person, color: Colors.white, size: 20),
+          radius: 20,
+          backgroundColor: Colors.grey.shade200,
+          child: const Icon(Icons.person, color: Colors.black54, size: 24),
         ),
       ),
       onPressed: () => AppNavigator.toProfile(),
@@ -382,15 +332,17 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-class _InsightCard extends StatelessWidget {
+class _DashboardStatCard extends StatelessWidget {
   final String title;
-  final int count;
+  final String value;
+  final String subtext;
   final IconData icon;
   final Color color;
 
-  const _InsightCard({
+  const _DashboardStatCard({
     required this.title,
-    required this.count,
+    required this.value,
+    required this.subtext,
     required this.icon,
     required this.color,
   });
@@ -398,129 +350,199 @@ class _InsightCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: 180,
+      margin: const EdgeInsets.only(right: 16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade100,
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
-        border: Border.all(color: Colors.grey.shade100),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: () {}, // Add navigation if needed
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(icon, color: color, size: 22),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      count.toString(),
-                      style: GoogleFonts.poppins(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    Text(
-                      title,
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey.shade600,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade600,
             ),
           ),
-        ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: GoogleFonts.poppins(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            subtext,
+            style: GoogleFonts.poppins(
+              fontSize: 11,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _ActionCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
+class _StatusCard extends StatelessWidget {
+  final int count;
+  final String label;
   final Color color;
-  final VoidCallback onTap;
+  final Color textColor;
 
-  const _ActionCard({
-    required this.title,
-    required this.icon,
+  const _StatusCard({
+    required this.count,
+    required this.label,
     required this.color,
-    required this.onTap,
+    required this.textColor,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: color,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade100,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+      ),
+      child: Column(
+        children: [
+          Text(
+            count.toString(),
+            style: GoogleFonts.poppins(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: textColor.withOpacity(0.8),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: textColor.withOpacity(0.6),
+            ),
           ),
         ],
-        border: Border.all(color: Colors.grey.shade100),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
+    );
+  }
+}
+
+class _DeadlineListItem extends StatelessWidget {
+  final String name;
+  final String item;
+  final String dueText;
+  final String status;
+  final Color statusColor;
+  final Color statusTextColor;
+  final IconData icon;
+
+  const _DeadlineListItem({
+    required this.name,
+    required this.item,
+    required this.dueText,
+    required this.status,
+    required this.statusColor,
+    required this.statusTextColor,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.purple.shade50,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(
+              icon,
+              color: const Color(0xFF6200EE).withOpacity(0.7),
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(icon, color: color, size: 24),
-                ),
-                const SizedBox(height: 12),
                 Text(
-                  title,
-                  textAlign: TextAlign.center,
+                  name,
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  "$item • $dueText",
                   style: GoogleFonts.poppins(
                     fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
+                    color: Colors.grey.shade600,
                   ),
                 ),
               ],
             ),
           ),
-        ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: statusColor,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              status,
+              style: GoogleFonts.poppins(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: statusTextColor,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

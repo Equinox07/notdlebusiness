@@ -42,6 +42,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   String _fabric = "";
   int _quantity = 1;
 
+  // ── Pricing state ────────────────────────────────────────────────────────
+  double _materialCost = 0;
+  double _laborCost = 0;
+  bool _depositReceived = false;
+  double _depositAmount = 0;
+
   late Future<List<Customer>> _customersFuture;
 
   static const List<String> _outfitTypes = [
@@ -128,13 +134,24 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             ? _orderTitle
             : "$_outfitType for ${_selectedCustomer!.name}";
 
+    final totalAmount = _materialCost + _laborCost;
+    final effectivePaymentAmount =
+        _depositReceived
+            ? _depositAmount
+            : (totalAmount > 0
+                ? totalAmount
+                : double.tryParse(_paymentAmount ?? '0') ?? 0);
+
     final newOrder = Order(
       id: const Uuid().v4(),
       title: title,
       customerId: _selectedCustomer!.id!,
       status: _status,
       paymentStatus: _paymentStatus,
-      paymentAmount: double.tryParse(_paymentAmount ?? '0'),
+      paymentAmount:
+          effectivePaymentAmount > 0
+              ? effectivePaymentAmount
+              : double.tryParse(_paymentAmount ?? '0'),
       dueDate:
           _dueDate != null ? DateFormat('yyyy-MM-dd').format(_dueDate!) : null,
       notes: _notes ?? '',
@@ -323,6 +340,35 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                   _DesignInspirationCard(),
                   const SizedBox(height: 16),
                   _FabricSamplesCard(),
+                  const SizedBox(height: 24),
+                  // ── Step 3: Pricing & Payments ─────────────────────────────
+                  _SectionStepLabel(
+                    step: 3,
+                    totalSteps: 4,
+                    label: 'Pricing & Payments',
+                  ),
+                  const SizedBox(height: 12),
+                  _PricingPaymentsCard(
+                    materialCost: _materialCost,
+                    laborCost: _laborCost,
+                    depositReceived: _depositReceived,
+                    depositAmount: _depositAmount,
+                    onMaterialCostChanged:
+                        (v) => setState(() => _materialCost = v),
+                    onLaborCostChanged: (v) => setState(() => _laborCost = v),
+                    onDepositToggled:
+                        (v) => setState(() => _depositReceived = v),
+                    onDepositAmountChanged:
+                        (v) => setState(() => _depositAmount = v),
+                  ),
+                  const SizedBox(height: 24),
+                  // ── Step 4 preview label ────────────────────────────────────
+                  _SectionStepLabel(
+                    step: 4,
+                    totalSteps: 4,
+                    label: 'Production Timeline',
+                  ),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
@@ -912,6 +958,341 @@ class _AdvancedDetailsCard extends StatelessWidget {
 
 // ── DESIGN INSPIRATION CARD ───────────────────────────────────────────────────
 
+// ── PRICING & PAYMENTS CARD ──────────────────────────────────────────────────
+
+class _SectionStepLabel extends StatelessWidget {
+  final int step;
+  final int totalSteps;
+  final String label;
+  const _SectionStepLabel({
+    required this.step,
+    required this.totalSteps,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF3D0),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            'STEP $step OF $totalSteps',
+            style: GoogleFonts.poppins(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFFB8860B),
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PricingPaymentsCard extends StatefulWidget {
+  final double materialCost;
+  final double laborCost;
+  final bool depositReceived;
+  final double depositAmount;
+  final ValueChanged<double> onMaterialCostChanged;
+  final ValueChanged<double> onLaborCostChanged;
+  final ValueChanged<bool> onDepositToggled;
+  final ValueChanged<double> onDepositAmountChanged;
+
+  const _PricingPaymentsCard({
+    required this.materialCost,
+    required this.laborCost,
+    required this.depositReceived,
+    required this.depositAmount,
+    required this.onMaterialCostChanged,
+    required this.onLaborCostChanged,
+    required this.onDepositToggled,
+    required this.onDepositAmountChanged,
+  });
+
+  @override
+  State<_PricingPaymentsCard> createState() => _PricingPaymentsCardState();
+}
+
+class _PricingPaymentsCardState extends State<_PricingPaymentsCard> {
+  late final TextEditingController _materialCtrl;
+  late final TextEditingController _laborCtrl;
+  late final TextEditingController _depositCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _materialCtrl = TextEditingController(
+      text:
+          widget.materialCost > 0 ? widget.materialCost.toStringAsFixed(2) : '',
+    );
+    _laborCtrl = TextEditingController(
+      text: widget.laborCost > 0 ? widget.laborCost.toStringAsFixed(2) : '',
+    );
+    _depositCtrl = TextEditingController(
+      text:
+          widget.depositAmount > 0
+              ? widget.depositAmount.toStringAsFixed(2)
+              : '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _materialCtrl.dispose();
+    _laborCtrl.dispose();
+    _depositCtrl.dispose();
+    super.dispose();
+  }
+
+  double get _total => widget.materialCost + widget.laborCost;
+  double get _remaining =>
+      _total - (widget.depositReceived ? widget.depositAmount : 0);
+
+  @override
+  Widget build(BuildContext context) {
+    final currencyFmt = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+
+    return _SectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Material Cost
+          _FieldLabel('Material Cost'),
+          const SizedBox(height: 6),
+          _CurrencyField(
+            controller: _materialCtrl,
+            hint: '0.00',
+            onChanged:
+                (v) => widget.onMaterialCostChanged(double.tryParse(v) ?? 0),
+          ),
+          const SizedBox(height: 14),
+          // Labor Cost
+          _FieldLabel('Labor Cost'),
+          const SizedBox(height: 6),
+          _CurrencyField(
+            controller: _laborCtrl,
+            hint: '0.00',
+            onChanged:
+                (v) => widget.onLaborCostChanged(double.tryParse(v) ?? 0),
+          ),
+          const SizedBox(height: 16),
+          // Dashed divider
+          _DashedDivider(),
+          const SizedBox(height: 14),
+          // Total Amount row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total Amount',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.grey.shade500,
+                ),
+              ),
+              Text(
+                currencyFmt.format(_total),
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          // Deposit Received row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Deposit Received',
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Enable to record partial payment',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Switch(
+                value: widget.depositReceived,
+                onChanged: widget.onDepositToggled,
+                activeColor: Colors.white,
+                activeTrackColor: _kPurple,
+                inactiveThumbColor: Colors.white,
+                inactiveTrackColor: Colors.grey.shade300,
+                trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+              ),
+            ],
+          ),
+          // Deposit Amount + Remaining Balance (shown when toggle on)
+          if (widget.depositReceived) ...[
+            const SizedBox(height: 14),
+            _CurrencyField(
+              controller: _depositCtrl,
+              hint: '0.00',
+              highlighted: true,
+              onChanged:
+                  (v) => widget.onDepositAmountChanged(double.tryParse(v) ?? 0),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F0FF),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Remaining Balance',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    currencyFmt.format(_remaining < 0 ? 0 : _remaining),
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: _kPurple,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// A text field with a $ prefix icon for currency input.
+class _CurrencyField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hint;
+  final bool highlighted;
+  final ValueChanged<String> onChanged;
+
+  const _CurrencyField({
+    required this.controller,
+    required this.hint,
+    required this.onChanged,
+    this.highlighted = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color:
+            highlighted
+                ? _kPurple.withValues(alpha: 0.07)
+                : const Color(0xFFF0EFF4),
+        borderRadius: BorderRadius.circular(14),
+        border:
+            highlighted
+                ? Border.all(color: _kPurple.withValues(alpha: 0.4), width: 1.5)
+                : null,
+      ),
+      child: TextField(
+        controller: controller,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        onChanged: onChanged,
+        style: GoogleFonts.poppins(
+          fontSize: 16,
+          fontWeight: highlighted ? FontWeight.w600 : FontWeight.normal,
+          color: highlighted ? _kPurple : Colors.black87,
+        ),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: GoogleFonts.poppins(
+            color:
+                highlighted
+                    ? _kPurple.withValues(alpha: 0.5)
+                    : Colors.grey.shade400,
+            fontSize: 16,
+          ),
+          prefixIcon: Icon(
+            Icons.attach_money_rounded,
+            size: 18,
+            color: highlighted ? _kPurple : Colors.grey.shade400,
+          ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+        ),
+      ),
+    );
+  }
+}
+
+/// A simple dashed divider drawn via a CustomPaint.
+class _DashedDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 1,
+      width: double.infinity,
+      child: CustomPaint(painter: _DashedLinePainter()),
+    );
+  }
+}
+
+class _DashedLinePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    const dashWidth = 6.0;
+    const dashSpace = 4.0;
+    final paint =
+        Paint()
+          ..color = const Color(0xFFD0CDE8)
+          ..strokeWidth = 1.2
+          ..style = PaintingStyle.stroke;
+    double startX = 0;
+    while (startX < size.width) {
+      canvas.drawLine(Offset(startX, 0), Offset(startX + dashWidth, 0), paint);
+      startX += dashWidth + dashSpace;
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedLinePainter old) => false;
+}
+
 // ── FABRIC SAMPLES CARD ─────────────────────────────────────────────────────
 
 class _FabricSamplesCard extends StatelessWidget {
@@ -1197,11 +1578,11 @@ class _BottomCTA extends StatelessWidget {
                 style: GoogleFonts.poppins(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  fontSize: 16,
                 ),
               ),
               const SizedBox(width: 8),
-              const Icon(Icons.arrow_forward, color: Colors.white, size: 18),
+              const Icon(Icons.auto_awesome, color: Colors.white, size: 18),
             ],
           ),
         ),

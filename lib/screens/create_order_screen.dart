@@ -35,6 +35,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   String _clientSearch = "";
   String _status = "In Progress";
   String _paymentStatus = "Unpaid";
+  DateTime? _startDate;
   DateTime? _dueDate;
   String? _notes;
   String? _paymentAmount;
@@ -96,7 +97,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   Future<void> _selectDueDate(BuildContext context) async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _dueDate ?? DateTime.now(),
+      initialDate: _dueDate ?? DateTime.now().add(const Duration(days: 7)),
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime(2101),
       builder:
@@ -114,6 +115,31 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           ),
     );
     if (picked != null && picked != _dueDate) setState(() => _dueDate = picked);
+  }
+
+  Future<void> _selectStartDate(BuildContext context) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _startDate ?? DateTime.now(),
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime(2101),
+      builder:
+          (context, child) => Theme(
+            data: ThemeData.light().copyWith(
+              colorScheme: const ColorScheme.light(
+                primary: _kPurple,
+                onPrimary: Colors.white,
+                surface: Colors.white,
+                onSurface: Colors.black87,
+              ),
+              dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
+            ),
+            child: child!,
+          ),
+    );
+    if (picked != null && picked != _startDate) {
+      setState(() => _startDate = picked);
+    }
   }
 
   void _submitForm() async {
@@ -322,13 +348,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                   ),
                   const SizedBox(height: 16),
                   _AdvancedDetailsCard(
-                    dueDate: _dueDate,
                     status: _status,
                     paymentStatus: _paymentStatus,
                     paymentAmount: _paymentAmount,
                     orderStatuses: _orderStatuses,
                     paymentStatuses: _paymentStatuses,
-                    onDueDateTap: () => _selectDueDate(context),
                     onStatusChanged: (v) => setState(() => _status = v!),
                     onPaymentStatusChanged:
                         (v) => setState(() => _paymentStatus = v!),
@@ -367,6 +391,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                     step: 4,
                     totalSteps: 4,
                     label: 'Production Timeline',
+                  ),
+                  const SizedBox(height: 12),
+                  _ProductionTimelineCard(
+                    startDate: _startDate,
+                    dueDate: _dueDate,
+                    onSelectStartDate: () => _selectStartDate(context),
+                    onSelectDueDate: () => _selectDueDate(context),
                   ),
                   const SizedBox(height: 8),
                 ],
@@ -769,13 +800,11 @@ class _OutfitDetailsCard extends StatelessWidget {
 // ── ADVANCED DETAILS CARD ────────────────────────────────────────────────────
 
 class _AdvancedDetailsCard extends StatelessWidget {
-  final DateTime? dueDate;
   final String status;
   final String paymentStatus;
   final String? paymentAmount;
   final List<String> orderStatuses;
   final List<String> paymentStatuses;
-  final VoidCallback onDueDateTap;
   final ValueChanged<String?> onStatusChanged;
   final ValueChanged<String?> onPaymentStatusChanged;
   final FormFieldSetter<String?> onPaymentAmountSaved;
@@ -783,13 +812,11 @@ class _AdvancedDetailsCard extends StatelessWidget {
   final FormFieldSetter<String?> onNotesSaved;
 
   const _AdvancedDetailsCard({
-    required this.dueDate,
     required this.status,
     required this.paymentStatus,
     required this.paymentAmount,
     required this.orderStatuses,
     required this.paymentStatuses,
-    required this.onDueDateTap,
     required this.onStatusChanged,
     required this.onPaymentStatusChanged,
     required this.onPaymentAmountSaved,
@@ -818,42 +845,6 @@ class _AdvancedDetailsCard extends StatelessWidget {
             style: GoogleFonts.poppins(fontSize: 14),
             decoration: _inputDeco("e.g. Custom Wedding Dress"),
             onSaved: onTitleSaved,
-          ),
-          const SizedBox(height: 14),
-          // Due date
-          _FieldLabel("Due Date"),
-          const SizedBox(height: 6),
-          GestureDetector(
-            onTap: onDueDateTap,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF0EFF4),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today_outlined,
-                    size: 16,
-                    color: Colors.grey.shade500,
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    dueDate != null
-                        ? DateFormat('MMMM d, yyyy').format(dueDate!)
-                        : "Select a date",
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color:
-                          dueDate != null
-                              ? Colors.black87
-                              : Colors.grey.shade400,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ),
           const SizedBox(height: 14),
           // Status + Payment row
@@ -1753,4 +1744,223 @@ InputDecoration _inputDeco(String? hint) {
     ),
     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
   );
+}
+
+class _ProductionTimelineCard extends StatelessWidget {
+  final DateTime? startDate;
+  final DateTime? dueDate;
+  final VoidCallback onSelectStartDate;
+  final VoidCallback onSelectDueDate;
+
+  const _ProductionTimelineCard({
+    required this.startDate,
+    required this.dueDate,
+    required this.onSelectStartDate,
+    required this.onSelectDueDate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return _SectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: _kPurple.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child:
+                    const Icon(Icons.timer_outlined, color: _kPurple, size: 18),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                "Production Timeline",
+                style: GoogleFonts.poppins(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _DateTile(
+                  label: "Start Date",
+                  date: startDate,
+                  onTap: onSelectStartDate,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _DateTile(
+                  label: "Due Date",
+                  date: dueDate,
+                  onTap: onSelectDueDate,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _FieldLabel("Timeline Visualization"),
+          const SizedBox(height: 8),
+          _TimelineVisualizer(startDate: startDate, dueDate: dueDate),
+        ],
+      ),
+    );
+  }
+}
+
+class _DateTile extends StatelessWidget {
+  final String label;
+  final DateTime? date;
+  final VoidCallback onTap;
+
+  const _DateTile({required this.label, this.date, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 12,
+            color: Colors.grey.shade500,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 6),
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0EFF4),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: 16,
+                  color: Colors.grey.shade500,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    date != null
+                        ? DateFormat('MMM d, yyyy').format(date!)
+                        : "Select",
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color:
+                          date != null ? Colors.black87 : Colors.grey.shade400,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TimelineVisualizer extends StatelessWidget {
+  final DateTime? startDate;
+  final DateTime? dueDate;
+
+  const _TimelineVisualizer({this.startDate, this.dueDate});
+
+  @override
+  Widget build(BuildContext context) {
+    if (startDate == null || dueDate == null) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: Text(
+            "Select dates to see timeline",
+            style: GoogleFonts.poppins(
+              fontSize: 13,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ),
+      );
+    }
+
+    final diff = dueDate!.difference(startDate!).inDays;
+    final isNegative = diff < 0;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _kPurple.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _kPurple.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Estimated Duration",
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                isNegative ? "Invalid Dates" : "$diff Days",
+                style: GoogleFonts.poppins(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: isNegative ? Colors.red : _kPurple,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Stack(
+            children: [
+              Container(
+                height: 8,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              if (!isNegative && diff > 0)
+                Container(
+                  height: 8,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [_kPurple, Color(0xFF9162E4)],
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }

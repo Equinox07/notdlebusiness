@@ -1021,4 +1021,32 @@ class ApiService {
     final response = await get('/companies/$companyId/clients/stats');
     return StatsDto.fromJson(response);
   }
+
+  String get googleAuthUrl => '$_baseUrl/oauth2/authorization/google';
+
+  Future<void> forgotPassword(String identifier) async {
+    await post('/auth/forgot-password', {
+      'identifier': identifier,
+      'email': true, // Defaulting to email as per common usage in this app
+      'phone': false,
+    });
+  }
+
+  Future<void> verifyResetCode({
+    required String identifier,
+    required String resetCode,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    await post('/auth/verify-reset-code', {
+      'identifier': identifier,
+      'resetCode': resetCode,
+      'newPassword': newPassword,
+      'confirmPassword': confirmPassword,
+      'action': 'verify', // Assuming 'verify' is the action for resetting
+      'verifyAction': true,
+      'passwordMatching': newPassword == confirmPassword,
+      'resendAction': false,
+    });
+  }
 }

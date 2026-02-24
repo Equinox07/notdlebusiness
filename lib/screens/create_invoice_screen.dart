@@ -9,7 +9,6 @@ import 'package:notdle/models/invoice_item.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/invoice_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:uuid/uuid.dart';
 
 const _kPurple = Color(0xFF6200EE);
 const _kBg = Color(0xFFF5F4F8);
@@ -25,7 +24,7 @@ class CreateInvoiceScreen extends StatefulWidget {
 
 class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Form state
   Customer? _selectedCustomer;
   String _invoiceNumber = "";
@@ -34,10 +33,10 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
   String _notes = "";
   String _terms = "Payment due within 30 days";
   double _taxRate = 0.0;
-  
+
   // Invoice items
   List<InvoiceItem> _items = [];
-  
+
   late Future<List<Customer>> _customersFuture;
 
   @override
@@ -48,7 +47,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     _generateInvoiceNumber();
     _issueDate = DateTime.now();
     _dueDate = DateTime.now().add(const Duration(days: 30));
-    
+
     // If order is provided but no customer, fetch customer from order
     if (widget.order != null && _selectedCustomer == null) {
       _fetchCustomerFromOrder();
@@ -96,13 +95,15 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
 
   void _addItem() {
     setState(() {
-      _items.add(InvoiceItem(
-        invoiceId: '',
-        description: '',
-        quantity: 1,
-        unitPrice: 0.0,
-        amount: 0.0,
-      ));
+      _items.add(
+        InvoiceItem(
+          invoiceId: '',
+          description: '',
+          quantity: 1,
+          unitPrice: 0.0,
+          amount: 0.0,
+        ),
+      );
     });
   }
 
@@ -136,15 +137,16 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
       initialDate: _issueDate ?? DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime(2101),
-      builder: (context, child) => Theme(
-        data: ThemeData.light().copyWith(
-          colorScheme: const ColorScheme.light(
-            primary: _kPurple,
-            onPrimary: Colors.white,
+      builder:
+          (context, child) => Theme(
+            data: ThemeData.light().copyWith(
+              colorScheme: const ColorScheme.light(
+                primary: _kPurple,
+                onPrimary: Colors.white,
+              ),
+            ),
+            child: child!,
           ),
-        ),
-        child: child!,
-      ),
     );
     if (picked != null) setState(() => _issueDate = picked);
   }
@@ -155,15 +157,16 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
       initialDate: _dueDate ?? DateTime.now().add(const Duration(days: 30)),
       firstDate: DateTime(2020),
       lastDate: DateTime(2101),
-      builder: (context, child) => Theme(
-        data: ThemeData.light().copyWith(
-          colorScheme: const ColorScheme.light(
-            primary: _kPurple,
-            onPrimary: Colors.white,
+      builder:
+          (context, child) => Theme(
+            data: ThemeData.light().copyWith(
+              colorScheme: const ColorScheme.light(
+                primary: _kPurple,
+                onPrimary: Colors.white,
+              ),
+            ),
+            child: child!,
           ),
-        ),
-        child: child!,
-      ),
     );
     if (picked != null) setState(() => _dueDate = picked);
   }
@@ -173,7 +176,10 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     if (_selectedCustomer == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Please select a customer", style: GoogleFonts.poppins()),
+          content: Text(
+            "Please select a customer",
+            style: GoogleFonts.poppins(),
+          ),
         ),
       );
       return;
@@ -195,12 +201,18 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     );
 
     try {
-      await Provider.of<InvoiceProvider>(context, listen: false).addInvoice(invoice);
+      await Provider.of<InvoiceProvider>(
+        context,
+        listen: false,
+      ).addInvoice(invoice);
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Invoice created successfully", style: GoogleFonts.poppins()),
+          content: Text(
+            "Invoice created successfully",
+            style: GoogleFonts.poppins(),
+          ),
           backgroundColor: Colors.green,
         ),
       );
@@ -309,15 +321,16 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                   DropdownButtonFormField<Customer>(
                     value: _selectedCustomer,
                     decoration: _inputDecoration("Select Customer"),
-                    items: customers.map((customer) {
-                      return DropdownMenuItem<Customer>(
-                        value: customer,
-                        child: Text(
-                          customer.name,
-                          style: GoogleFonts.poppins(),
-                        ),
-                      );
-                    }).toList(),
+                    items:
+                        customers.map((customer) {
+                          return DropdownMenuItem<Customer>(
+                            value: customer,
+                            child: Text(
+                              customer.name,
+                              style: GoogleFonts.poppins(),
+                            ),
+                          );
+                        }).toList(),
                     onChanged: (customer) {
                       setState(() => _selectedCustomer = customer);
                     },
@@ -358,7 +371,9 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                           initialValue: _invoiceNumber,
                           decoration: _inputDecoration("Invoice Number"),
                           readOnly: true,
-                          style: GoogleFonts.poppins(color: Colors.grey.shade600),
+                          style: GoogleFonts.poppins(
+                            color: Colors.grey.shade600,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -368,9 +383,12 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                           child: AbsorbPointer(
                             child: TextFormField(
                               controller: TextEditingController(
-                                text: _issueDate != null
-                                    ? DateFormat('MMM dd, yyyy').format(_issueDate!)
-                                    : '',
+                                text:
+                                    _issueDate != null
+                                        ? DateFormat(
+                                          'MMM dd, yyyy',
+                                        ).format(_issueDate!)
+                                        : '',
                               ),
                               decoration: _inputDecoration("Issue Date"),
                               style: GoogleFonts.poppins(),
@@ -386,9 +404,10 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
                     child: AbsorbPointer(
                       child: TextFormField(
                         controller: TextEditingController(
-                          text: _dueDate != null
-                              ? DateFormat('MMM dd, yyyy').format(_dueDate!)
-                              : '',
+                          text:
+                              _dueDate != null
+                                  ? DateFormat('MMM dd, yyyy').format(_dueDate!)
+                                  : '',
                         ),
                         decoration: _inputDecoration("Due Date"),
                         style: GoogleFonts.poppins(),
@@ -645,16 +664,22 @@ class _InvoiceItemRowState extends State<_InvoiceItemRow> {
   @override
   void initState() {
     super.initState();
-    _descriptionController = TextEditingController(text: widget.item.description);
-    _quantityController = TextEditingController(text: widget.item.quantity.toString());
-    _unitPriceController = TextEditingController(text: widget.item.unitPrice.toStringAsFixed(2));
+    _descriptionController = TextEditingController(
+      text: widget.item.description,
+    );
+    _quantityController = TextEditingController(
+      text: widget.item.quantity.toString(),
+    );
+    _unitPriceController = TextEditingController(
+      text: widget.item.unitPrice.toStringAsFixed(2),
+    );
   }
 
   void _updateAmount(String? value) {
     final quantity = int.tryParse(_quantityController.text) ?? 0;
     final unitPrice = double.tryParse(_unitPriceController.text) ?? 0.0;
     final amount = quantity * unitPrice;
-    
+
     final updatedItem = InvoiceItem(
       id: widget.item.id,
       invoiceId: widget.item.invoiceId,
@@ -663,7 +688,7 @@ class _InvoiceItemRowState extends State<_InvoiceItemRow> {
       unitPrice: unitPrice,
       amount: amount,
     );
-    
+
     widget.onUpdate(updatedItem);
   }
 
@@ -679,7 +704,10 @@ class _InvoiceItemRowState extends State<_InvoiceItemRow> {
                 controller: _descriptionController,
                 decoration: InputDecoration(
                   hintText: "Description",
-                  hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400, fontSize: 12),
+                  hintStyle: GoogleFonts.poppins(
+                    color: Colors.grey.shade400,
+                    fontSize: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(color: Colors.grey.shade300),
@@ -692,7 +720,10 @@ class _InvoiceItemRowState extends State<_InvoiceItemRow> {
                     borderRadius: BorderRadius.circular(8),
                     borderSide: const BorderSide(color: _kPurple),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
                 style: GoogleFonts.poppins(fontSize: 12),
                 onChanged: (value) => _updateAmount(value),
@@ -705,7 +736,10 @@ class _InvoiceItemRowState extends State<_InvoiceItemRow> {
                 controller: _quantityController,
                 decoration: InputDecoration(
                   hintText: "Qty",
-                  hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400, fontSize: 12),
+                  hintStyle: GoogleFonts.poppins(
+                    color: Colors.grey.shade400,
+                    fontSize: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(color: Colors.grey.shade300),
@@ -718,7 +752,10 @@ class _InvoiceItemRowState extends State<_InvoiceItemRow> {
                     borderRadius: BorderRadius.circular(8),
                     borderSide: const BorderSide(color: _kPurple),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
                 keyboardType: TextInputType.number,
                 style: GoogleFonts.poppins(fontSize: 12),
@@ -732,7 +769,10 @@ class _InvoiceItemRowState extends State<_InvoiceItemRow> {
                 controller: _unitPriceController,
                 decoration: InputDecoration(
                   hintText: "Price",
-                  hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400, fontSize: 12),
+                  hintStyle: GoogleFonts.poppins(
+                    color: Colors.grey.shade400,
+                    fontSize: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide(color: Colors.grey.shade300),
@@ -745,7 +785,10 @@ class _InvoiceItemRowState extends State<_InvoiceItemRow> {
                     borderRadius: BorderRadius.circular(8),
                     borderSide: const BorderSide(color: _kPurple),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                 ),
                 keyboardType: TextInputType.number,
                 style: GoogleFonts.poppins(fontSize: 12),

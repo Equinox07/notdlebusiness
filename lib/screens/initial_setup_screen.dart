@@ -60,7 +60,7 @@ class _InitialSetupScreenState extends State<InitialSetupScreen> {
                     ),
                   ),
                   Text(
-                    'STEP 1 OF 3',
+                    'STEP 3 OF 3',
                     style: GoogleFonts.inter(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,

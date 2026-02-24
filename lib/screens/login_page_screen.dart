@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/screens/company_registration_screen.dart';
 import 'package:notdle/screens/forget_password_screen.dart';
-import 'package:notdle/screens/signup_screen.dart';
+import 'package:notdle/screens/create_business_account_screen.dart';
 import 'package:notdle/services/api_service.dart';
 import 'package:notdle/services/session_manager.dart';
 import 'package:notdle/utils/helpers.dart';
@@ -466,11 +466,9 @@ class _LoginScreenState extends State<LoginPageScreen> {
                         Center(
                           child: GestureDetector(
                             onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => const SignupScreenPage(),
-                                ),
+                              Navigator.pushNamed(
+                                context,
+                                CreateBusinessAccountScreen.tag,
                               );
                             },
                             child: RichText(

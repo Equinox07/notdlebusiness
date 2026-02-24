@@ -13,6 +13,8 @@ import 'package:notdle/screens/data_page.dart';
 import 'package:notdle/screens/invoices_screen.dart';
 import 'package:notdle/screens/login_page_screen.dart';
 import 'package:notdle/screens/forget_password_screen.dart';
+import 'package:notdle/screens/create_business_account_screen.dart';
+import 'package:notdle/screens/initial_setup_screen.dart';
 import 'package:notdle/screens/main.dart';
 import 'package:notdle/screens/notification_screen.dart';
 import 'package:notdle/screens/orders_screen.dart';
@@ -41,6 +43,9 @@ class IndexPage extends StatelessWidget {
       routes: {
         LoginPageScreen.tag: (context) => const LoginPageScreen(),
         ForgetPasswordScreen.tag: (context) => const ForgetPasswordScreen(),
+        CreateBusinessAccountScreen.tag:
+            (context) => const CreateBusinessAccountScreen(),
+        InitialSetupScreen.tag: (context) => const InitialSetupScreen(),
         CompanyRegistrationScreen.tag:
             (context) => const CompanyRegistrationScreen(),
         SignupApp.tag: (context) => const SignupApp(),

@@ -7,6 +7,7 @@ import 'package:notdle/models/invoice.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/invoice_provider.dart';
 import 'package:notdle/screens/invoice_details_screen.dart';
+import 'package:notdle/screens/create_invoice_screen.dart';
 import 'package:provider/provider.dart';
 
 class _InvoiceWithCustomer {
@@ -265,7 +266,15 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
               left: 20,
               right: 20,
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CreateInvoiceScreen(),
+                    ),
+                  );
+                  _refreshInvoices();
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF6200EE),
                   foregroundColor: Colors.white,

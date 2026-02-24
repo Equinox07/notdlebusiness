@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/service_model.dart';
 import 'package:notdle/screens/all_measurement_screen.dart';
+import 'package:notdle/screens/customers_screen.dart';
+import 'package:notdle/screens/orders_screen.dart';
 // Your navigation destinations
 
 class ServicesScreen extends StatelessWidget {
@@ -140,13 +142,26 @@ class ServicesScreen extends StatelessWidget {
                     if (service.isComingSoon) return;
                     switch (service.title) {
                       case 'Customers':
-                        debugPrint("Service clicked ${service.title}");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CustomersScreen(),
+                          ),
+                        );
                         break;
                       case 'Measurements':
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (_) => const AllMeasurementScreen(),
+                          ),
+                        );
+                        break;
+                      case 'Orders':
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const OrdersScreen(),
                           ),
                         );
                         break;

@@ -8,6 +8,14 @@ import 'package:notdle/models/user_model.dart';
 import 'package:notdle/models/company.dart';
 import 'package:notdle/models/app_version.dart';
 import 'package:notdle/models/stats_model.dart';
+import 'package:notdle/models/auth_models.dart';
+
+class UnauthorizedException implements Exception {
+  final String message;
+  UnauthorizedException(this.message);
+  @override
+  String toString() => message;
+}
 
 class ApiService {
   static final String _baseUrl =
@@ -36,21 +44,11 @@ class ApiService {
   // Get company by ID
   Future<Company> getCompanyById(String companyId) async {
     try {
-      final headers = await _getHeaders();
-      final response = await http.get(
-        Uri.parse('$_baseUrl/companies/$companyId'),
-        headers: headers,
-      );
-
-      if (response.statusCode == 200) {
-        final companyData = json.decode(response.body);
-        return Company.fromMap({
-          ...companyData,
-          'id': companyId, // Ensure ID is included in the map
-        });
-      } else {
-        throw Exception('Failed to load company data: ${response.statusCode}');
-      }
+      final companyData = await get('/companies/$companyId');
+      return Company.fromMap({
+        ...companyData,
+        'id': companyId, // Ensure ID is included in the map
+      });
     } catch (e) {
       throw Exception('Error fetching company data: $e');
     }
@@ -59,26 +57,13 @@ class ApiService {
   // Get current authenticated user
   Future<User> getCurrentUser() async {
     try {
-      final headers = await _getHeaders();
-      final response = await http.get(
-        Uri.parse('$_baseUrl/users/me'),
-        headers: headers,
-      );
+      final userData = await get('/users/me');
+      final user = User.fromJson(userData);
 
-      if (response.statusCode == 200) {
-        final userData = json.decode(response.body);
-        final user = User.fromJson(userData);
+      // Store user data in secure storage
+      await _storage.write(key: 'user_data', value: json.encode(user.toJson()));
 
-        // Store user data in secure storage
-        await _storage.write(
-          key: 'user_data',
-          value: json.encode(user.toJson()),
-        );
-
-        return user;
-      } else {
-        throw Exception('Failed to fetch user data: ${response.statusCode}');
-      }
+      return user;
     } catch (e) {
       throw Exception('Error fetching user data: $e');
     }
@@ -106,17 +91,8 @@ class ApiService {
   // Delete user account
   Future<void> deleteAccount() async {
     try {
-      final headers = await _getHeaders();
-      final response = await http.delete(
-        Uri.parse('$_baseUrl/users/me'),
-        headers: headers,
-      );
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        await _storage.deleteAll();
-      } else {
-        throw Exception('Failed to delete account: ${response.statusCode}');
-      }
+      await delete('/users/me');
+      await _storage.deleteAll();
     } catch (e) {
       throw Exception('Error deleting account: $e');
     }
@@ -154,6 +130,8 @@ class ApiService {
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return body;
+    } else if (response.statusCode == 401) {
+      throw UnauthorizedException('Unauthorized');
     } else {
       String message = 'Status Code: ${response.statusCode}';
       if (body is Map && body.containsKey('message')) {
@@ -170,39 +148,7 @@ class ApiService {
     Map<String, dynamic> companyData,
   ) async {
     try {
-      final headers = await _getHeaders();
-      final response = await http.post(
-        Uri.parse('$_baseUrl/companies'),
-        headers: headers,
-        body: json.encode(companyData),
-      );
-
-      if (response.statusCode == 201) {
-        return json.decode(response.body);
-      } else if (response.statusCode == 401) {
-        // Clear all user data and tokens
-        await _storage.deleteAll(); // Clear all stored data
-        await clearUserData(); // Clear any additional user data
-
-        // Navigate to login screen if we have a valid context
-        if (navigatorKey.currentContext != null) {
-          if (navigatorKey.currentState != null) {
-            navigatorKey.currentState!.pushNamedAndRemoveUntil(
-              '/login',
-              (route) => false,
-            );
-          } else {
-            Navigator.of(
-              navigatorKey.currentContext!,
-            ).pushNamedAndRemoveUntil('/login', (route) => false);
-          }
-        }
-        throw Exception('Session expired. Please login again.');
-      } else {
-        final error = json.decode(response.body);
-        debugPrint('Registration Error: $error');
-        throw Exception(error['message'] ?? 'Failed to register company');
-      }
+      return await post('/companies', companyData);
     } catch (e) {
       debugPrint('Registration Error: $e');
       rethrow;
@@ -215,14 +161,7 @@ class ApiService {
     Map<String, dynamic> companyData,
   ) async {
     try {
-      final headers = await _getHeaders();
-      final response = await http.patch(
-        Uri.parse('$_baseUrl/companies/$companyId'),
-        headers: headers,
-        body: json.encode(companyData),
-      );
-
-      return _handleResponse(response);
+      return await patch('/companies/$companyId', companyData);
     } catch (e) {
       debugPrint('Patch Company Error: $e');
       rethrow;
@@ -247,8 +186,15 @@ class ApiService {
     );
 
     final data = _handleResponse(response);
-    if (data != null && data['token'] != null) {
-      await _storage.write(key: 'auth_token', value: data['token']);
+    if (data != null) {
+      final loginResponse = LoginResponse.fromJson(data);
+      await _storage.write(key: 'auth_token', value: loginResponse.token);
+      if (loginResponse.refreshToken != null) {
+        await _storage.write(
+          key: 'refresh_token',
+          value: loginResponse.refreshToken,
+        );
+      }
     }
     return data;
   }
@@ -277,52 +223,122 @@ class ApiService {
     );
 
     final data = _handleResponse(response);
-    if (data != null && data['token'] != null) {
-      await _storage.write(key: 'auth_token', value: data['token']);
+    if (data != null) {
+      final loginResponse = LoginResponse.fromJson(data);
+      await _storage.write(key: 'auth_token', value: loginResponse.token);
+      if (loginResponse.refreshToken != null) {
+        await _storage.write(
+          key: 'refresh_token',
+          value: loginResponse.refreshToken,
+        );
+      }
     }
     return data;
   }
 
   // Update user details
   Future<User> updateUser(String userId, Map<String, dynamic> userData) async {
-    final response = await http.put(
-      Uri.parse('$_baseUrl/users/$userId'),
-      headers: await _getHeaders(),
-      body: json.encode(userData),
-    );
-
-    final responseData = _handleResponse(response);
+    final responseData = await put('/users/$userId', userData);
     return User.fromJson(responseData);
   }
 
   // Change user password
   Future<void> changePassword(String userId, String newPassword) async {
-    await http.post(
-      Uri.parse(
-        '$_baseUrl/users/$userId/change-password?newPassword=$newPassword',
-      ),
-      headers: await _getHeaders(),
-    );
+    await post('/users/$userId/change-password?newPassword=$newPassword', {});
   }
 
   // Deactivate user account
   Future<void> deactivateUser(String userId) async {
-    await http.post(
-      Uri.parse('$_baseUrl/users/$userId/deactivate'),
-      headers: await _getHeaders(),
-    );
+    await post('/users/$userId/deactivate', {});
   }
 
   // Activate user account
   Future<void> activateUser(String userId) async {
-    await http.post(
-      Uri.parse('$_baseUrl/users/$userId/activate'),
-      headers: await _getHeaders(),
-    );
+    await post('/users/$userId/activate', {});
   }
 
   Future<void> logout() async {
+    final refreshToken = await _storage.read(key: 'refresh_token');
+    if (refreshToken != null) {
+      try {
+        await http.post(
+          Uri.parse('$_baseUrl/auth/logout'),
+          headers: await _getHeaders(),
+          body: json.encode({'refreshToken': refreshToken}),
+        );
+      } catch (e) {
+        debugPrint('Error during api logout: $e');
+      }
+    }
     await _storage.delete(key: 'auth_token');
+    await _storage.delete(key: 'refresh_token');
+    await _storage.delete(key: 'user_data');
+  }
+
+  // Google Sign-in
+  Future<Map<String, dynamic>> googleSignin(
+    String idToken, {
+    String? deviceId,
+  }) async {
+    final body = {'idToken': idToken};
+    if (deviceId != null) {
+      body['deviceId'] = deviceId;
+    }
+
+    final response = await http.post(
+      Uri.parse('$_baseUrl/auth/google-signin'),
+      headers: await _getHeaders(),
+      body: json.encode(body),
+    );
+
+    final data = _handleResponse(response);
+    if (data != null) {
+      final loginResponse = LoginResponse.fromJson(data);
+      await _storage.write(key: 'auth_token', value: loginResponse.token);
+      if (loginResponse.refreshToken != null) {
+        await _storage.write(
+          key: 'refresh_token',
+          value: loginResponse.refreshToken,
+        );
+      }
+    }
+    return data;
+  }
+
+  // Refresh token
+  Future<bool> refreshToken() async {
+    try {
+      final refreshToken = await _storage.read(key: 'refresh_token');
+      if (refreshToken == null) return false;
+
+      final response = await http.post(
+        Uri.parse('$_baseUrl/auth/refresh-token'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(
+          RefreshTokenRequest(refreshToken: refreshToken).toJson(),
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final loginResponse = LoginResponse.fromJson(data);
+        await _storage.write(key: 'auth_token', value: loginResponse.token);
+        if (loginResponse.refreshToken != null) {
+          await _storage.write(
+            key: 'refresh_token',
+            value: loginResponse.refreshToken,
+          );
+        }
+        return true;
+      } else {
+        await logout();
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error refreshing token: $e');
+      await logout();
+      return false;
+    }
   }
 
   // Generic CRUD operations
@@ -336,38 +352,99 @@ class ApiService {
       ),
     );
 
-    final response = await http.get(uri, headers: await _getHeaders());
-
-    return _handleResponse(response);
+    try {
+      final response = await http.get(uri, headers: await _getHeaders());
+      return _handleResponse(response);
+    } on UnauthorizedException {
+      if (await refreshToken()) {
+        final response = await http.get(uri, headers: await _getHeaders());
+        return _handleResponse(response);
+      }
+      rethrow;
+    }
   }
 
   Future<dynamic> post(String endpoint, dynamic body) async {
-    final response = await http.post(
-      Uri.parse('$_baseUrl$endpoint'),
-      headers: await _getHeaders(),
-      body: json.encode(body),
-    );
-
-    return _handleResponse(response);
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl$endpoint'),
+        headers: await _getHeaders(),
+        body: json.encode(body),
+      );
+      return _handleResponse(response);
+    } on UnauthorizedException {
+      if (await refreshToken()) {
+        final response = await http.post(
+          Uri.parse('$_baseUrl$endpoint'),
+          headers: await _getHeaders(),
+          body: json.encode(body),
+        );
+        return _handleResponse(response);
+      }
+      rethrow;
+    }
   }
 
   Future<dynamic> put(String endpoint, dynamic body) async {
-    final response = await http.put(
-      Uri.parse('$_baseUrl$endpoint'),
-      headers: await _getHeaders(),
-      body: json.encode(body),
-    );
+    try {
+      final response = await http.put(
+        Uri.parse('$_baseUrl$endpoint'),
+        headers: await _getHeaders(),
+        body: json.encode(body),
+      );
+      return _handleResponse(response);
+    } on UnauthorizedException {
+      if (await refreshToken()) {
+        final response = await http.put(
+          Uri.parse('$_baseUrl$endpoint'),
+          headers: await _getHeaders(),
+          body: json.encode(body),
+        );
+        return _handleResponse(response);
+      }
+      rethrow;
+    }
+  }
 
-    return _handleResponse(response);
+  Future<dynamic> patch(String endpoint, dynamic body) async {
+    try {
+      final response = await http.patch(
+        Uri.parse('$_baseUrl$endpoint'),
+        headers: await _getHeaders(),
+        body: json.encode(body),
+      );
+      return _handleResponse(response);
+    } on UnauthorizedException {
+      if (await refreshToken()) {
+        final response = await http.patch(
+          Uri.parse('$_baseUrl$endpoint'),
+          headers: await _getHeaders(),
+          body: json.encode(body),
+        );
+        return _handleResponse(response);
+      }
+      rethrow;
+    }
   }
 
   Future<void> delete(String endpoint) async {
-    final response = await http.delete(
-      Uri.parse('$_baseUrl$endpoint'),
-      headers: await _getHeaders(),
-    );
-
-    _handleResponse(response);
+    try {
+      final response = await http.delete(
+        Uri.parse('$_baseUrl$endpoint'),
+        headers: await _getHeaders(),
+      );
+      _handleResponse(response);
+    } on UnauthorizedException {
+      if (await refreshToken()) {
+        final response = await http.delete(
+          Uri.parse('$_baseUrl$endpoint'),
+          headers: await _getHeaders(),
+        );
+        _handleResponse(response);
+        return;
+      }
+      rethrow;
+    }
   }
 
   // Specific API endpoints
@@ -381,28 +458,17 @@ class ApiService {
     String companyId,
     Map<String, dynamic> companyData,
   ) async {
-    final response = await http.put(
-      Uri.parse('$_baseUrl/companies/$companyId'),
-      headers: await _getHeaders(),
-      body: json.encode(companyData),
-    );
-    return _handleResponse(response);
+    return await put('/companies/$companyId', companyData);
   }
 
   // Deactivate company
   Future<void> deactivateCompany(String companyId) async {
-    await http.post(
-      Uri.parse('$_baseUrl/companies/$companyId/deactivate'),
-      headers: await _getHeaders(),
-    );
+    await post('/companies/$companyId/deactivate', {});
   }
 
   // Activate company
   Future<void> activateCompany(String companyId) async {
-    await http.post(
-      Uri.parse('$_baseUrl/companies/$companyId/activate'),
-      headers: await _getHeaders(),
-    );
+    await post('/companies/$companyId/activate', {});
   }
 
   // Search companies
@@ -455,20 +521,12 @@ class ApiService {
     String projectId,
     Map<String, dynamic> projectData,
   ) async {
-    final response = await http.put(
-      Uri.parse('$_baseUrl/companies/$companyId/projects/$projectId'),
-      headers: await _getHeaders(),
-      body: json.encode(projectData),
-    );
-    return _handleResponse(response);
+    return await put('/companies/$companyId/projects/$projectId', projectData);
   }
 
   // Delete a project
   Future<void> deleteProject(String companyId, String projectId) async {
-    await http.delete(
-      Uri.parse('$_baseUrl/companies/$companyId/projects/$projectId'),
-      headers: await _getHeaders(),
-    );
+    await delete('/companies/$companyId/projects/$projectId');
   }
 
   // Update project status
@@ -544,20 +602,12 @@ class ApiService {
     String clientId,
     Map<String, dynamic> clientData,
   ) async {
-    final response = await http.put(
-      Uri.parse('$_baseUrl/companies/$companyId/clients/$clientId'),
-      headers: await _getHeaders(),
-      body: json.encode(clientData),
-    );
-    return _handleResponse(response);
+    return await put('/companies/$companyId/clients/$clientId', clientData);
   }
 
   // Delete a client
   Future<void> deleteClient(String companyId, String clientId) async {
-    await http.delete(
-      Uri.parse('$_baseUrl/companies/$companyId/clients/$clientId'),
-      headers: await _getHeaders(),
-    );
+    await delete('/companies/$companyId/clients/$clientId');
   }
 
   // Search clients by name
@@ -619,20 +669,12 @@ class ApiService {
     String invoiceId,
     Map<String, dynamic> invoiceData,
   ) async {
-    final response = await http.put(
-      Uri.parse('$_baseUrl/companies/$companyId/invoices/$invoiceId'),
-      headers: await _getHeaders(),
-      body: json.encode(invoiceData),
-    );
-    return _handleResponse(response);
+    return await put('/companies/$companyId/invoices/$invoiceId', invoiceData);
   }
 
   // Delete an invoice
   Future<void> deleteInvoice(String companyId, String invoiceId) async {
-    await http.delete(
-      Uri.parse('$_baseUrl/companies/$companyId/invoices/$invoiceId'),
-      headers: await _getHeaders(),
-    );
+    await delete('/companies/$companyId/invoices/$invoiceId');
   }
 
   // Update invoice status
@@ -737,20 +779,12 @@ class ApiService {
     String orderId,
     Map<String, dynamic> orderData,
   ) async {
-    final response = await http.put(
-      Uri.parse('$_baseUrl/companies/$companyId/orders/$orderId'),
-      headers: await _getHeaders(),
-      body: json.encode(orderData),
-    );
-    return _handleResponse(response);
+    return await put('/companies/$companyId/orders/$orderId', orderData);
   }
 
   // Delete an order
   Future<void> deleteOrder(String companyId, String orderId) async {
-    await http.delete(
-      Uri.parse('$_baseUrl/companies/$companyId/orders/$orderId'),
-      headers: await _getHeaders(),
-    );
+    await delete('/companies/$companyId/orders/$orderId');
   }
 
   // Update order status
@@ -844,20 +878,12 @@ class ApiService {
     String paymentId,
     Map<String, dynamic> paymentData,
   ) async {
-    final response = await http.put(
-      Uri.parse('$_baseUrl/payments/$paymentId'),
-      headers: await _getHeaders(),
-      body: json.encode(paymentData),
-    );
-    return _handleResponse(response);
+    return await put('/payments/$paymentId', paymentData);
   }
 
   // Delete a payment
   Future<void> deletePayment(String paymentId) async {
-    await http.delete(
-      Uri.parse('$_baseUrl/payments/$paymentId'),
-      headers: await _getHeaders(),
-    );
+    await delete('/payments/$paymentId');
   }
 
   // Get payments for a specific invoice
@@ -927,20 +953,12 @@ class ApiService {
     String measurementId,
     Map<String, dynamic> data,
   ) async {
-    final response = await http.put(
-      Uri.parse('$_baseUrl/v1/measurements/$measurementId'),
-      headers: await _getHeaders(),
-      body: json.encode(data),
-    );
-    return _handleResponse(response);
+    return await put('/v1/measurements/$measurementId', data);
   }
 
   // Delete a measurement
   Future<void> deleteMeasurement(String measurementId) async {
-    await http.delete(
-      Uri.parse('$_baseUrl/v1/measurements/$measurementId'),
-      headers: await _getHeaders(),
-    );
+    await delete('/v1/measurements/$measurementId');
   }
 
   // Get all measurements for a specific client

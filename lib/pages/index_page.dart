@@ -113,7 +113,8 @@ class _StartupScreen extends StatelessWidget {
       // User found, check if they have a company
       if (!user.hasCompany) {
         // No company, go to company registration
-        return CompanyRegistrationScreen();
+        return CreateBusinessAccountScreen();
+        // return CompanyRegistrationScreen();
       }
 
       // User has a company, go to dashboard

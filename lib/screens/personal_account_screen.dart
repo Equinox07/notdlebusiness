@@ -3,6 +3,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/screens/login_page_screen.dart';
 import 'package:notdle/screens/create_business_account_screen.dart';
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:notdle/providers/api_provider.dart';
+import 'package:notdle/pages/dashboards/dashboard_screen.dart';
 
 class PersonalAccountScreen extends StatefulWidget {
   static const String tag = 'personal-account';
@@ -26,6 +29,12 @@ class _PersonalAccountScreenState extends State<PersonalAccountScreen> {
   String _selectedCountryCode = '+1';
   bool _obscurePassword = true;
   bool _isLoading = false;
+  String? _errorMessage;
+
+  // Password validation state
+  bool _hasMinLength = false;
+  bool _hasNumber = false;
+  bool _hasSpecialChar = false;
 
   final Color primaryPurple = const Color(0xFF6B11B2);
   final Color textGrey = const Color(0xFF64748B);
@@ -33,7 +42,27 @@ class _PersonalAccountScreenState extends State<PersonalAccountScreen> {
   final Color inputBg = Colors.white;
 
   @override
+  void initState() {
+    super.initState();
+    _passwordController.addListener(_validatePassword);
+  }
+
+  void _validatePassword() {
+    final password = _passwordController.text;
+    setState(() {
+      _hasMinLength = password.length >= 8;
+      _hasNumber = RegExp(r'(?=.*[0-9])').hasMatch(password);
+      _hasSpecialChar = RegExp(
+        r'(?=.*[!@#$%^&*(),.?":{}|<>])',
+      ).hasMatch(password);
+    });
+  }
+
+  bool get _isPasswordValid => _hasMinLength && _hasNumber && _hasSpecialChar;
+
+  @override
   void dispose() {
+    _passwordController.removeListener(_validatePassword);
     _firstNameController.dispose();
     _lastNameController.dispose();
     _businessNameController.dispose();
@@ -43,23 +72,69 @@ class _PersonalAccountScreenState extends State<PersonalAccountScreen> {
     super.dispose();
   }
 
-  Future<void> _handleNextStep() async {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
-      setState(() => _isLoading = true);
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+
       try {
-        await Future.delayed(const Duration(milliseconds: 500));
-        if (mounted) {
+        final apiProvider = Provider.of<ApiProvider>(context, listen: false);
+
+        // Construct full phone number
+        final phoneNumber =
+            '$_selectedCountryCode${_phoneController.text.trim().replaceAll(' ', '')}';
+
+        await apiProvider.apiService.signup(
+          firstName: _firstNameController.text.trim(),
+          lastName: _lastNameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          mobile: phoneNumber,
+        );
+
+        // Fetch the current user after successful signup
+        final user = await apiProvider.apiService.getCurrentUser();
+
+        if (!mounted) return;
+
+        // Check if user has a company
+        if (user.hasCompany) {
+          // If user has a company, fetch company data and navigate to dashboard
+          try {
+            final company = await apiProvider.apiService.getCompanyById(
+              user.companyId!,
+            );
+            if (!mounted) return;
+            Navigator.pushReplacementNamed(
+              context,
+              DashboardScreen.tag,
+              arguments: company,
+            );
+          } catch (e) {
+            setState(() {
+              _errorMessage = 'Failed to fetch company data: ${e.toString()}';
+            });
+            return;
+          }
+        } else {
+          // If no company, navigate to Step 2: Business Account
+          if (!mounted) return;
           Navigator.pushNamed(context, CreateBusinessAccountScreen.tag);
         }
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Error: $e')));
-        }
+        setState(() {
+          _errorMessage =
+              e.toString().contains('Exception:')
+                  ? e.toString().replaceAll('Exception: ', '')
+                  : 'Failed to create account: ${e.toString()}';
+        });
       } finally {
         if (mounted) {
-          setState(() => _isLoading = false);
+          setState(() {
+            _isLoading = false;
+          });
         }
       }
     }
@@ -173,6 +248,41 @@ class _PersonalAccountScreenState extends State<PersonalAccountScreen> {
                     ),
                   ],
                 ),
+                if (_errorMessage != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.red.shade100),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            color: Colors.red.shade700,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: GoogleFonts.inter(
+                                color: Colors.red.shade700,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 24),
                 // Fields
                 _buildFieldLabel('FIRST NAME'),
@@ -269,14 +379,46 @@ class _PersonalAccountScreenState extends State<PersonalAccountScreen> {
                           () => _obscurePassword = !_obscurePassword,
                         ),
                   ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a password';
+                    }
+                    if (!_isPasswordValid) {
+                      return 'Password does not meet all requirements';
+                    }
+                    return null;
+                  },
                 ),
+                const SizedBox(height: 12),
+                // Password requirements indicators
+                FocusScope.of(context).hasFocus
+                    ? Column(
+                      children: [
+                        _buildPasswordRequirement(
+                          'At least 8 characters',
+                          _hasMinLength,
+                        ),
+                        const SizedBox(height: 4),
+                        _buildPasswordRequirement(
+                          'At least one number',
+                          _hasNumber,
+                        ),
+                        const SizedBox(height: 4),
+                        _buildPasswordRequirement(
+                          'At least one special character',
+                          _hasSpecialChar,
+                        ),
+                      ],
+                    )
+                    : const SizedBox.shrink(),
                 const SizedBox(height: 24),
                 // Create Account Button
                 SizedBox(
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleNextStep,
+                    onPressed:
+                        (_isLoading || !_isPasswordValid) ? null : _submitForm,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryPurple,
                       foregroundColor: Colors.white,
@@ -455,6 +597,7 @@ class _PersonalAccountScreenState extends State<PersonalAccountScreen> {
     TextInputType keyboardType = TextInputType.text,
     Widget? suffixIcon,
     int? maxLength,
+    String? Function(String?)? validator,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -493,12 +636,14 @@ class _PersonalAccountScreenState extends State<PersonalAccountScreen> {
             vertical: 14,
           ),
         ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Please enter $hintText';
-          }
-          return null;
-        },
+        validator:
+            validator ??
+            (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter $hintText';
+              }
+              return null;
+            },
       ),
     );
   }
@@ -576,6 +721,27 @@ class _PersonalAccountScreenState extends State<PersonalAccountScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildPasswordRequirement(String label, bool isMet) {
+    return Row(
+      children: [
+        Icon(
+          isMet ? Icons.check_circle : Icons.circle_outlined,
+          color: isMet ? Colors.green : textGrey.withOpacity(0.5),
+          size: 16,
+        ),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 12,
+            color: isMet ? Colors.green.shade700 : textGrey,
+            fontWeight: isMet ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ],
     );
   }
 }

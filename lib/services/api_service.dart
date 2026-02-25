@@ -143,11 +143,25 @@ class ApiService {
 
   // Handle API response
   dynamic _handleResponse(http.Response response) {
+    dynamic body;
+    try {
+      if (response.body.isNotEmpty) {
+        body = json.decode(response.body);
+      }
+    } catch (e) {
+      debugPrint('Error decoding response body: $e');
+    }
+
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      if (response.body.isEmpty) return null;
-      return json.decode(response.body);
+      return body;
     } else {
-      throw Exception('Failed to load data: ${response.statusCode}');
+      String message = 'Status Code: ${response.statusCode}';
+      if (body is Map && body.containsKey('message')) {
+        message = body['message'];
+      } else if (body is Map && body.containsKey('error')) {
+        message = body['error'];
+      }
+      throw Exception(message);
     }
   }
 
@@ -225,6 +239,7 @@ class ApiService {
     required String lastName,
     required String email,
     required String password,
+    required String mobile,
   }) async {
     final response = await http.post(
       Uri.parse('$_baseUrl/auth/signup'),
@@ -237,6 +252,7 @@ class ApiService {
         'lastName': lastName,
         'email': email,
         'password': password,
+        'mobile': mobile,
       }),
     );
 
@@ -1024,29 +1040,31 @@ class ApiService {
 
   String get googleAuthUrl => '$_baseUrl/oauth2/authorization/google';
 
-  Future<void> forgotPassword(String identifier) async {
-    await post('/auth/forgot-password', {
+  Future<Map<String, dynamic>> forgotPassword(String identifier) async {
+    final response = await post('/auth/forgot-password', {
       'identifier': identifier,
-      'email': true, // Defaulting to email as per common usage in this app
+      'email': true,
       'phone': false,
     });
+    return response;
   }
 
-  Future<void> verifyResetCode({
+  Future<Map<String, dynamic>> verifyResetCode({
     required String identifier,
     required String resetCode,
     required String newPassword,
     required String confirmPassword,
   }) async {
-    await post('/auth/verify-reset-code', {
+    final response = await post('/auth/verify-reset-code', {
       'identifier': identifier,
       'resetCode': resetCode,
       'newPassword': newPassword,
       'confirmPassword': confirmPassword,
-      'action': 'verify', // Assuming 'verify' is the action for resetting
+      'action': 'verify',
       'verifyAction': true,
       'passwordMatching': newPassword == confirmPassword,
       'resendAction': false,
     });
+    return response;
   }
 }

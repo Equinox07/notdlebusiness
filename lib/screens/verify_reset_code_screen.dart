@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:notdle/screens/login_page_screen.dart';
 import 'package:notdle/services/api_service.dart';
 
 class VerifyResetCodeScreen extends StatefulWidget {
@@ -309,24 +310,39 @@ class _VerifyResetCodeScreenState extends State<VerifyResetCodeScreen> {
 
                             setState(() => _isLoading = true);
                             try {
-                              await ApiService().verifyResetCode(
-                                identifier: widget.identifier,
-                                resetCode: code,
-                                newPassword: newPassword,
-                                confirmPassword: confirmPassword,
-                              );
+                              final response = await ApiService()
+                                  .verifyResetCode(
+                                    identifier: widget.identifier,
+                                    resetCode: code,
+                                    newPassword: newPassword,
+                                    confirmPassword: confirmPassword,
+                                  );
 
                               if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Password reset successfully. Please login with your new password.',
+                                if (response['success'] == true) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        response['message'] ??
+                                            'Password reset successfully. Please login with your new password.',
+                                      ),
                                     ),
-                                  ),
-                                );
-                                Navigator.of(
-                                  context,
-                                ).popUntil((route) => route.isFirst);
+                                  );
+                                  // Navigate to login screen
+                                  Navigator.of(context).pushNamedAndRemoveUntil(
+                                    LoginPageScreen.tag,
+                                    (route) => false,
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        response['message'] ??
+                                            'Failed to reset password. Please try again.',
+                                      ),
+                                    ),
+                                  );
+                                }
                               }
                             } catch (e) {
                               if (mounted) {

@@ -26,7 +26,7 @@ class _CreateBusinessAccountScreenState
   final Color primaryPurple = const Color(0xFF6B11B2);
   final Color textGrey = const Color(0xFF64748B);
   final Color bgColor = const Color(0xFFF9F7F2);
-  final Color inputBg = Colors.white;
+  final Color inputBg = Colors.grey.shade200;
 
   @override
   void dispose() {
@@ -102,12 +102,12 @@ class _CreateBusinessAccountScreenState
                     const SizedBox(width: 44),
                   ],
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 28),
                 // Title
                 Text(
                   'Your Business Profile',
                   style: GoogleFonts.playfairDisplay(
-                    fontSize: 32,
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFF0F172A),
                   ),
@@ -117,7 +117,7 @@ class _CreateBusinessAccountScreenState
                 Text(
                   "Tell us about your craft to personalize your experience.",
                   style: GoogleFonts.inter(
-                    fontSize: 15,
+                    fontSize: 13,
                     color: textGrey,
                     height: 1.5,
                   ),
@@ -216,79 +216,88 @@ class _CreateBusinessAccountScreenState
     required String hintText,
     required IconData icon,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: inputBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+    return TextFormField(
+      controller: controller,
+      style: GoogleFonts.poppins(
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
       ),
-      child: TextFormField(
-        controller: controller,
-        style: GoogleFonts.inter(
-          fontSize: 14,
-          color: const Color(0xFF0F172A),
-          fontWeight: FontWeight.w500,
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: GoogleFonts.poppins(color: Colors.grey.shade600),
+        filled: true,
+        fillColor: inputBg,
+        prefixIcon: Icon(icon, color: Colors.grey.shade400, size: 20),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: GoogleFonts.inter(
-            color: Colors.grey.shade400,
-            fontSize: 14,
-          ),
-          prefixIcon: Icon(icon, color: Colors.grey.shade400, size: 20),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
-        validator: (value) {
-          if (value == null || value.isEmpty) {
-            return 'Please enter $hintText';
-          }
-          return null;
-        },
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.indigo.shade600, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
       ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter $hintText';
+        }
+        return null;
+      },
     );
   }
 
   Widget _buildDropdownField() {
-    return Container(
-      decoration: BoxDecoration(
-        color: inputBg,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+    return DropdownButtonFormField<String>(
+      value: _selectedBusinessType,
+      style: GoogleFonts.poppins(
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
       ),
-      child: DropdownButtonFormField<String>(
-        value: _selectedBusinessType,
-        decoration: InputDecoration(
-          prefixIcon: Icon(
-            Icons.category_outlined,
-            color: Colors.grey.shade400,
-            size: 20,
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 8,
-          ),
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: inputBg,
+        prefixIcon: Icon(
+          Icons.category_outlined,
+          color: Colors.grey.shade400,
+          size: 20,
         ),
-        hint: Text(
-          'Select your craft',
-          style: GoogleFonts.inter(color: Colors.grey.shade400, fontSize: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
-        icon: Icon(Icons.keyboard_arrow_down, color: textGrey.withOpacity(0.5)),
-        items:
-            ['Tailor', 'Designer', 'Manufacturer', 'Boutique'].map((type) {
-              return DropdownMenuItem(
-                value: type,
-                child: Text(type, style: GoogleFonts.inter(fontSize: 14)),
-              );
-            }).toList(),
-        onChanged: (value) => setState(() => _selectedBusinessType = value),
-        validator:
-            (value) => value == null ? 'Please select business type' : null,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.indigo.shade600, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
+      hint: Text(
+        'Select your craft',
+        style: GoogleFonts.poppins(color: Colors.grey.shade600, fontSize: 14),
+      ),
+      icon: Icon(Icons.keyboard_arrow_down, color: textGrey.withOpacity(0.5)),
+      items:
+          ['Tailor', 'Designer', 'Manufacturer', 'Boutique'].map((type) {
+            return DropdownMenuItem(
+              value: type,
+              child: Text(type, style: GoogleFonts.poppins(fontSize: 14)),
+            );
+          }).toList(),
+      onChanged: (value) => setState(() => _selectedBusinessType = value),
+      validator:
+          (value) => value == null ? 'Please select business type' : null,
     );
   }
 
@@ -316,27 +325,47 @@ class _CreateBusinessAccountScreenState
           ),
         );
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: inputBg,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: inputBg,
+          prefixIcon: Icon(
+            Icons.public_outlined,
+            color: Colors.grey.shade400,
+            size: 20,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.indigo.shade600, width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
         ),
         child: Row(
           children: [
-            Icon(Icons.public_outlined, color: Colors.grey.shade400, size: 20),
-            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 _selectedCountry?.name ?? 'Select Country',
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 14,
                   color:
                       _selectedCountry == null
-                          ? Colors.grey.shade400
-                          : const Color(0xFF0F172A),
-                  fontWeight: FontWeight.w500,
+                          ? Colors.grey.shade600
+                          : Colors.black87,
+                  fontWeight:
+                      _selectedCountry == null
+                          ? FontWeight.normal
+                          : FontWeight.bold,
                 ),
               ),
             ),

@@ -32,7 +32,7 @@ class _InitialSetupScreenState extends State<InitialSetupScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
               // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -71,7 +71,7 @@ class _InitialSetupScreenState extends State<InitialSetupScreen> {
                   const SizedBox(width: 44),
                 ],
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
               // Title
               Center(
                 child: Column(
@@ -84,7 +84,7 @@ class _InitialSetupScreenState extends State<InitialSetupScreen> {
                         color: const Color(0xFF0F172A),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     Text(
                       'Let’s customize your workspace to fit your\nbusiness needs.',
                       textAlign: TextAlign.center,
@@ -97,7 +97,7 @@ class _InitialSetupScreenState extends State<InitialSetupScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 24),
               // Business Currency Card
               _buildSetupCard(
                 icon: Icons.account_balance_wallet_outlined,
@@ -105,7 +105,7 @@ class _InitialSetupScreenState extends State<InitialSetupScreen> {
                 subtitle: 'Main transaction currency',
                 child: _buildCurrencyDropdown(),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               // Measurement System Card
               _buildSetupCard(
                 icon: Icons.straighten_outlined,
@@ -113,7 +113,7 @@ class _InitialSetupScreenState extends State<InitialSetupScreen> {
                 subtitle: 'Used for pattern making',
                 child: _buildMeasurementToggle(),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               // Push Notifications Card
               _buildSetupCard(
                 icon: Icons.notifications_none_outlined,
@@ -127,7 +127,7 @@ class _InitialSetupScreenState extends State<InitialSetupScreen> {
                 ),
                 isRow: true,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               // App Appearance Card
               _buildSetupCard(
                 icon: Icons.palette_outlined,
@@ -135,11 +135,11 @@ class _InitialSetupScreenState extends State<InitialSetupScreen> {
                 subtitle: 'Choose your preferred aesthetic',
                 child: _buildThemeSelection(),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 24),
               // Finish Button
               SizedBox(
                 width: double.infinity,
-                height: 64,
+                height: 56,
                 child: ElevatedButton(
                   onPressed: () {
                     // Navigate to dashboard or next setup step
@@ -170,7 +170,7 @@ class _InitialSetupScreenState extends State<InitialSetupScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -186,7 +186,7 @@ class _InitialSetupScreenState extends State<InitialSetupScreen> {
     bool isRow = false,
   }) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(24),
@@ -258,7 +258,7 @@ class _InitialSetupScreenState extends State<InitialSetupScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
                   child,
                 ],
               ),

@@ -155,17 +155,29 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
 
                             setState(() => _isLoading = true);
                             try {
-                              await ApiService().forgotPassword(identifier);
+                              final response = await ApiService()
+                                  .forgotPassword(identifier);
                               if (mounted) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (context) => VerifyResetCodeScreen(
-                                          identifier: identifier,
-                                        ),
-                                  ),
-                                );
+                                if (response['success'] == true) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => VerifyResetCodeScreen(
+                                            identifier: identifier,
+                                          ),
+                                    ),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        response['message'] ??
+                                            'Failed to send recovery link. Please try again.',
+                                      ),
+                                    ),
+                                  );
+                                }
                               }
                             } catch (e) {
                               if (mounted) {

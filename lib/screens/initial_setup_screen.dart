@@ -36,7 +36,15 @@ class _InitialSetupScreenState extends State<InitialSetupScreen> {
       context,
       listen: false,
     );
-    final company = companyProvider.company;
+    var company = companyProvider.company;
+
+    // Fallback to SessionManager if provider company is null
+    if (company == null) {
+      company = await SessionManager.getCompany();
+      if (company != null) {
+        companyProvider.setCompany(company);
+      }
+    }
 
     if (company == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -54,9 +62,9 @@ class _InitialSetupScreenState extends State<InitialSetupScreen> {
 
       final patchData = {
         'currency': currencyCode,
-        'measurementSystem': _measurementSystem,
+        'measurementSystem': _measurementSystem.toUpperCase(),
         'enablePushNotifications': _pushNotifications,
-        'appAppearance': _themeMode,
+        'appAppearance': _themeMode.toUpperCase(),
       };
 
       await apiProvider.apiService.patchCompany(company.id, patchData);
@@ -64,9 +72,9 @@ class _InitialSetupScreenState extends State<InitialSetupScreen> {
       // Update local company data
       final updatedCompany = company.copyWith(
         currency: currencyCode,
-        measurementSystem: _measurementSystem,
+        measurementSystem: _measurementSystem.toUpperCase(),
         enablePushNotifications: _pushNotifications,
-        appAppearance: _themeMode,
+        appAppearance: _themeMode.toUpperCase(),
       );
 
       await SessionManager.saveCompany(updatedCompany);

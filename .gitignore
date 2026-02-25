@@ -53,4 +53,8 @@ screen_snippet*
 dashboard.txt
 dshbrd.txt
 
-notdle-api.json
+# notdle-api.json
+
+oauthkey
+
+client_secret*.json

@@ -11,6 +11,7 @@ import 'package:notdle/utils/session_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:notdle/providers/company_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginPageScreen extends StatefulWidget {
   const LoginPageScreen({super.key});
@@ -27,6 +28,9 @@ class _LoginScreenState extends State<LoginPageScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+
+  // Initialize with standard parameters
+  final _googleSignIn = GoogleSignIn.instance;
 
   @override
   void dispose() {
@@ -60,6 +64,25 @@ class _LoginScreenState extends State<LoginPageScreen> {
         deviceImei: deviceImei,
       );
 
+      await _handleLoginSuccess(data, deviceImei);
+    } catch (e) {
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleLoginSuccess(
+    Map<String, dynamic>? data,
+    String? deviceImei,
+  ) async {
+    try {
       await _apiService.getCurrentUser();
       final user = await _apiService.getStoredUser();
 
@@ -67,7 +90,7 @@ class _LoginScreenState extends State<LoginPageScreen> {
         throw Exception('Failed to load user data');
       }
 
-      if (SessionHelper.isNewDevice(user, deviceImei)) {
+      if (deviceImei != null && SessionHelper.isNewDevice(user, deviceImei)) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -122,10 +145,10 @@ class _LoginScreenState extends State<LoginPageScreen> {
       }
     } catch (e) {
       if (mounted) {
-        Navigator.of(context).pop();
+        if (Navigator.canPop(context)) Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Login failed: ${e.toString()}'),
+            content: Text('Post-login processing failed: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -135,14 +158,52 @@ class _LoginScreenState extends State<LoginPageScreen> {
 
   Future<void> _handleSocialLogin(String provider) async {
     if (provider == 'Google') {
-      final url = Uri.parse(_apiService.googleAuthUrl);
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-      } else {
+      try {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Could not launch $url')));
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return const Center(child: CircularProgressIndicator());
+            },
+          );
+        }
+
+        final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+        if (googleUser == null) {
+          if (mounted)
+            Navigator.of(context).pop(); // User cancelled the sign-in
+          return;
+        }
+
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
+        final String? idToken = googleAuth.idToken;
+
+        if (idToken == null) {
+          throw Exception('Failed to obtain Google ID Token');
+        }
+
+        String? deviceImei = await getDeviceImei();
+        if (deviceImei == null || deviceImei.isEmpty) {
+          deviceImei = await getDeviceId();
+        }
+
+        final data = await _apiService.googleSignin(
+          idToken,
+          deviceId: deviceImei,
+        );
+
+        await _handleLoginSuccess(data, deviceImei);
+      } catch (e) {
+        if (mounted) {
+          if (Navigator.canPop(context)) Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Google Sign-in failed: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
         }
       }
     } else {

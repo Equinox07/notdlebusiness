@@ -51,6 +51,7 @@ dependencies:
   cloudinary_url_gen: ^1.3.0
   currency_picker: ^2.0.21
   country_picker: ^2.0.21
+  google_sign_in: ^7.2.0
 
 dev_dependencies:
   flutter_test:

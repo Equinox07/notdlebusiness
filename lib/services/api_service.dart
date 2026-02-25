@@ -31,6 +31,10 @@ class ApiService {
 
   ApiService._internal();
 
+  String getUrlBase() {
+    return _baseUrl.replaceAll('/api', '');
+  }
+
   // Get headers with authorization
   Future<Map<String, String>> _getHeaders() async {
     final token = await _storage.read(key: 'auth_token');
@@ -273,6 +277,12 @@ class ApiService {
     await _storage.delete(key: 'auth_token');
     await _storage.delete(key: 'refresh_token');
     await _storage.delete(key: 'user_data');
+  }
+
+  Future<Map<String, dynamic>> loginWithToken(String token) async {
+    await _storage.write(key: 'auth_token', value: token);
+    final data = await getCurrentUser();
+    return data.toJson();
   }
 
   // Google Sign-in

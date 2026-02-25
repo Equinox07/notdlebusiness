@@ -10,8 +10,8 @@ import 'package:notdle/utils/helpers.dart';
 import 'package:notdle/utils/session_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:notdle/providers/company_provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 class LoginPageScreen extends StatefulWidget {
   const LoginPageScreen({super.key});
@@ -30,7 +30,21 @@ class _LoginScreenState extends State<LoginPageScreen> {
   bool _obscurePassword = true;
 
   // Initialize with standard parameters
-  final _googleSignIn = GoogleSignIn.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeGoogleSignIn();
+  }
+
+  Future<void> _initializeGoogleSignIn() async {
+    try {
+      await _googleSignIn.initialize();
+    } catch (e) {
+      debugPrint('Error initializing Google Sign-In: $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -169,19 +183,23 @@ class _LoginScreenState extends State<LoginPageScreen> {
           );
         }
 
-        final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-        if (googleUser == null) {
-          if (mounted)
-            Navigator.of(context).pop(); // User cancelled the sign-in
-          return;
-        }
+        final String baseUrl = _apiService.getUrlBase();
+        final String authUrl = '$baseUrl/oauth2/authorization/google';
+        final String callbackUrlScheme = 'notdle';
 
-        final GoogleSignInAuthentication googleAuth =
-            await googleUser.authentication;
-        final String? idToken = googleAuth.idToken;
+        final result = await FlutterWebAuth2.authenticate(
+          url: authUrl,
+          callbackUrlScheme: callbackUrlScheme,
+        );
 
-        if (idToken == null) {
-          throw Exception('Failed to obtain Google ID Token');
+        // Extract token from notdle://login-callback?token=xxx
+        final Uri uri = Uri.parse(result);
+        final String? token = uri.queryParameters['token'];
+
+        if (token == null) {
+          throw Exception(
+            'Failed to obtain authentication token from redirect',
+          );
         }
 
         String? deviceImei = await getDeviceImei();
@@ -189,10 +207,7 @@ class _LoginScreenState extends State<LoginPageScreen> {
           deviceImei = await getDeviceId();
         }
 
-        final data = await _apiService.googleSignin(
-          idToken,
-          deviceId: deviceImei,
-        );
+        final data = await _apiService.loginWithToken(token);
 
         await _handleLoginSuccess(data, deviceImei);
       } catch (e) {

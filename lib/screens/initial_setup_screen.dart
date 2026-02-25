@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:currency_picker/currency_picker.dart';
+import 'package:notdle/providers/api_provider.dart';
+import 'package:notdle/providers/company_provider.dart';
+import 'package:notdle/services/session_manager.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:notdle/pages/dashboards/dashboard_screen.dart';
 
 class InitialSetupScreen extends StatefulWidget {
   static const String tag = 'initial-setup';
@@ -16,162 +23,230 @@ class _InitialSetupScreenState extends State<InitialSetupScreen> {
   String _measurementSystem = 'Metric'; // Metric or Imperial
   bool _pushNotifications = true;
   String _themeMode = 'Light'; // Light or Dark
+  bool _isLoading = false;
 
   final Color primaryPurple = const Color(0xFF6B11B2);
   final Color textGrey = const Color(0xFF64748B);
   final Color bgColor = const Color(0xFFF9F7F2);
   final Color cardBg = Colors.white;
 
+  Future<void> _finishSetup() async {
+    final apiProvider = Provider.of<ApiProvider>(context, listen: false);
+    final companyProvider = Provider.of<CompanyProvider>(
+      context,
+      listen: false,
+    );
+    final company = companyProvider.company;
+
+    if (company == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error: No company found to update')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    context.loaderOverlay.show();
+
+    try {
+      // Extract currency code from string like "USD - US Dollar ($)"
+      final currencyCode = _selectedCurrency.split(' ')[0];
+
+      final patchData = {
+        'currency': currencyCode,
+        'measurementSystem': _measurementSystem,
+        'enablePushNotifications': _pushNotifications,
+        'appAppearance': _themeMode,
+      };
+
+      await apiProvider.apiService.patchCompany(company.id, patchData);
+
+      // Update local company data
+      final updatedCompany = company.copyWith(
+        currency: currencyCode,
+        measurementSystem: _measurementSystem,
+        enablePushNotifications: _pushNotifications,
+        appAppearance: _themeMode,
+      );
+
+      await SessionManager.saveCompany(updatedCompany);
+      companyProvider.setCompany(updatedCompany);
+
+      // Mark initial setup as completed in SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('initialScreenCompleted', true);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Initial setup completed successfully!')),
+      );
+
+      // Navigate to dashboard
+      Navigator.pushReplacementNamed(context, DashboardScreen.tag);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Setup failed: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        context.loaderOverlay.hide();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: bgColor,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
-              // Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.arrow_back_ios_new,
-                        color: const Color(0xFF0F172A),
-                        size: 18,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    'STEP 3 OF 3',
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: textGrey,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  const SizedBox(width: 44),
-                ],
-              ),
-              const SizedBox(height: 24),
-              // Title
-              Center(
-                child: Column(
+    return LoaderOverlay(
+      child: Scaffold(
+        backgroundColor: bgColor,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 12),
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Initial Setup',
-                      style: GoogleFonts.playfairDisplay(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: const Color(0xFF0F172A),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Let’s customize your workspace to fit your\nbusiness needs.',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        color: textGrey,
-                        height: 1.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              // Business Currency Card
-              _buildSetupCard(
-                icon: Icons.account_balance_wallet_outlined,
-                title: 'Business Currency',
-                subtitle: 'Main transaction currency',
-                child: _buildCurrencyDropdown(),
-              ),
-              const SizedBox(height: 12),
-              // Measurement System Card
-              _buildSetupCard(
-                icon: Icons.straighten_outlined,
-                title: 'Measurement System',
-                subtitle: 'Used for pattern making',
-                child: _buildMeasurementToggle(),
-              ),
-              const SizedBox(height: 12),
-              // Push Notifications Card
-              _buildSetupCard(
-                icon: Icons.notifications_none_outlined,
-                title: 'Push Notifications',
-                subtitle: 'Order and deadline alerts',
-                child: Switch(
-                  value: _pushNotifications,
-                  onChanged:
-                      (value) => setState(() => _pushNotifications = value),
-                  activeColor: primaryPurple,
-                ),
-                isRow: true,
-              ),
-              const SizedBox(height: 12),
-              // App Appearance Card
-              _buildSetupCard(
-                icon: Icons.palette_outlined,
-                title: 'App Appearance',
-                subtitle: 'Choose your preferred aesthetic',
-                child: _buildThemeSelection(),
-              ),
-              const SizedBox(height: 24),
-              // Finish Button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Navigate to dashboard or next setup step
-                    Navigator.pushReplacementNamed(context, 'dashboard');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryPurple,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    elevation: 8,
-                    shadowColor: primaryPurple.withOpacity(0.4),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Finish Setup',
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.arrow_back_ios_new,
+                          color: const Color(0xFF0F172A),
+                          size: 18,
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      const Icon(Icons.arrow_forward, size: 20),
+                    ),
+                    Text(
+                      'STEP 3 OF 3',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: textGrey,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(width: 44),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                // Title
+                Center(
+                  child: Column(
+                    children: [
+                      Text(
+                        'Initial Setup',
+                        style: GoogleFonts.playfairDisplay(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF0F172A),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Let’s customize your workspace to fit your\nbusiness needs.',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          color: textGrey,
+                          height: 1.5,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-            ],
+                const SizedBox(height: 24),
+                // Business Currency Card
+                _buildSetupCard(
+                  icon: Icons.account_balance_wallet_outlined,
+                  title: 'Business Currency',
+                  subtitle: 'Main transaction currency',
+                  child: _buildCurrencyDropdown(),
+                ),
+                const SizedBox(height: 12),
+                // Measurement System Card
+                _buildSetupCard(
+                  icon: Icons.straighten_outlined,
+                  title: 'Measurement System',
+                  subtitle: 'Used for pattern making',
+                  child: _buildMeasurementToggle(),
+                ),
+                const SizedBox(height: 12),
+                // Push Notifications Card
+                _buildSetupCard(
+                  icon: Icons.notifications_none_outlined,
+                  title: 'Push Notifications',
+                  subtitle: 'Order and deadline alerts',
+                  child: Switch(
+                    value: _pushNotifications,
+                    onChanged:
+                        (value) => setState(() => _pushNotifications = value),
+                    activeColor: primaryPurple,
+                  ),
+                  isRow: true,
+                ),
+                const SizedBox(height: 12),
+                // App Appearance Card
+                _buildSetupCard(
+                  icon: Icons.palette_outlined,
+                  title: 'App Appearance',
+                  subtitle: 'Choose your preferred aesthetic',
+                  child: _buildThemeSelection(),
+                ),
+                const SizedBox(height: 24),
+                // Finish Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _finishSetup,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryPurple,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      elevation: 8,
+                      shadowColor: primaryPurple.withOpacity(0.4),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Finish Setup',
+                          style: GoogleFonts.inter(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.arrow_forward, size: 20),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),

@@ -209,6 +209,26 @@ class ApiService {
     }
   }
 
+  // Update company details (patch)
+  Future<Map<String, dynamic>> patchCompany(
+    String companyId,
+    Map<String, dynamic> companyData,
+  ) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.patch(
+        Uri.parse('$_baseUrl/companies/$companyId'),
+        headers: headers,
+        body: json.encode(companyData),
+      );
+
+      return _handleResponse(response);
+    } catch (e) {
+      debugPrint('Patch Company Error: $e');
+      rethrow;
+    }
+  }
+
   // Authentication
   Future<Map<String, dynamic>> login(
     String email,

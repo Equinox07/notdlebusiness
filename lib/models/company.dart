@@ -21,6 +21,14 @@ class Company {
   final String currency;
   final String country;
   final String? deviceId;
+  final String businessType;
+  final bool enablePushNotifications;
+  final bool enableSmsNotifications;
+  final bool enableEmailNotifications;
+  final String? measurementSystem;
+  final String? appAppearance;
+  final String? genderSpecialty;
+  final String? locationName;
 
   Company({
     String? id,
@@ -38,6 +46,14 @@ class Company {
     this.currency = 'GHS',
     this.country = 'Ghana',
     this.deviceId,
+    this.businessType = "",
+    this.enablePushNotifications = false,
+    this.enableSmsNotifications = false,
+    this.enableEmailNotifications = false,
+    this.measurementSystem,
+    this.appAppearance,
+    this.genderSpecialty,
+    this.locationName,
   }) : id = id ?? const Uuid().v4();
 
   // Factory constructor to create a Company from a Map
@@ -45,11 +61,11 @@ class Company {
     return Company(
       id: map['id'] as String,
       businessName: map['businessName'] as String,
-      ownerName: map['ownerName'] as String,
+      ownerName: map['ownerName'] as String? ?? "",
       email: map['email'] as String,
       mobile: map['mobile'] as String,
-      yearsOfExperience: (map['yearsOfExperience'] as num).toInt(),
-      registrationNumber: map['registrationNumber'] as String,
+      yearsOfExperience: (map['yearsOfExperience'] as num?)?.toInt() ?? 0,
+      registrationNumber: map['registrationNumber'] as String? ?? "na",
       countryCode: map['countryCode'] as String,
       address: map['address'] as String,
       logoUrl: map['logoUrl'] as String?,
@@ -58,6 +74,15 @@ class Company {
       currency: map['currency'] as String? ?? 'GHS',
       country: map['country'] as String? ?? 'Ghana',
       deviceId: map['deviceId'] as String?,
+      businessType: map['businessType'] as String? ?? "",
+      enablePushNotifications: map['enablePushNotifications'] as bool? ?? false,
+      enableSmsNotifications: map['enableSmsNotifications'] as bool? ?? false,
+      enableEmailNotifications:
+          map['enableEmailNotifications'] as bool? ?? false,
+      measurementSystem: map['measurementSystem'] as String?,
+      appAppearance: map['appAppearance'] as String?,
+      genderSpecialty: map['genderSpecialty'] as String?,
+      locationName: map['locationName'] as String?,
     );
   }
 
@@ -79,6 +104,14 @@ class Company {
       'currency': currency,
       'country': country,
       'deviceId': deviceId,
+      'businessType': businessType,
+      'enablePushNotifications': enablePushNotifications,
+      'enableSmsNotifications': enableSmsNotifications,
+      'enableEmailNotifications': enableEmailNotifications,
+      'measurementSystem': measurementSystem,
+      'appAppearance': appAppearance,
+      'genderSpecialty': genderSpecialty,
+      'locationName': locationName,
     };
   }
 
@@ -98,6 +131,14 @@ class Company {
     String? currency,
     String? country,
     String? deviceId,
+    String? businessType,
+    bool? enablePushNotifications,
+    bool? enableSmsNotifications,
+    bool? enableEmailNotifications,
+    String? measurementSystem,
+    String? appAppearance,
+    String? genderSpecialty,
+    String? locationName,
   }) {
     return Company(
       id: id ?? this.id,
@@ -115,6 +156,17 @@ class Company {
       currency: currency ?? this.currency,
       country: country ?? this.country,
       deviceId: deviceId ?? this.deviceId,
+      businessType: businessType ?? this.businessType,
+      enablePushNotifications:
+          enablePushNotifications ?? this.enablePushNotifications,
+      enableSmsNotifications:
+          enableSmsNotifications ?? this.enableSmsNotifications,
+      enableEmailNotifications:
+          enableEmailNotifications ?? this.enableEmailNotifications,
+      measurementSystem: measurementSystem ?? this.measurementSystem,
+      appAppearance: appAppearance ?? this.appAppearance,
+      genderSpecialty: genderSpecialty ?? this.genderSpecialty,
+      locationName: locationName ?? this.locationName,
     );
   }
 }

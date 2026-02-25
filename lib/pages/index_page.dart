@@ -113,11 +113,17 @@ class _StartupScreen extends StatelessWidget {
       // User found, check if they have a company
       if (!user.hasCompany) {
         // No company, go to company registration
-        return CreateBusinessAccountScreen();
-        // return CompanyRegistrationScreen();
+        return const CreateBusinessAccountScreen();
       }
 
-      // User has a company, go to dashboard
+      // Check if initial setup is completed
+      final initialScreenCompleted =
+          prefs.getBool('initialScreenCompleted') ?? false;
+      if (!initialScreenCompleted) {
+        return const InitialSetupScreen();
+      }
+
+      // User has a company and completed setup, go to dashboard
       return const DashboardScreen();
     } catch (e) {
       // In case of any error, default to login screen

@@ -4,6 +4,8 @@ import 'package:notdle/utils/helpers.dart';
 import 'package:uuid/uuid.dart';
 import '../models/invoice.dart';
 import '../models/order.dart';
+import 'package:notdle/services/api_service.dart';
+import 'package:notdle/services/session_manager.dart';
 
 class InvoiceProvider extends ChangeNotifier {
   final InvoiceDao invoiceDao;
@@ -24,9 +26,21 @@ class InvoiceProvider extends ChangeNotifier {
   }
 
   Future<void> addInvoice(Invoice invoice) async {
-    await invoiceDao.insertInvoice(invoice);
-    for (final item in invoice.items) {
-      await invoiceDao.insertInvoiceItem(item);
+    final company = await SessionManager.getCompany();
+    final user = await ApiService().getStoredUser();
+
+    final updatedInvoice = invoice.copyWith(
+      companyId: company?.id,
+      userId: user?.id,
+    );
+
+    await invoiceDao.insertInvoice(updatedInvoice);
+    for (final item in updatedInvoice.items) {
+      final updatedItem = item.copyWith(
+        companyId: company?.id,
+        userId: user?.id,
+      );
+      await invoiceDao.insertInvoiceItem(updatedItem);
     }
     await fetchInvoices();
   }
@@ -43,10 +57,15 @@ class InvoiceProvider extends ChangeNotifier {
 
   /// ✅ Auto-generate an invoice from an order
   Future<void> createInvoiceFromOrder(Order order) async {
+    final company = await SessionManager.getCompany();
+    final user = await ApiService().getStoredUser();
+
     final invoice = Invoice(
       id: const Uuid().v4(),
       invoiceNumber: generateInvoiceNumber(),
       customerId: order.customerId,
+      companyId: company?.id,
+      userId: user?.id,
       status: 'unpaid',
       issueDate: DateTime.now(),
       dueDate: DateTime.now().add(const Duration(days: 30)),

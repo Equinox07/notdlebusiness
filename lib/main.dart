@@ -12,6 +12,7 @@ import 'package:notdle/providers/invoice_provider.dart';
 import 'package:notdle/providers/measurement_provider.dart';
 import 'package:notdle/providers/notification_provider.dart';
 import 'package:notdle/providers/order_provider.dart';
+import 'package:notdle/providers/payment_provider.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -126,6 +127,26 @@ void main() async {
     await database.execute('DROP TABLE IF EXISTS customers_old');
   });
 
+  final migration5to6 = Migration(5, 6, (database) async {
+    await database.execute('ALTER TABLE customers ADD COLUMN companyId TEXT');
+    await database.execute('ALTER TABLE customers ADD COLUMN userId TEXT');
+    await database.execute(
+      'ALTER TABLE measurements ADD COLUMN companyId TEXT',
+    );
+    await database.execute('ALTER TABLE measurements ADD COLUMN userId TEXT');
+    await database.execute('ALTER TABLE orders ADD COLUMN companyId TEXT');
+    await database.execute('ALTER TABLE orders ADD COLUMN userId TEXT');
+    await database.execute('ALTER TABLE invoices ADD COLUMN userId TEXT');
+    await database.execute('ALTER TABLE order_items ADD COLUMN companyId TEXT');
+    await database.execute('ALTER TABLE order_items ADD COLUMN userId TEXT');
+    await database.execute(
+      'ALTER TABLE invoice_items ADD COLUMN companyId TEXT',
+    );
+    await database.execute('ALTER TABLE invoice_items ADD COLUMN userId TEXT');
+    await database.execute('ALTER TABLE payments ADD COLUMN userId TEXT');
+    await database.execute('ALTER TABLE projects ADD COLUMN user_id TEXT');
+  });
+
   final db =
       await $FloorAppDatabase
           .databaseBuilder('app_database')
@@ -134,6 +155,7 @@ void main() async {
             migration2to3,
             migration3to4,
             migration4to5,
+            migration5to6,
           ])
           .addCallback(
             Callback(
@@ -185,6 +207,9 @@ void main() async {
               ),
         ),
         ChangeNotifierProvider(create: (context) => NotificationProvider()),
+        ChangeNotifierProvider(
+          create: (context) => PaymentProvider(paymentDao: db.paymentDao),
+        ),
       ],
       child: const IndexPage(),
     ),

@@ -8,22 +8,35 @@ import 'package:flutter/cupertino.dart';
 String generateInvoiceNumber() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   final random = Random();
-  return String.fromCharCodes(Iterable.generate(
-    15,
-    (_) => chars.codeUnitAt(random.nextInt(chars.length)),
-  ));
+  return String.fromCharCodes(
+    Iterable.generate(
+      15,
+      (_) => chars.codeUnitAt(random.nextInt(chars.length)),
+    ),
+  );
 }
 
 String generateOrderNumber() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   final random = Random();
-  return String.fromCharCodes(Iterable.generate(
-    15,
-    (_) => chars.codeUnitAt(random.nextInt(chars.length)),
-  ));
+  return String.fromCharCodes(
+    Iterable.generate(
+      15,
+      (_) => chars.codeUnitAt(random.nextInt(chars.length)),
+    ),
+  );
 }
 
-
+String generatePaymentReference() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  final random = Random();
+  return String.fromCharCodes(
+    Iterable.generate(
+      15,
+      (_) => chars.codeUnitAt(random.nextInt(chars.length)),
+    ),
+  );
+}
 
 Future<String> getDeviceId() async {
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();

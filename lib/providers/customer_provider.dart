@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:notdle/models/dao/customer_dao.dart';
 import 'package:notdle/models/dao/order_dao.dart';
 import '../models/customer.dart';
+import 'package:notdle/services/api_service.dart';
+import 'package:notdle/services/session_manager.dart';
 
 class CustomerProvider extends ChangeNotifier {
   final CustomerDao customerDao;
   final OrderDao orderDao;
 
-  CustomerProvider({required this.customerDao, required this.orderDao });
+  CustomerProvider({required this.customerDao, required this.orderDao});
 
   List<Customer> _customers = [];
   List<Customer> get customers => _customers;
@@ -21,7 +23,13 @@ class CustomerProvider extends ChangeNotifier {
   }
 
   Future<void> addCustomer(Customer customer) async {
-    await customerDao.insertCustomer(customer);
+    final company = await SessionManager.getCompany();
+    final user = await ApiService().getStoredUser();
+    final updatedCustomer = customer.copyWith(
+      companyId: company?.id,
+      userId: user?.id,
+    );
+    await customerDao.insertCustomer(updatedCustomer);
     await fetchCustomers(); // refresh
   }
 
@@ -45,12 +53,19 @@ class CustomerProvider extends ChangeNotifier {
   }
 
   Future<Customer> addNewCustomer(Customer customer) async {
-    // final savedCustomer = await repository.insertCustomer(customer);
-    final savedCustomer = await customerDao.insertCustomer(customer);
-    customer = (await customerDao.getCustomerById(customer.id!))!;
-    _customers.add(customer);
-    notifyListeners();
-    return customer;
-  }
+    final company = await SessionManager.getCompany();
+    final user = await ApiService().getStoredUser();
+    final updatedCustomer = customer.copyWith(
+      companyId: company?.id,
+      userId: user?.id,
+    );
 
+    // final savedCustomer = await repository.insertCustomer(customer);
+    final savedCustomer = await customerDao.insertCustomer(updatedCustomer);
+    final fetchedCustomer =
+        (await customerDao.getCustomerById(updatedCustomer.id!))!;
+    _customers.add(fetchedCustomer);
+    notifyListeners();
+    return fetchedCustomer;
+  }
 }

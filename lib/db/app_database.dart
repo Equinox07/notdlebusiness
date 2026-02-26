@@ -8,6 +8,7 @@ import 'package:notdle/models/dao/invoice_dao.dart';
 import 'package:notdle/models/dao/measurement_dao.dart';
 import 'package:notdle/models/dao/order_dao.dart';
 import 'package:notdle/models/dao/project_dao.dart';
+import 'package:notdle/models/dao/payment_dao.dart';
 import 'package:notdle/models/datetime_convertor.dart';
 import 'package:notdle/models/datetime_null_convertor.dart';
 import 'package:notdle/models/invoice_item.dart';
@@ -31,7 +32,7 @@ part 'app_database.g.dart'; // The file that will be generated
   DateTimeNullConvertor,
 ])
 @Database(
-  version: 5, // Increment version for schema changes
+  version: 6, // Increment version for schema changes
   entities: [
     Company,
     Customer,
@@ -51,6 +52,7 @@ abstract class AppDatabase extends FloorDatabase {
   MeasurementDao get measurementDao;
   InvoiceDao get invoiceDao;
   ProjectDao get projectDao;
+  PaymentDao get paymentDao;
 
   Future<void> truncateAllTables() async {
     await (database as sqflite.Database).transaction((txn) async {

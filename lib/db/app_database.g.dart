@@ -84,13 +84,15 @@ class _$AppDatabase extends AppDatabase {
 
   ProjectDao? _projectDaoInstance;
 
+  PaymentDao? _paymentDaoInstance;
+
   Future<sqflite.Database> open(
     String path,
     List<Migration> migrations, [
     Callback? callback,
   ]) async {
     final databaseOptions = sqflite.OpenDatabaseOptions(
-      version: 5,
+      version: 6,
       onConfigure: (database) async {
         await database.execute('PRAGMA foreign_keys = ON');
         await callback?.onConfigure?.call(database);
@@ -159,6 +161,11 @@ class _$AppDatabase extends AppDatabase {
   @override
   ProjectDao get projectDao {
     return _projectDaoInstance ??= _$ProjectDao(database, changeListener);
+  }
+
+  @override
+  PaymentDao get paymentDao {
+    return _paymentDaoInstance ??= _$PaymentDao(database, changeListener);
   }
 }
 
@@ -1757,6 +1764,144 @@ class _$ProjectDao extends ProjectDao {
   @override
   Future<void> deleteProject(Project project) async {
     await _projectDeletionAdapter.delete(project);
+  }
+}
+
+class _$PaymentDao extends PaymentDao {
+  _$PaymentDao(
+    this.database,
+    this.changeListener,
+  )   : _queryAdapter = QueryAdapter(database),
+        _paymentInsertionAdapter = InsertionAdapter(
+            database,
+            'payments',
+            (Payment item) => <String, Object?>{
+                  'id': item.id,
+                  'invoiceId': item.invoiceId,
+                  'companyId': item.companyId,
+                  'amount': item.amount,
+                  'paymentDate': _dateTimeConvertor.encode(item.paymentDate),
+                  'referenceNumber': item.referenceNumber,
+                  'notes': item.notes,
+                  'status': item.status,
+                  'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'userId': item.userId
+                }),
+        _paymentUpdateAdapter = UpdateAdapter(
+            database,
+            'payments',
+            ['id'],
+            (Payment item) => <String, Object?>{
+                  'id': item.id,
+                  'invoiceId': item.invoiceId,
+                  'companyId': item.companyId,
+                  'amount': item.amount,
+                  'paymentDate': _dateTimeConvertor.encode(item.paymentDate),
+                  'referenceNumber': item.referenceNumber,
+                  'notes': item.notes,
+                  'status': item.status,
+                  'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'userId': item.userId
+                }),
+        _paymentDeletionAdapter = DeletionAdapter(
+            database,
+            'payments',
+            ['id'],
+            (Payment item) => <String, Object?>{
+                  'id': item.id,
+                  'invoiceId': item.invoiceId,
+                  'companyId': item.companyId,
+                  'amount': item.amount,
+                  'paymentDate': _dateTimeConvertor.encode(item.paymentDate),
+                  'referenceNumber': item.referenceNumber,
+                  'notes': item.notes,
+                  'status': item.status,
+                  'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'userId': item.userId
+                });
+
+  final sqflite.DatabaseExecutor database;
+
+  final StreamController<String> changeListener;
+
+  final QueryAdapter _queryAdapter;
+
+  final InsertionAdapter<Payment> _paymentInsertionAdapter;
+
+  final UpdateAdapter<Payment> _paymentUpdateAdapter;
+
+  final DeletionAdapter<Payment> _paymentDeletionAdapter;
+
+  @override
+  Future<List<Payment>> getAllPayments() async {
+    return _queryAdapter.queryList('SELECT * FROM payments',
+        mapper: (Map<String, Object?> row) => Payment(
+            id: row['id'] as String?,
+            invoiceId: row['invoiceId'] as String,
+            companyId: row['companyId'] as String?,
+            amount: row['amount'] as double,
+            paymentDate: _dateTimeConvertor.decode(row['paymentDate'] as int),
+            referenceNumber: row['referenceNumber'] as String?,
+            notes: row['notes'] as String?,
+            status: row['status'] as String,
+            syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
+            isSynced: (row['isSynced'] as int) != 0,
+            userId: row['userId'] as String?));
+  }
+
+  @override
+  Future<Payment?> getPaymentById(String id) async {
+    return _queryAdapter.query('SELECT * FROM payments WHERE id = ?1',
+        mapper: (Map<String, Object?> row) => Payment(
+            id: row['id'] as String?,
+            invoiceId: row['invoiceId'] as String,
+            companyId: row['companyId'] as String?,
+            amount: row['amount'] as double,
+            paymentDate: _dateTimeConvertor.decode(row['paymentDate'] as int),
+            referenceNumber: row['referenceNumber'] as String?,
+            notes: row['notes'] as String?,
+            status: row['status'] as String,
+            syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
+            isSynced: (row['isSynced'] as int) != 0,
+            userId: row['userId'] as String?),
+        arguments: [id]);
+  }
+
+  @override
+  Future<List<Payment>> getPaymentsForInvoice(String invoiceId) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM payments WHERE invoiceId = ?1',
+        mapper: (Map<String, Object?> row) => Payment(
+            id: row['id'] as String?,
+            invoiceId: row['invoiceId'] as String,
+            companyId: row['companyId'] as String?,
+            amount: row['amount'] as double,
+            paymentDate: _dateTimeConvertor.decode(row['paymentDate'] as int),
+            referenceNumber: row['referenceNumber'] as String?,
+            notes: row['notes'] as String?,
+            status: row['status'] as String,
+            syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
+            isSynced: (row['isSynced'] as int) != 0,
+            userId: row['userId'] as String?),
+        arguments: [invoiceId]);
+  }
+
+  @override
+  Future<void> insertPayment(Payment payment) async {
+    await _paymentInsertionAdapter.insert(payment, OnConflictStrategy.replace);
+  }
+
+  @override
+  Future<void> updatePayment(Payment payment) async {
+    await _paymentUpdateAdapter.update(payment, OnConflictStrategy.abort);
+  }
+
+  @override
+  Future<void> deletePayment(Payment payment) async {
+    await _paymentDeletionAdapter.delete(payment);
   }
 }
 

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:notdle/models/dao/customer_dao.dart';
 import 'package:notdle/models/dao/measurement_dao.dart';
 import '../models/measurement.dart';
+import 'package:notdle/services/api_service.dart';
+import 'package:notdle/services/session_manager.dart';
 
 class MeasurementProvider extends ChangeNotifier {
   final MeasurementDao measurementDao;
@@ -20,11 +22,18 @@ class MeasurementProvider extends ChangeNotifier {
   List<Measurement> get measurements => _measurements;
 
   Future<Measurement> addMeasurement(Measurement measurement) async {
+    final company = await SessionManager.getCompany();
+    final user = await ApiService().getStoredUser();
+    final updatedMeasurement = measurement.copyWith(
+      companyId: company?.id,
+      userId: user?.id,
+    );
+
     // final saved = await repository.addMeasurement(m);
     // _measurements.add(saved);
-    await measurementDao.insertMeasurement(measurement);
+    await measurementDao.insertMeasurement(updatedMeasurement);
     notifyListeners();
-    return measurement;
+    return updatedMeasurement;
   }
 
   Future<void> updateMeasurement(Measurement measurement) async {

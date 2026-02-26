@@ -3,6 +3,8 @@ import 'package:notdle/models/dao/order_dao.dart';
 import 'package:notdle/models/order_with_details.dart';
 import 'package:notdle/utils/helpers.dart';
 import '../models/order.dart';
+import 'package:notdle/services/api_service.dart';
+import 'package:notdle/services/session_manager.dart';
 
 class OrderProvider extends ChangeNotifier {
   final OrderDao orderDao;
@@ -28,7 +30,14 @@ class OrderProvider extends ChangeNotifier {
   }
 
   Future<void> addOrder(Order order) async {
-    final newOrder = order.copyWith(orderNumber: generateOrderNumber());
+    final company = await SessionManager.getCompany();
+    final user = await ApiService().getStoredUser();
+
+    final newOrder = order.copyWith(
+      orderNumber: generateOrderNumber(),
+      companyId: company?.id,
+      userId: user?.id,
+    );
     await orderDao.insertOrder(newOrder);
     await fetchOrders();
   }
@@ -62,7 +71,9 @@ class OrderProvider extends ChangeNotifier {
     debugPrint("PROVIDER: 🔍 Looking up customer with ID: ${order.customerId}");
     final customer = await orderDao.getCustomer(order.customerId);
     if (customer == null) {
-      debugPrint("PROVIDER: ❌ Customer not found for ID: ${order.customerId}. Aborting.");
+      debugPrint(
+        "PROVIDER: ❌ Customer not found for ID: ${order.customerId}. Aborting.",
+      );
       return null;
     }
     debugPrint("PROVIDER: ✅ Customer found: ${customer.name}");
@@ -73,7 +84,9 @@ class OrderProvider extends ChangeNotifier {
     debugPrint("PROVIDER: 🔍 Looking up invoice for order ID: ${order.id}");
     final invoice = await orderDao.getInvoiceByOrderId(order.id);
     if (invoice == null) {
-      debugPrint("PROVIDER: ℹ️ No invoice found for this order. This is acceptable.");
+      debugPrint(
+        "PROVIDER: ℹ️ No invoice found for this order. This is acceptable.",
+      );
     } else {
       debugPrint("PROVIDER: ✅ Invoice found: ${invoice.id}");
     }

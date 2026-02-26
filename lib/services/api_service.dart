@@ -285,6 +285,36 @@ class ApiService {
     return data.toJson();
   }
 
+  // Google Sign-in code exchange
+  Future<Map<String, dynamic>> exchangeGoogleCode(
+    String code, {
+    String? deviceId,
+  }) async {
+    final body = {'code': code};
+    if (deviceId != null) {
+      body['deviceId'] = deviceId;
+    }
+
+    final response = await http.post(
+      Uri.parse('$_baseUrl/auth/oauth2/google/exchange-code'),
+      headers: await _getHeaders(),
+      body: json.encode(body),
+    );
+
+    final data = _handleResponse(response);
+    if (data != null) {
+      final loginResponse = LoginResponse.fromJson(data);
+      await _storage.write(key: 'auth_token', value: loginResponse.token);
+      if (loginResponse.refreshToken != null) {
+        await _storage.write(
+          key: 'refresh_token',
+          value: loginResponse.refreshToken,
+        );
+      }
+    }
+    return data;
+  }
+
   // Google Sign-in
   Future<Map<String, dynamic>> googleSignin(
     String idToken, {

@@ -1,4 +1,6 @@
 // lib/screens/login_screen.dart
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/screens/company_registration_screen.dart';
@@ -12,6 +14,7 @@ import 'package:provider/provider.dart';
 import 'package:notdle/providers/company_provider.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
+import 'package:http/http.dart' as http;
 
 class LoginPageScreen extends StatefulWidget {
   const LoginPageScreen({super.key});
@@ -185,9 +188,6 @@ class _LoginScreenState extends State<LoginPageScreen> {
 
         final String baseUrl = _apiService.getUrlBase();
 
-        final String callbackUrlScheme = 'https';
-        final String callbackUrlScheme1 = 'https';
-
         // App specific variables
         final googleClientId =
             '771814763529-neu8hs5dj6biebjoeo68kdp8d9e10i1t.apps.googleusercontent.com';
@@ -248,7 +248,12 @@ class _LoginScreenState extends State<LoginPageScreen> {
           deviceImei = await getDeviceId();
         }
 
-        final data = await _apiService.googleSignin(code, deviceId: deviceImei);
+        final data = await _apiService.exchangeGoogleCode(
+          code,
+          deviceId: deviceImei,
+        );
+
+        debugPrint('Data: $data');
 
         await _handleLoginSuccess(data, deviceImei);
       } catch (e) {

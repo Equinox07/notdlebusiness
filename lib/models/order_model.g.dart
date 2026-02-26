@@ -23,6 +23,7 @@ OrderDto _$OrderDtoFromJson(Map<String, dynamic> json) => OrderDto(
       items: (json['items'] as List<dynamic>)
           .map((e) => OrderItemDto.fromJson(e as Map<String, dynamic>))
           .toList(),
+      userId: json['userId'] as String?,
     );
 
 Map<String, dynamic> _$OrderDtoToJson(OrderDto instance) => <String, dynamic>{
@@ -39,6 +40,7 @@ Map<String, dynamic> _$OrderDtoToJson(OrderDto instance) => <String, dynamic>{
       'companyId': instance.companyId,
       'clientId': instance.clientId,
       'items': instance.items,
+      'userId': instance.userId,
     };
 
 OrderItemDto _$OrderItemDtoFromJson(Map<String, dynamic> json) => OrderItemDto(
@@ -51,6 +53,8 @@ OrderItemDto _$OrderItemDtoFromJson(Map<String, dynamic> json) => OrderItemDto(
       taxRate: (json['taxRate'] as num?)?.toDouble(),
       amount: (json['amount'] as num).toDouble(),
       orderId: json['orderId'] as String?,
+      companyId: json['companyId'] as String?,
+      userId: json['userId'] as String?,
     );
 
 Map<String, dynamic> _$OrderItemDtoToJson(OrderItemDto instance) =>
@@ -64,4 +68,6 @@ Map<String, dynamic> _$OrderItemDtoToJson(OrderItemDto instance) =>
       'taxRate': instance.taxRate,
       'amount': instance.amount,
       'orderId': instance.orderId,
+      'companyId': instance.companyId,
+      'userId': instance.userId,
     };

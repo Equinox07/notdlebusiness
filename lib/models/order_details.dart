@@ -11,6 +11,8 @@ class OrderDetails {
   final String dueDate;
   final List<OrderEvent> timeline;
   final String? notes;
+  final String? companyId;
+  final String? userId;
 
   OrderDetails({
     required this.order,
@@ -20,6 +22,8 @@ class OrderDetails {
     required this.dueDate,
     required this.timeline,
     this.notes,
+    this.companyId,
+    this.userId,
   });
 
   Map<String, dynamic> toMap() {
@@ -30,6 +34,8 @@ class OrderDetails {
       'paymentStatus': paymentStatus,
       'dueDate': dueDate,
       'notes': notes,
+      'companyId': companyId,
+      'userId': userId,
     };
   }
 
@@ -46,6 +52,8 @@ class OrderDetails {
       dueDate: map['dueDate'],
       timeline: timeline,
       notes: map['notes'],
+      companyId: map['companyId'],
+      userId: map['userId'],
     );
   }
 }

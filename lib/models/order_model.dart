@@ -17,6 +17,7 @@ class OrderDto {
   final String companyId;
   final String clientId;
   final List<OrderItemDto> items;
+  final String? userId;
 
   OrderDto({
     this.id,
@@ -32,9 +33,11 @@ class OrderDto {
     required this.companyId,
     required this.clientId,
     required this.items,
+    this.userId,
   });
 
-  factory OrderDto.fromJson(Map<String, dynamic> json) => _$OrderDtoFromJson(json);
+  factory OrderDto.fromJson(Map<String, dynamic> json) =>
+      _$OrderDtoFromJson(json);
   Map<String, dynamic> toJson() => _$OrderDtoToJson(this);
 }
 
@@ -49,6 +52,8 @@ class OrderItemDto {
   final double? taxRate;
   final double amount;
   final String? orderId;
+  final String? companyId;
+  final String? userId;
 
   OrderItemDto({
     this.id,
@@ -60,8 +65,11 @@ class OrderItemDto {
     this.taxRate,
     required this.amount,
     this.orderId,
+    this.companyId,
+    this.userId,
   });
 
-  factory OrderItemDto.fromJson(Map<String, dynamic> json) => _$OrderItemDtoFromJson(json);
+  factory OrderItemDto.fromJson(Map<String, dynamic> json) =>
+      _$OrderItemDtoFromJson(json);
   Map<String, dynamic> toJson() => _$OrderItemDtoToJson(this);
 }

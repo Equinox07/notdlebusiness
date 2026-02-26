@@ -25,6 +25,8 @@ InvoiceDto _$InvoiceDtoFromJson(Map<String, dynamic> json) => InvoiceDto(
       payments: (json['payments'] as List<dynamic>)
           .map((e) => PaymentDto.fromJson(e as Map<String, dynamic>))
           .toList(),
+      companyId: json['companyId'] as String?,
+      userId: json['userId'] as String?,
     );
 
 Map<String, dynamic> _$InvoiceDtoToJson(InvoiceDto instance) =>
@@ -43,6 +45,8 @@ Map<String, dynamic> _$InvoiceDtoToJson(InvoiceDto instance) =>
       'projectId': instance.projectId,
       'items': instance.items,
       'payments': instance.payments,
+      'companyId': instance.companyId,
+      'userId': instance.userId,
     };
 
 InvoiceItemDto _$InvoiceItemDtoFromJson(Map<String, dynamic> json) =>
@@ -55,6 +59,8 @@ InvoiceItemDto _$InvoiceItemDtoFromJson(Map<String, dynamic> json) =>
       taxRate: (json['taxRate'] as num?)?.toDouble(),
       amount: (json['amount'] as num).toDouble(),
       invoiceId: json['invoiceId'] as String?,
+      companyId: json['companyId'] as String?,
+      userId: json['userId'] as String?,
     );
 
 Map<String, dynamic> _$InvoiceItemDtoToJson(InvoiceItemDto instance) =>
@@ -67,6 +73,8 @@ Map<String, dynamic> _$InvoiceItemDtoToJson(InvoiceItemDto instance) =>
       'taxRate': instance.taxRate,
       'amount': instance.amount,
       'invoiceId': instance.invoiceId,
+      'companyId': instance.companyId,
+      'userId': instance.userId,
     };
 
 PaymentDto _$PaymentDtoFromJson(Map<String, dynamic> json) => PaymentDto(
@@ -79,6 +87,7 @@ PaymentDto _$PaymentDtoFromJson(Map<String, dynamic> json) => PaymentDto(
       status: json['status'] as String,
       invoiceId: json['invoiceId'] as String,
       companyId: json['companyId'] as String,
+      userId: json['userId'] as String?,
     );
 
 Map<String, dynamic> _$PaymentDtoToJson(PaymentDto instance) =>
@@ -92,4 +101,5 @@ Map<String, dynamic> _$PaymentDtoToJson(PaymentDto instance) =>
       'status': instance.status,
       'invoiceId': instance.invoiceId,
       'companyId': instance.companyId,
+      'userId': instance.userId,
     };

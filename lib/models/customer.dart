@@ -18,6 +18,8 @@ class Customer {
   final DateTime createdDate;
   final DateTime? syncDate; // New field
   final bool isSynced; // New field
+  final String? companyId;
+  final String? userId;
 
   Customer({
     String? id,
@@ -32,6 +34,8 @@ class Customer {
     required this.createdDate,
     this.syncDate, // Add to constructor
     this.isSynced = false, // Add to constructor with default value
+    this.companyId,
+    this.userId,
   }) : id = id ?? const Uuid().v4();
 
   Customer copyWith({
@@ -47,6 +51,8 @@ class Customer {
     DateTime? createdDate,
     DateTime? syncDate, // Add to copyWith
     bool? isSynced, // Add to copyWith
+    String? companyId,
+    String? userId,
   }) {
     return Customer(
       id: id ?? this.id,
@@ -61,6 +67,8 @@ class Customer {
       createdDate: createdDate ?? this.createdDate,
       syncDate: syncDate ?? this.syncDate, // Update in copyWith
       isSynced: isSynced ?? this.isSynced, // Update in copyWith
+      companyId: companyId ?? this.companyId,
+      userId: userId ?? this.userId,
     );
   }
 }

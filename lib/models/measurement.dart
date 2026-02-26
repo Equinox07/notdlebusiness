@@ -28,6 +28,8 @@ class Measurement {
   final DateTime? updatedDate;
   final DateTime? syncDate; // New field
   final bool isSynced; // New field
+  final String? companyId;
+  final String? userId;
 
   @ignore
   Customer? customer;
@@ -42,6 +44,8 @@ class Measurement {
     this.customer,
     this.syncDate, // Add to constructor
     this.isSynced = false, // Add to constructor with default value
+    this.companyId,
+    this.userId,
   }) : id = id ?? const Uuid().v4();
 
   void linkCustomer(Customer c) {
@@ -57,6 +61,8 @@ class Measurement {
     DateTime? updatedDate,
     DateTime? syncDate, // Add to copyWith
     bool? isSynced, // Add to copyWith
+    String? companyId,
+    String? userId,
   }) {
     return Measurement(
       id: id ?? this.id,
@@ -68,6 +74,8 @@ class Measurement {
       customer: customer,
       syncDate: syncDate ?? this.syncDate, // Update in copyWith
       isSynced: isSynced ?? this.isSynced, // Update in copyWith
+      companyId: companyId ?? this.companyId,
+      userId: userId ?? this.userId,
     );
   }
 }

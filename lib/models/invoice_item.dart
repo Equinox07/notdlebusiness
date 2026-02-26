@@ -11,7 +11,7 @@ import 'invoice.dart';
       parentColumns: ['id'],
       entity: Invoice,
       onDelete: ForeignKeyAction.cascade,
-    )
+    ),
   ],
 )
 class InvoiceItem {
@@ -25,6 +25,8 @@ class InvoiceItem {
   final double amount;
   final DateTime? syncDate; // New field
   final bool isSynced; // New field
+  final String? companyId;
+  final String? userId;
 
   InvoiceItem({
     String? id,
@@ -36,6 +38,8 @@ class InvoiceItem {
     required this.amount,
     this.syncDate, // Add to constructor
     this.isSynced = false, // Add to constructor with default value
+    this.companyId,
+    this.userId,
   }) : id = id ?? const Uuid().v4();
 
   InvoiceItem copyWith({
@@ -48,6 +52,8 @@ class InvoiceItem {
     double? amount,
     DateTime? syncDate, // Add to copyWith
     bool? isSynced, // Add to copyWith
+    String? companyId,
+    String? userId,
   }) {
     return InvoiceItem(
       id: id ?? this.id,
@@ -59,6 +65,8 @@ class InvoiceItem {
       amount: amount ?? this.amount,
       syncDate: syncDate ?? this.syncDate, // Update in copyWith
       isSynced: isSynced ?? this.isSynced, // Update in copyWith
+      companyId: companyId ?? this.companyId,
+      userId: userId ?? this.userId,
     );
   }
 }

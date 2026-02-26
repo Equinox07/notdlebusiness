@@ -8,6 +8,8 @@ class ServiceModel {
   final IconData icon;
   final Color iconColor;
   final bool isComingSoon;
+  final String? companyId;
+  final String? userId;
 
   const ServiceModel({
     required this.title,
@@ -15,5 +17,7 @@ class ServiceModel {
     required this.icon,
     required this.iconColor,
     this.isComingSoon = false,
+    this.companyId,
+    this.userId,
   });
 }

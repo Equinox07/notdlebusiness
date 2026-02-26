@@ -69,6 +69,9 @@ class Project extends Equatable {
   @ColumnInfo(name: 'sync_date')
   final DateTime? syncDate;
 
+  @ColumnInfo(name: 'user_id')
+  final String? userId;
+
   Project({
     String? id,
     required this.companyId,
@@ -86,6 +89,7 @@ class Project extends Equatable {
     this.isSynced = false,
     this.syncDate,
     this.client,
+    this.userId,
   }) : id = id ?? const Uuid().v4(),
        createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
@@ -124,6 +128,7 @@ class Project extends Equatable {
     DateTime? updatedAt,
     bool? isSynced,
     DateTime? syncDate,
+    String? userId,
   }) {
     return Project(
       id: id ?? this.id,
@@ -142,6 +147,7 @@ class Project extends Equatable {
       updatedAt: updatedAt ?? DateTime.now(),
       isSynced: isSynced ?? this.isSynced,
       syncDate: syncDate ?? this.syncDate,
+      userId: userId ?? this.userId,
     );
   }
 
@@ -163,6 +169,7 @@ class Project extends Equatable {
     updatedAt,
     isSynced,
     syncDate,
+    userId,
   ];
 
   // Helper methods
@@ -195,6 +202,7 @@ class ProjectDto {
   final DateTime? startDate;
   final DateTime? deadline;
   final double? budget;
+  final String? userId;
 
   ProjectDto({
     this.id,
@@ -206,6 +214,7 @@ class ProjectDto {
     this.startDate,
     this.deadline,
     this.budget,
+    this.userId,
   });
 
   factory ProjectDto.fromProject(Project project) => ProjectDto(
@@ -218,6 +227,7 @@ class ProjectDto {
     startDate: project.startDate,
     deadline: project.deadline,
     budget: project.budget,
+    userId: project.userId,
   );
 
   factory ProjectDto.fromJson(Map<String, dynamic> json) =>
@@ -242,5 +252,6 @@ extension ProjectDtoX on ProjectDto {
     startDate: startDate,
     deadline: deadline,
     budget: budget ?? 0.0,
+    userId: userId,
   );
 }

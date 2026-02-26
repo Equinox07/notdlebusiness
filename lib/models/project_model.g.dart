@@ -39,6 +39,7 @@ Project _$ProjectFromJson(Map<String, dynamic> json) => Project(
       client: json['client'] == null
           ? null
           : ClientDto.fromJson(json['client'] as Map<String, dynamic>),
+      userId: json['userId'] as String?,
     );
 
 Map<String, dynamic> _$ProjectToJson(Project instance) => <String, dynamic>{
@@ -58,6 +59,7 @@ Map<String, dynamic> _$ProjectToJson(Project instance) => <String, dynamic>{
       'updatedAt': instance.updatedAt.toIso8601String(),
       'isSynced': instance.isSynced,
       'syncDate': instance.syncDate?.toIso8601String(),
+      'userId': instance.userId,
     };
 
 ProjectDto _$ProjectDtoFromJson(Map<String, dynamic> json) => ProjectDto(
@@ -75,6 +77,7 @@ ProjectDto _$ProjectDtoFromJson(Map<String, dynamic> json) => ProjectDto(
           ? null
           : DateTime.parse(json['deadline'] as String),
       budget: (json['budget'] as num?)?.toDouble(),
+      userId: json['userId'] as String?,
     );
 
 Map<String, dynamic> _$ProjectDtoToJson(ProjectDto instance) =>
@@ -88,6 +91,7 @@ Map<String, dynamic> _$ProjectDtoToJson(ProjectDto instance) =>
       'startDate': instance.startDate?.toIso8601String(),
       'deadline': instance.deadline?.toIso8601String(),
       'budget': instance.budget,
+      'userId': instance.userId,
     };
 
 const _$ProjectStatusEnumMap = {

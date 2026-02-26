@@ -16,6 +16,8 @@ CreateMeasurementRequestDto _$CreateMeasurementRequestDtoFromJson(
         (k, e) => MapEntry(k, (e as num).toDouble()),
       ),
       clientId: json['clientId'] as String,
+      companyId: json['companyId'] as String?,
+      userId: json['userId'] as String?,
     );
 
 Map<String, dynamic> _$CreateMeasurementRequestDtoToJson(
@@ -25,6 +27,8 @@ Map<String, dynamic> _$CreateMeasurementRequestDtoToJson(
       'name': instance.name,
       'measurementValues': instance.measurementValues,
       'clientId': instance.clientId,
+      'companyId': instance.companyId,
+      'userId': instance.userId,
     };
 
 MeasurementResponseDto _$MeasurementResponseDtoFromJson(
@@ -39,6 +43,8 @@ MeasurementResponseDto _$MeasurementResponseDtoFromJson(
       clientId: json['clientId'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      companyId: json['companyId'] as String?,
+      userId: json['userId'] as String?,
     );
 
 Map<String, dynamic> _$MeasurementResponseDtoToJson(
@@ -50,4 +56,6 @@ Map<String, dynamic> _$MeasurementResponseDtoToJson(
       'clientId': instance.clientId,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt.toIso8601String(),
+      'companyId': instance.companyId,
+      'userId': instance.userId,
     };

@@ -106,23 +106,23 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `company` (`id` TEXT NOT NULL, `businessName` TEXT NOT NULL, `ownerName` TEXT NOT NULL, `email` TEXT NOT NULL, `mobile` TEXT NOT NULL, `yearsOfExperience` INTEGER NOT NULL, `registrationNumber` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `address` TEXT NOT NULL, `logoUrl` TEXT, `imagePath` TEXT, `active` INTEGER NOT NULL, `currency` TEXT NOT NULL, `country` TEXT NOT NULL, `deviceId` TEXT, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `company` (`id` TEXT NOT NULL, `businessName` TEXT NOT NULL, `ownerName` TEXT NOT NULL, `email` TEXT NOT NULL, `mobile` TEXT NOT NULL, `yearsOfExperience` INTEGER NOT NULL, `registrationNumber` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `address` TEXT NOT NULL, `logoUrl` TEXT, `imagePath` TEXT, `active` INTEGER NOT NULL, `currency` TEXT NOT NULL, `country` TEXT NOT NULL, `deviceId` TEXT, `businessType` TEXT NOT NULL, `enablePushNotifications` INTEGER NOT NULL, `enableSmsNotifications` INTEGER NOT NULL, `enableEmailNotifications` INTEGER NOT NULL, `measurementSystem` TEXT, `appAppearance` TEXT, `genderSpecialty` TEXT, `locationName` TEXT, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `customers` (`id` TEXT, `name` TEXT NOT NULL, `phone` TEXT NOT NULL, `email` TEXT, `lastVisit` INTEGER NOT NULL, `gender` TEXT NOT NULL, `address` TEXT, `imagePath` TEXT, `profileImageUrl` TEXT, `createdDate` INTEGER NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `customers` (`id` TEXT, `name` TEXT NOT NULL, `phone` TEXT NOT NULL, `email` TEXT, `lastVisit` INTEGER NOT NULL, `gender` TEXT NOT NULL, `address` TEXT, `imagePath` TEXT, `profileImageUrl` TEXT, `createdDate` INTEGER NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `orders` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `customerId` TEXT NOT NULL, `status` TEXT NOT NULL, `paymentStatus` TEXT NOT NULL, `paymentAmount` REAL, `dueDate` TEXT, `notes` TEXT, `createdDate` TEXT NOT NULL, `orderNumber` TEXT, `subtotal` REAL, `total` REAL, `tax` REAL, `expectedDeliveryDate` INTEGER, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `orders` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `customerId` TEXT NOT NULL, `status` TEXT NOT NULL, `paymentStatus` TEXT NOT NULL, `paymentAmount` REAL, `dueDate` TEXT, `notes` TEXT, `createdDate` TEXT NOT NULL, `orderNumber` TEXT, `subtotal` REAL, `total` REAL, `tax` REAL, `expectedDeliveryDate` INTEGER, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `measurements` (`id` TEXT NOT NULL, `customerId` TEXT NOT NULL, `name` TEXT NOT NULL, `measurementValues` TEXT NOT NULL, `createdDate` INTEGER NOT NULL, `updatedDate` INTEGER, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `measurements` (`id` TEXT NOT NULL, `customerId` TEXT NOT NULL, `name` TEXT NOT NULL, `measurementValues` TEXT NOT NULL, `createdDate` INTEGER NOT NULL, `updatedDate` INTEGER, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `invoices` (`id` TEXT NOT NULL, `customerId` TEXT NOT NULL, `companyId` TEXT, `status` TEXT NOT NULL, `createdDate` TEXT, `updatedDate` TEXT, `invoiceNumber` TEXT, `issueDate` INTEGER, `dueDate` INTEGER, `notes` TEXT, `terms` TEXT, `subtotal` REAL, `tax` REAL, `total` REAL, `projectId` TEXT, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `title` TEXT, `date` INTEGER, `orderId` TEXT, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, FOREIGN KEY (`orderId`) REFERENCES `orders` (`id`) ON UPDATE NO ACTION ON DELETE SET NULL, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `invoices` (`id` TEXT NOT NULL, `customerId` TEXT NOT NULL, `companyId` TEXT, `userId` TEXT, `status` TEXT NOT NULL, `createdDate` TEXT, `updatedDate` TEXT, `invoiceNumber` TEXT, `issueDate` INTEGER, `dueDate` INTEGER, `notes` TEXT, `terms` TEXT, `subtotal` REAL, `tax` REAL, `total` REAL, `projectId` TEXT, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `title` TEXT, `date` INTEGER, `orderId` TEXT, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, FOREIGN KEY (`orderId`) REFERENCES `orders` (`id`) ON UPDATE NO ACTION ON DELETE SET NULL, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `payments` (`id` TEXT NOT NULL, `invoiceId` TEXT NOT NULL, `companyId` TEXT, `amount` REAL NOT NULL, `paymentDate` INTEGER NOT NULL, `referenceNumber` TEXT, `notes` TEXT, `status` TEXT NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, FOREIGN KEY (`invoiceId`) REFERENCES `invoices` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `payments` (`id` TEXT NOT NULL, `invoiceId` TEXT NOT NULL, `companyId` TEXT, `amount` REAL NOT NULL, `paymentDate` INTEGER NOT NULL, `referenceNumber` TEXT, `notes` TEXT, `status` TEXT NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `userId` TEXT, FOREIGN KEY (`invoiceId`) REFERENCES `invoices` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `order_items` (`id` TEXT NOT NULL, `orderId` TEXT NOT NULL, `productName` TEXT NOT NULL, `productDescription` TEXT, `quantity` INTEGER NOT NULL, `unitPrice` REAL NOT NULL, `taxRate` REAL, `amount` REAL NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, FOREIGN KEY (`orderId`) REFERENCES `orders` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `order_items` (`id` TEXT NOT NULL, `orderId` TEXT NOT NULL, `productName` TEXT NOT NULL, `productDescription` TEXT, `quantity` INTEGER NOT NULL, `unitPrice` REAL NOT NULL, `taxRate` REAL, `amount` REAL NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, FOREIGN KEY (`orderId`) REFERENCES `orders` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `invoice_items` (`id` TEXT NOT NULL, `invoiceId` TEXT NOT NULL, `description` TEXT NOT NULL, `quantity` INTEGER NOT NULL, `unitPrice` REAL NOT NULL, `taxRate` REAL, `amount` REAL NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, FOREIGN KEY (`invoiceId`) REFERENCES `invoices` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `invoice_items` (`id` TEXT NOT NULL, `invoiceId` TEXT NOT NULL, `description` TEXT NOT NULL, `quantity` INTEGER NOT NULL, `unitPrice` REAL NOT NULL, `taxRate` REAL, `amount` REAL NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, FOREIGN KEY (`invoiceId`) REFERENCES `invoices` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `projects` (`id` TEXT NOT NULL, `company_id` TEXT NOT NULL, `client_id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `status` INTEGER NOT NULL, `start_date` INTEGER, `deadline` INTEGER, `completed_date` INTEGER, `budget` REAL NOT NULL, `spent` REAL NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `is_synced` INTEGER NOT NULL, `sync_date` INTEGER, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `projects` (`id` TEXT NOT NULL, `company_id` TEXT NOT NULL, `client_id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `status` INTEGER NOT NULL, `start_date` INTEGER, `deadline` INTEGER, `completed_date` INTEGER, `budget` REAL NOT NULL, `spent` REAL NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `is_synced` INTEGER NOT NULL, `sync_date` INTEGER, `user_id` TEXT, PRIMARY KEY (`id`))');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -185,7 +185,17 @@ class _$CompanyDao extends CompanyDao {
                   'active': item.active ? 1 : 0,
                   'currency': item.currency,
                   'country': item.country,
-                  'deviceId': item.deviceId
+                  'deviceId': item.deviceId,
+                  'businessType': item.businessType,
+                  'enablePushNotifications':
+                      item.enablePushNotifications ? 1 : 0,
+                  'enableSmsNotifications': item.enableSmsNotifications ? 1 : 0,
+                  'enableEmailNotifications':
+                      item.enableEmailNotifications ? 1 : 0,
+                  'measurementSystem': item.measurementSystem,
+                  'appAppearance': item.appAppearance,
+                  'genderSpecialty': item.genderSpecialty,
+                  'locationName': item.locationName
                 }),
         _companyUpdateAdapter = UpdateAdapter(
             database,
@@ -206,7 +216,17 @@ class _$CompanyDao extends CompanyDao {
                   'active': item.active ? 1 : 0,
                   'currency': item.currency,
                   'country': item.country,
-                  'deviceId': item.deviceId
+                  'deviceId': item.deviceId,
+                  'businessType': item.businessType,
+                  'enablePushNotifications':
+                      item.enablePushNotifications ? 1 : 0,
+                  'enableSmsNotifications': item.enableSmsNotifications ? 1 : 0,
+                  'enableEmailNotifications':
+                      item.enableEmailNotifications ? 1 : 0,
+                  'measurementSystem': item.measurementSystem,
+                  'appAppearance': item.appAppearance,
+                  'genderSpecialty': item.genderSpecialty,
+                  'locationName': item.locationName
                 });
 
   final sqflite.DatabaseExecutor database;
@@ -237,7 +257,17 @@ class _$CompanyDao extends CompanyDao {
             active: (row['active'] as int) != 0,
             currency: row['currency'] as String,
             country: row['country'] as String,
-            deviceId: row['deviceId'] as String?));
+            deviceId: row['deviceId'] as String?,
+            businessType: row['businessType'] as String,
+            enablePushNotifications:
+                (row['enablePushNotifications'] as int) != 0,
+            enableSmsNotifications: (row['enableSmsNotifications'] as int) != 0,
+            enableEmailNotifications:
+                (row['enableEmailNotifications'] as int) != 0,
+            measurementSystem: row['measurementSystem'] as String?,
+            appAppearance: row['appAppearance'] as String?,
+            genderSpecialty: row['genderSpecialty'] as String?,
+            locationName: row['locationName'] as String?));
   }
 
   @override
@@ -258,7 +288,17 @@ class _$CompanyDao extends CompanyDao {
             active: (row['active'] as int) != 0,
             currency: row['currency'] as String,
             country: row['country'] as String,
-            deviceId: row['deviceId'] as String?));
+            deviceId: row['deviceId'] as String?,
+            businessType: row['businessType'] as String,
+            enablePushNotifications:
+                (row['enablePushNotifications'] as int) != 0,
+            enableSmsNotifications: (row['enableSmsNotifications'] as int) != 0,
+            enableEmailNotifications:
+                (row['enableEmailNotifications'] as int) != 0,
+            measurementSystem: row['measurementSystem'] as String?,
+            appAppearance: row['appAppearance'] as String?,
+            genderSpecialty: row['genderSpecialty'] as String?,
+            locationName: row['locationName'] as String?));
   }
 
   @override
@@ -279,7 +319,17 @@ class _$CompanyDao extends CompanyDao {
             active: (row['active'] as int) != 0,
             currency: row['currency'] as String,
             country: row['country'] as String,
-            deviceId: row['deviceId'] as String?),
+            deviceId: row['deviceId'] as String?,
+            businessType: row['businessType'] as String,
+            enablePushNotifications:
+                (row['enablePushNotifications'] as int) != 0,
+            enableSmsNotifications: (row['enableSmsNotifications'] as int) != 0,
+            enableEmailNotifications:
+                (row['enableEmailNotifications'] as int) != 0,
+            measurementSystem: row['measurementSystem'] as String?,
+            appAppearance: row['appAppearance'] as String?,
+            genderSpecialty: row['genderSpecialty'] as String?,
+            locationName: row['locationName'] as String?),
         arguments: [id]);
   }
 
@@ -301,7 +351,17 @@ class _$CompanyDao extends CompanyDao {
             active: (row['active'] as int) != 0,
             currency: row['currency'] as String,
             country: row['country'] as String,
-            deviceId: row['deviceId'] as String?),
+            deviceId: row['deviceId'] as String?,
+            businessType: row['businessType'] as String,
+            enablePushNotifications:
+                (row['enablePushNotifications'] as int) != 0,
+            enableSmsNotifications: (row['enableSmsNotifications'] as int) != 0,
+            enableEmailNotifications:
+                (row['enableEmailNotifications'] as int) != 0,
+            measurementSystem: row['measurementSystem'] as String?,
+            appAppearance: row['appAppearance'] as String?,
+            genderSpecialty: row['genderSpecialty'] as String?,
+            locationName: row['locationName'] as String?),
         arguments: [email]);
   }
 
@@ -324,7 +384,17 @@ class _$CompanyDao extends CompanyDao {
             active: (row['active'] as int) != 0,
             currency: row['currency'] as String,
             country: row['country'] as String,
-            deviceId: row['deviceId'] as String?),
+            deviceId: row['deviceId'] as String?,
+            businessType: row['businessType'] as String,
+            enablePushNotifications:
+                (row['enablePushNotifications'] as int) != 0,
+            enableSmsNotifications: (row['enableSmsNotifications'] as int) != 0,
+            enableEmailNotifications:
+                (row['enableEmailNotifications'] as int) != 0,
+            measurementSystem: row['measurementSystem'] as String?,
+            appAppearance: row['appAppearance'] as String?,
+            genderSpecialty: row['genderSpecialty'] as String?,
+            locationName: row['locationName'] as String?),
         arguments: [mobile]);
   }
 
@@ -350,7 +420,17 @@ class _$CompanyDao extends CompanyDao {
             active: (row['active'] as int) != 0,
             currency: row['currency'] as String,
             country: row['country'] as String,
-            deviceId: row['deviceId'] as String?),
+            deviceId: row['deviceId'] as String?,
+            businessType: row['businessType'] as String,
+            enablePushNotifications:
+                (row['enablePushNotifications'] as int) != 0,
+            enableSmsNotifications: (row['enableSmsNotifications'] as int) != 0,
+            enableEmailNotifications:
+                (row['enableEmailNotifications'] as int) != 0,
+            measurementSystem: row['measurementSystem'] as String?,
+            appAppearance: row['appAppearance'] as String?,
+            genderSpecialty: row['genderSpecialty'] as String?,
+            locationName: row['locationName'] as String?),
         arguments: [mobile, password]);
   }
 
@@ -386,7 +466,9 @@ class _$CustomerDao extends CustomerDao {
                   'profileImageUrl': item.profileImageUrl,
                   'createdDate': _dateTimeConvertor.encode(item.createdDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
-                  'isSynced': item.isSynced ? 1 : 0
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'companyId': item.companyId,
+                  'userId': item.userId
                 }),
         _customerUpdateAdapter = UpdateAdapter(
             database,
@@ -404,7 +486,9 @@ class _$CustomerDao extends CustomerDao {
                   'profileImageUrl': item.profileImageUrl,
                   'createdDate': _dateTimeConvertor.encode(item.createdDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
-                  'isSynced': item.isSynced ? 1 : 0
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'companyId': item.companyId,
+                  'userId': item.userId
                 }),
         _customerDeletionAdapter = DeletionAdapter(
             database,
@@ -422,7 +506,9 @@ class _$CustomerDao extends CustomerDao {
                   'profileImageUrl': item.profileImageUrl,
                   'createdDate': _dateTimeConvertor.encode(item.createdDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
-                  'isSynced': item.isSynced ? 1 : 0
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'companyId': item.companyId,
+                  'userId': item.userId
                 });
 
   final sqflite.DatabaseExecutor database;
@@ -452,7 +538,9 @@ class _$CustomerDao extends CustomerDao {
             profileImageUrl: row['profileImageUrl'] as String?,
             createdDate: _dateTimeConvertor.decode(row['createdDate'] as int),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
-            isSynced: (row['isSynced'] as int) != 0));
+            isSynced: (row['isSynced'] as int) != 0,
+            companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?));
   }
 
   @override
@@ -470,7 +558,9 @@ class _$CustomerDao extends CustomerDao {
             profileImageUrl: row['profileImageUrl'] as String?,
             createdDate: _dateTimeConvertor.decode(row['createdDate'] as int),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
-            isSynced: (row['isSynced'] as int) != 0),
+            isSynced: (row['isSynced'] as int) != 0,
+            companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?),
         arguments: [id]);
   }
 
@@ -522,7 +612,9 @@ class _$OrderDao extends OrderDao {
                   'expectedDeliveryDate':
                       _dateTimeNullConvertor.encode(item.expectedDeliveryDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
-                  'isSynced': item.isSynced ? 1 : 0
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'companyId': item.companyId,
+                  'userId': item.userId
                 }),
         _orderItemInsertionAdapter = InsertionAdapter(
             database,
@@ -537,7 +629,9 @@ class _$OrderDao extends OrderDao {
                   'taxRate': item.taxRate,
                   'amount': item.amount,
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
-                  'isSynced': item.isSynced ? 1 : 0
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'companyId': item.companyId,
+                  'userId': item.userId
                 }),
         _orderUpdateAdapter = UpdateAdapter(
             database,
@@ -560,7 +654,9 @@ class _$OrderDao extends OrderDao {
                   'expectedDeliveryDate':
                       _dateTimeNullConvertor.encode(item.expectedDeliveryDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
-                  'isSynced': item.isSynced ? 1 : 0
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'companyId': item.companyId,
+                  'userId': item.userId
                 }),
         _orderItemUpdateAdapter = UpdateAdapter(
             database,
@@ -576,7 +672,9 @@ class _$OrderDao extends OrderDao {
                   'taxRate': item.taxRate,
                   'amount': item.amount,
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
-                  'isSynced': item.isSynced ? 1 : 0
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'companyId': item.companyId,
+                  'userId': item.userId
                 }),
         _orderDeletionAdapter = DeletionAdapter(
             database,
@@ -599,7 +697,9 @@ class _$OrderDao extends OrderDao {
                   'expectedDeliveryDate':
                       _dateTimeNullConvertor.encode(item.expectedDeliveryDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
-                  'isSynced': item.isSynced ? 1 : 0
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'companyId': item.companyId,
+                  'userId': item.userId
                 });
 
   final sqflite.DatabaseExecutor database;
@@ -638,7 +738,9 @@ class _$OrderDao extends OrderDao {
             expectedDeliveryDate: _dateTimeNullConvertor
                 .decode(row['expectedDeliveryDate'] as int?),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
-            isSynced: (row['isSynced'] as int) != 0));
+            isSynced: (row['isSynced'] as int) != 0,
+            companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?));
   }
 
   @override
@@ -661,7 +763,9 @@ class _$OrderDao extends OrderDao {
             expectedDeliveryDate: _dateTimeNullConvertor
                 .decode(row['expectedDeliveryDate'] as int?),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
-            isSynced: (row['isSynced'] as int) != 0),
+            isSynced: (row['isSynced'] as int) != 0,
+            companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?),
         arguments: [id]);
   }
 
@@ -694,7 +798,9 @@ class _$OrderDao extends OrderDao {
             expectedDeliveryDate: _dateTimeNullConvertor
                 .decode(row['expectedDeliveryDate'] as int?),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
-            isSynced: (row['isSynced'] as int) != 0),
+            isSynced: (row['isSynced'] as int) != 0,
+            companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?),
         arguments: [customerId]);
   }
 
@@ -726,7 +832,9 @@ class _$OrderDao extends OrderDao {
             expectedDeliveryDate: _dateTimeNullConvertor
                 .decode(row['expectedDeliveryDate'] as int?),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
-            isSynced: (row['isSynced'] as int) != 0));
+            isSynced: (row['isSynced'] as int) != 0,
+            companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?));
   }
 
   @override
@@ -743,7 +851,9 @@ class _$OrderDao extends OrderDao {
             taxRate: row['taxRate'] as double?,
             amount: row['amount'] as double,
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
-            isSynced: (row['isSynced'] as int) != 0),
+            isSynced: (row['isSynced'] as int) != 0,
+            companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?),
         arguments: [orderId]);
   }
 
@@ -769,7 +879,9 @@ class _$OrderDao extends OrderDao {
             profileImageUrl: row['profileImageUrl'] as String?,
             createdDate: _dateTimeConvertor.decode(row['createdDate'] as int),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
-            isSynced: (row['isSynced'] as int) != 0),
+            isSynced: (row['isSynced'] as int) != 0,
+            companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?),
         arguments: [customerId]);
   }
 
@@ -781,6 +893,7 @@ class _$OrderDao extends OrderDao {
             id: row['id'] as String?,
             customerId: row['customerId'] as String,
             companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?,
             status: row['status'] as String,
             createdDate: row['createdDate'] as String?,
             updatedDate: row['updatedDate'] as String?,
@@ -808,6 +921,7 @@ class _$OrderDao extends OrderDao {
             id: row['id'] as String?,
             customerId: row['customerId'] as String,
             companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?,
             status: row['status'] as String,
             createdDate: row['createdDate'] as String?,
             updatedDate: row['updatedDate'] as String?,
@@ -835,6 +949,7 @@ class _$OrderDao extends OrderDao {
             id: row['id'] as String?,
             customerId: row['customerId'] as String,
             companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?,
             status: row['status'] as String,
             createdDate: row['createdDate'] as String?,
             updatedDate: row['updatedDate'] as String?,
@@ -900,7 +1015,9 @@ class _$MeasurementDao extends MeasurementDao {
                   'updatedDate':
                       _dateTimeNullConvertor.encode(item.updatedDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
-                  'isSynced': item.isSynced ? 1 : 0
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'companyId': item.companyId,
+                  'userId': item.userId
                 }),
         _measurementUpdateAdapter = UpdateAdapter(
             database,
@@ -916,7 +1033,9 @@ class _$MeasurementDao extends MeasurementDao {
                   'updatedDate':
                       _dateTimeNullConvertor.encode(item.updatedDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
-                  'isSynced': item.isSynced ? 1 : 0
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'companyId': item.companyId,
+                  'userId': item.userId
                 }),
         _measurementDeletionAdapter = DeletionAdapter(
             database,
@@ -932,7 +1051,9 @@ class _$MeasurementDao extends MeasurementDao {
                   'updatedDate':
                       _dateTimeNullConvertor.encode(item.updatedDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
-                  'isSynced': item.isSynced ? 1 : 0
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'companyId': item.companyId,
+                  'userId': item.userId
                 });
 
   final sqflite.DatabaseExecutor database;
@@ -961,7 +1082,9 @@ class _$MeasurementDao extends MeasurementDao {
             updatedDate:
                 _dateTimeNullConvertor.decode(row['updatedDate'] as int?),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
-            isSynced: (row['isSynced'] as int) != 0));
+            isSynced: (row['isSynced'] as int) != 0,
+            companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?));
   }
 
   @override
@@ -977,7 +1100,9 @@ class _$MeasurementDao extends MeasurementDao {
             updatedDate:
                 _dateTimeNullConvertor.decode(row['updatedDate'] as int?),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
-            isSynced: (row['isSynced'] as int) != 0),
+            isSynced: (row['isSynced'] as int) != 0,
+            companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?),
         arguments: [id]);
   }
 
@@ -986,7 +1111,7 @@ class _$MeasurementDao extends MeasurementDao {
       String customerId) async {
     return _queryAdapter.queryList(
         'SELECT * FROM measurements WHERE customerId = ?1 ORDER BY createdDate ASC',
-        mapper: (Map<String, Object?> row) => Measurement(id: row['id'] as String?, customerId: row['customerId'] as String, name: row['name'] as String, measurementValues: _measurementMapConverter.decode(row['measurementValues'] as String), createdDate: _dateTimeConvertor.decode(row['createdDate'] as int), updatedDate: _dateTimeNullConvertor.decode(row['updatedDate'] as int?), syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?), isSynced: (row['isSynced'] as int) != 0),
+        mapper: (Map<String, Object?> row) => Measurement(id: row['id'] as String?, customerId: row['customerId'] as String, name: row['name'] as String, measurementValues: _measurementMapConverter.decode(row['measurementValues'] as String), createdDate: _dateTimeConvertor.decode(row['createdDate'] as int), updatedDate: _dateTimeNullConvertor.decode(row['updatedDate'] as int?), syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?), isSynced: (row['isSynced'] as int) != 0, companyId: row['companyId'] as String?, userId: row['userId'] as String?),
         arguments: [customerId]);
   }
 
@@ -1005,7 +1130,9 @@ class _$MeasurementDao extends MeasurementDao {
             updatedDate:
                 _dateTimeNullConvertor.decode(row['updatedDate'] as int?),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
-            isSynced: (row['isSynced'] as int) != 0),
+            isSynced: (row['isSynced'] as int) != 0,
+            companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?),
         arguments: [customerId]);
   }
 
@@ -1022,7 +1149,9 @@ class _$MeasurementDao extends MeasurementDao {
             updatedDate:
                 _dateTimeNullConvertor.decode(row['updatedDate'] as int?),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
-            isSynced: (row['isSynced'] as int) != 0),
+            isSynced: (row['isSynced'] as int) != 0,
+            companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?),
         arguments: [id]);
   }
 
@@ -1063,6 +1192,7 @@ class _$InvoiceDao extends InvoiceDao {
                   'id': item.id,
                   'customerId': item.customerId,
                   'companyId': item.companyId,
+                  'userId': item.userId,
                   'status': item.status,
                   'createdDate': item.createdDate,
                   'updatedDate': item.updatedDate,
@@ -1093,7 +1223,9 @@ class _$InvoiceDao extends InvoiceDao {
                   'taxRate': item.taxRate,
                   'amount': item.amount,
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
-                  'isSynced': item.isSynced ? 1 : 0
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'companyId': item.companyId,
+                  'userId': item.userId
                 }),
         _paymentInsertionAdapter = InsertionAdapter(
             database,
@@ -1108,7 +1240,8 @@ class _$InvoiceDao extends InvoiceDao {
                   'notes': item.notes,
                   'status': item.status,
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
-                  'isSynced': item.isSynced ? 1 : 0
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'userId': item.userId
                 }),
         _invoiceUpdateAdapter = UpdateAdapter(
             database,
@@ -1118,6 +1251,7 @@ class _$InvoiceDao extends InvoiceDao {
                   'id': item.id,
                   'customerId': item.customerId,
                   'companyId': item.companyId,
+                  'userId': item.userId,
                   'status': item.status,
                   'createdDate': item.createdDate,
                   'updatedDate': item.updatedDate,
@@ -1149,7 +1283,9 @@ class _$InvoiceDao extends InvoiceDao {
                   'taxRate': item.taxRate,
                   'amount': item.amount,
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
-                  'isSynced': item.isSynced ? 1 : 0
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'companyId': item.companyId,
+                  'userId': item.userId
                 }),
         _paymentUpdateAdapter = UpdateAdapter(
             database,
@@ -1165,7 +1301,8 @@ class _$InvoiceDao extends InvoiceDao {
                   'notes': item.notes,
                   'status': item.status,
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
-                  'isSynced': item.isSynced ? 1 : 0
+                  'isSynced': item.isSynced ? 1 : 0,
+                  'userId': item.userId
                 }),
         _invoiceDeletionAdapter = DeletionAdapter(
             database,
@@ -1175,6 +1312,7 @@ class _$InvoiceDao extends InvoiceDao {
                   'id': item.id,
                   'customerId': item.customerId,
                   'companyId': item.companyId,
+                  'userId': item.userId,
                   'status': item.status,
                   'createdDate': item.createdDate,
                   'updatedDate': item.updatedDate,
@@ -1221,6 +1359,7 @@ class _$InvoiceDao extends InvoiceDao {
             id: row['id'] as String?,
             customerId: row['customerId'] as String,
             companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?,
             status: row['status'] as String,
             createdDate: row['createdDate'] as String?,
             updatedDate: row['updatedDate'] as String?,
@@ -1247,6 +1386,7 @@ class _$InvoiceDao extends InvoiceDao {
             id: row['id'] as String?,
             customerId: row['customerId'] as String,
             companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?,
             status: row['status'] as String,
             createdDate: row['createdDate'] as String?,
             updatedDate: row['updatedDate'] as String?,
@@ -1280,7 +1420,9 @@ class _$InvoiceDao extends InvoiceDao {
             taxRate: row['taxRate'] as double?,
             amount: row['amount'] as double,
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
-            isSynced: (row['isSynced'] as int) != 0),
+            isSynced: (row['isSynced'] as int) != 0,
+            companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?),
         arguments: [invoiceId]);
   }
 
@@ -1305,7 +1447,8 @@ class _$InvoiceDao extends InvoiceDao {
             notes: row['notes'] as String?,
             status: row['status'] as String,
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
-            isSynced: (row['isSynced'] as int) != 0),
+            isSynced: (row['isSynced'] as int) != 0,
+            userId: row['userId'] as String?),
         arguments: [invoiceId]);
   }
 
@@ -1378,7 +1521,8 @@ class _$ProjectDao extends ProjectDao {
                   'created_at': _dateTimeConvertor.encode(item.createdAt),
                   'updated_at': _dateTimeConvertor.encode(item.updatedAt),
                   'is_synced': item.isSynced ? 1 : 0,
-                  'sync_date': _dateTimeNullConvertor.encode(item.syncDate)
+                  'sync_date': _dateTimeNullConvertor.encode(item.syncDate),
+                  'user_id': item.userId
                 }),
         _projectUpdateAdapter = UpdateAdapter(
             database,
@@ -1400,7 +1544,8 @@ class _$ProjectDao extends ProjectDao {
                   'created_at': _dateTimeConvertor.encode(item.createdAt),
                   'updated_at': _dateTimeConvertor.encode(item.updatedAt),
                   'is_synced': item.isSynced ? 1 : 0,
-                  'sync_date': _dateTimeNullConvertor.encode(item.syncDate)
+                  'sync_date': _dateTimeNullConvertor.encode(item.syncDate),
+                  'user_id': item.userId
                 }),
         _projectDeletionAdapter = DeletionAdapter(
             database,
@@ -1422,7 +1567,8 @@ class _$ProjectDao extends ProjectDao {
                   'created_at': _dateTimeConvertor.encode(item.createdAt),
                   'updated_at': _dateTimeConvertor.encode(item.updatedAt),
                   'is_synced': item.isSynced ? 1 : 0,
-                  'sync_date': _dateTimeNullConvertor.encode(item.syncDate)
+                  'sync_date': _dateTimeNullConvertor.encode(item.syncDate),
+                  'user_id': item.userId
                 });
 
   final sqflite.DatabaseExecutor database;
@@ -1456,7 +1602,8 @@ class _$ProjectDao extends ProjectDao {
             createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?),
             updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?),
             isSynced: (row['is_synced'] as int) != 0,
-            syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?)),
+            syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?),
+            userId: row['user_id'] as String?),
         arguments: [id]);
   }
 
@@ -1480,7 +1627,8 @@ class _$ProjectDao extends ProjectDao {
             createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?),
             updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?),
             isSynced: (row['is_synced'] as int) != 0,
-            syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?)),
+            syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?),
+            userId: row['user_id'] as String?),
         arguments: [companyId]);
   }
 
@@ -1491,7 +1639,7 @@ class _$ProjectDao extends ProjectDao {
   ) async {
     return _queryAdapter.queryList(
         'SELECT * FROM projects      WHERE company_id = ?1      AND (title LIKE \'%\' || ?2 || \'%\' OR description LIKE \'%\' || ?2 || \'%\')     ORDER BY updated_at DESC',
-        mapper: (Map<String, Object?> row) => Project(id: row['id'] as String?, companyId: row['company_id'] as String, clientId: row['client_id'] as String, title: row['title'] as String, description: row['description'] as String?, status: ProjectStatus.values[row['status'] as int], startDate: _dateTimeNullConvertor.decode(row['start_date'] as int?), deadline: _dateTimeNullConvertor.decode(row['deadline'] as int?), completedDate: _dateTimeNullConvertor.decode(row['completed_date'] as int?), budget: row['budget'] as double, spent: row['spent'] as double, createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?), updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?), isSynced: (row['is_synced'] as int) != 0, syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?)),
+        mapper: (Map<String, Object?> row) => Project(id: row['id'] as String?, companyId: row['company_id'] as String, clientId: row['client_id'] as String, title: row['title'] as String, description: row['description'] as String?, status: ProjectStatus.values[row['status'] as int], startDate: _dateTimeNullConvertor.decode(row['start_date'] as int?), deadline: _dateTimeNullConvertor.decode(row['deadline'] as int?), completedDate: _dateTimeNullConvertor.decode(row['completed_date'] as int?), budget: row['budget'] as double, spent: row['spent'] as double, createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?), updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?), isSynced: (row['is_synced'] as int) != 0, syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?), userId: row['user_id'] as String?),
         arguments: [companyId, query]);
   }
 
@@ -1502,7 +1650,7 @@ class _$ProjectDao extends ProjectDao {
   ) async {
     return _queryAdapter.queryList(
         'SELECT * FROM projects      WHERE company_id = ?1      AND status = ?2     ORDER BY updated_at DESC',
-        mapper: (Map<String, Object?> row) => Project(id: row['id'] as String?, companyId: row['company_id'] as String, clientId: row['client_id'] as String, title: row['title'] as String, description: row['description'] as String?, status: ProjectStatus.values[row['status'] as int], startDate: _dateTimeNullConvertor.decode(row['start_date'] as int?), deadline: _dateTimeNullConvertor.decode(row['deadline'] as int?), completedDate: _dateTimeNullConvertor.decode(row['completed_date'] as int?), budget: row['budget'] as double, spent: row['spent'] as double, createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?), updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?), isSynced: (row['is_synced'] as int) != 0, syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?)),
+        mapper: (Map<String, Object?> row) => Project(id: row['id'] as String?, companyId: row['company_id'] as String, clientId: row['client_id'] as String, title: row['title'] as String, description: row['description'] as String?, status: ProjectStatus.values[row['status'] as int], startDate: _dateTimeNullConvertor.decode(row['start_date'] as int?), deadline: _dateTimeNullConvertor.decode(row['deadline'] as int?), completedDate: _dateTimeNullConvertor.decode(row['completed_date'] as int?), budget: row['budget'] as double, spent: row['spent'] as double, createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?), updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?), isSynced: (row['is_synced'] as int) != 0, syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?), userId: row['user_id'] as String?),
         arguments: [companyId, status]);
   }
 
@@ -1513,7 +1661,7 @@ class _$ProjectDao extends ProjectDao {
   ) async {
     return _queryAdapter.queryList(
         'SELECT * FROM projects      WHERE company_id = ?1      AND deadline < ?2     AND status NOT IN (\'COMPLETED\', \'CANCELLED\')     ORDER BY deadline ASC',
-        mapper: (Map<String, Object?> row) => Project(id: row['id'] as String?, companyId: row['company_id'] as String, clientId: row['client_id'] as String, title: row['title'] as String, description: row['description'] as String?, status: ProjectStatus.values[row['status'] as int], startDate: _dateTimeNullConvertor.decode(row['start_date'] as int?), deadline: _dateTimeNullConvertor.decode(row['deadline'] as int?), completedDate: _dateTimeNullConvertor.decode(row['completed_date'] as int?), budget: row['budget'] as double, spent: row['spent'] as double, createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?), updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?), isSynced: (row['is_synced'] as int) != 0, syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?)),
+        mapper: (Map<String, Object?> row) => Project(id: row['id'] as String?, companyId: row['company_id'] as String, clientId: row['client_id'] as String, title: row['title'] as String, description: row['description'] as String?, status: ProjectStatus.values[row['status'] as int], startDate: _dateTimeNullConvertor.decode(row['start_date'] as int?), deadline: _dateTimeNullConvertor.decode(row['deadline'] as int?), completedDate: _dateTimeNullConvertor.decode(row['completed_date'] as int?), budget: row['budget'] as double, spent: row['spent'] as double, createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?), updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?), isSynced: (row['is_synced'] as int) != 0, syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?), userId: row['user_id'] as String?),
         arguments: [companyId, _dateTimeConvertor.encode(date)]);
   }
 
@@ -1541,7 +1689,8 @@ class _$ProjectDao extends ProjectDao {
             createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?),
             updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?),
             isSynced: (row['is_synced'] as int) != 0,
-            syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?)),
+            syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?),
+            userId: row['user_id'] as String?),
         arguments: [
           companyId,
           _dateTimeConvertor.encode(startDate),
@@ -1569,7 +1718,8 @@ class _$ProjectDao extends ProjectDao {
             createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?),
             updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?),
             isSynced: (row['is_synced'] as int) != 0,
-            syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?)),
+            syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?),
+            userId: row['user_id'] as String?),
         arguments: [clientId]);
   }
 

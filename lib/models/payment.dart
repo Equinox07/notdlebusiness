@@ -11,7 +11,7 @@ import 'invoice.dart'; // Assuming Invoice model is in invoice.dart
       parentColumns: ['id'],
       entity: Invoice,
       onDelete: ForeignKeyAction.cascade,
-    )
+    ),
   ],
 )
 class Payment {
@@ -26,6 +26,7 @@ class Payment {
   final String status;
   final DateTime? syncDate; // New field
   final bool isSynced; // New field
+  final String? userId;
 
   Payment({
     String? id,
@@ -38,6 +39,7 @@ class Payment {
     required this.status,
     this.syncDate, // Add to constructor
     this.isSynced = false, // Add to constructor with default value
+    this.userId,
   }) : id = id ?? const Uuid().v4();
 
   Payment copyWith({
@@ -51,6 +53,7 @@ class Payment {
     String? status,
     DateTime? syncDate, // Add to copyWith
     bool? isSynced, // Add to copyWith
+    String? userId,
   }) {
     return Payment(
       id: id ?? this.id,
@@ -63,6 +66,7 @@ class Payment {
       status: status ?? this.status,
       syncDate: syncDate ?? this.syncDate, // Update in copyWith
       isSynced: isSynced ?? this.isSynced, // Update in copyWith
+      userId: userId ?? this.userId,
     );
   }
 }

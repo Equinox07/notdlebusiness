@@ -7,8 +7,12 @@ import 'customer.dart';
 @Entity(
   tableName: 'orders',
   foreignKeys: [
-    ForeignKey(childColumns: ['customerId'], parentColumns: ['id'], entity: Customer )
-  ]
+    ForeignKey(
+      childColumns: ['customerId'],
+      parentColumns: ['id'],
+      entity: Customer,
+    ),
+  ],
 )
 class Order {
   @PrimaryKey()
@@ -28,6 +32,8 @@ class Order {
   final DateTime? expectedDeliveryDate;
   final DateTime? syncDate; // New field
   final bool isSynced; // New field
+  final String? companyId;
+  final String? userId;
 
   @ignore
   final List<OrderItem> items; // Add items list
@@ -50,8 +56,9 @@ class Order {
     this.items = const [], // Initialize items list
     this.syncDate, // Add to constructor
     this.isSynced = false, // Add to constructor with default value
+    this.companyId,
+    this.userId,
   }) : id = id ?? const Uuid().v4();
-
 
   Order copyWith({
     String? title,
@@ -70,6 +77,8 @@ class Order {
     List<OrderItem>? items, // Add items to copyWith
     DateTime? syncDate, // Add to copyWith
     bool? isSynced, // Add to copyWith
+    String? companyId,
+    String? userId,
   }) {
     return Order(
       id: id,
@@ -89,8 +98,11 @@ class Order {
       items: items ?? this.items, // Update items in copyWith
       syncDate: syncDate ?? this.syncDate, // Update in copyWith
       isSynced: isSynced ?? this.isSynced, // Update in copyWith
+      companyId: companyId ?? this.companyId,
+      userId: userId ?? this.userId,
     );
   }
+
   //
   // // Convert an Order object into a Map.
   // Map<String, dynamic> toMap() {

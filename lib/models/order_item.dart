@@ -11,7 +11,7 @@ import 'order.dart'; // Assuming Order model is in order.dart
       parentColumns: ['id'],
       entity: Order,
       onDelete: ForeignKeyAction.cascade,
-    )
+    ),
   ],
 )
 class OrderItem {
@@ -26,6 +26,8 @@ class OrderItem {
   final double amount;
   final DateTime? syncDate; // New field
   final bool isSynced; // New field
+  final String? companyId;
+  final String? userId;
 
   OrderItem({
     String? id,
@@ -38,6 +40,8 @@ class OrderItem {
     required this.amount,
     this.syncDate, // Add to constructor
     this.isSynced = false, // Add to constructor with default value
+    this.companyId,
+    this.userId,
   }) : id = id ?? const Uuid().v4();
 
   OrderItem copyWith({
@@ -51,6 +55,8 @@ class OrderItem {
     double? amount,
     DateTime? syncDate, // Add to copyWith
     bool? isSynced, // Add to copyWith
+    String? companyId,
+    String? userId,
   }) {
     return OrderItem(
       id: id ?? this.id,
@@ -63,6 +69,8 @@ class OrderItem {
       amount: amount ?? this.amount,
       syncDate: syncDate ?? this.syncDate, // Update in copyWith
       isSynced: isSynced ?? this.isSynced, // Update in copyWith
+      companyId: companyId ?? this.companyId,
+      userId: userId ?? this.userId,
     );
   }
 }

@@ -11,6 +11,7 @@ class ClientDto {
   final String phoneNumber;
   final String address;
   final String? companyId;
+  final String? userId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -22,10 +23,12 @@ class ClientDto {
     required this.phoneNumber,
     required this.address,
     this.companyId,
+    this.userId,
     this.createdAt,
     this.updatedAt,
   });
 
-  factory ClientDto.fromJson(Map<String, dynamic> json) => _$ClientDtoFromJson(json);
+  factory ClientDto.fromJson(Map<String, dynamic> json) =>
+      _$ClientDtoFromJson(json);
   Map<String, dynamic> toJson() => _$ClientDtoToJson(this);
 }

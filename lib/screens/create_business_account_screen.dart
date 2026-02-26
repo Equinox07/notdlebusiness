@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/screens/initial_setup_screen.dart';
 import 'package:country_picker/country_picker.dart';
@@ -33,6 +34,7 @@ class _CreateBusinessAccountScreenState
   Country? _selectedCountry;
   String? _selectedCountryCode;
   bool _isLoading = false;
+  bool _isPhoneNull = false;
 
   final Color primaryPurple = const Color(0xFF6B11B2);
   final Color textGrey = const Color(0xFF64748B);
@@ -51,23 +53,30 @@ class _CreateBusinessAccountScreenState
     if (user != null) {
       setState(() {
         _emailController.text = user.email;
-        // User model uses 'phone', let's check if it needs parsing for country code
-        if (user.phone != null && user.phone!.startsWith('+')) {
-          // Rudimentary split for prepopulation if needed,
-          // but for now just putting the whole thing or last 10 digits
-          if (user.phone!.length > 10) {
-            _mobileController.text = user.phone!.substring(
-              user.phone!.length - 10,
-            );
-            _selectedCountryCode = user.phone!.substring(
-              0,
-              user.phone!.length - 10,
-            );
+
+        if (user.phone == null || user.phone!.isEmpty) {
+          _isPhoneNull = true;
+          _selectedCountryCode = '+1'; // default
+        } else {
+          _isPhoneNull = false;
+          // User model uses 'phone', let's check if it needs parsing for country code
+          if (user.phone!.startsWith('+')) {
+            // Rudimentary split for prepopulation if needed,
+            // but for now just putting the whole thing or last 10 digits
+            if (user.phone!.length > 10) {
+              _mobileController.text = user.phone!.substring(
+                user.phone!.length - 10,
+              );
+              _selectedCountryCode = user.phone!.substring(
+                0,
+                user.phone!.length - 10,
+              );
+            } else {
+              _mobileController.text = user.phone!;
+            }
           } else {
             _mobileController.text = user.phone!;
           }
-        } else {
-          _mobileController.text = user.phone ?? '';
         }
       });
     }
@@ -253,6 +262,11 @@ class _CreateBusinessAccountScreenState
                   ),
                   const SizedBox(height: 32),
                   // Fields
+                  if (_isPhoneNull) ...[
+                    _buildFieldLabel('MOBILE NUMBER'),
+                    _buildPhoneField(),
+                    const SizedBox(height: 24),
+                  ],
                   _buildFieldLabel('BUSINESS NAME'),
                   _buildTextField(
                     controller: _businessNameController,
@@ -338,6 +352,87 @@ class _CreateBusinessAccountScreenState
           letterSpacing: 1.2,
         ),
       ),
+    );
+  }
+
+  Widget _buildPhoneField() {
+    return TextFormField(
+      controller: _mobileController,
+      keyboardType: TextInputType.phone,
+      style: GoogleFonts.poppins(
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
+      ),
+      decoration: InputDecoration(
+        hintText: 'e.g. 555 123 4567',
+        hintStyle: GoogleFonts.poppins(color: Colors.grey.shade600),
+        filled: true,
+        fillColor: inputBg,
+        prefixIcon: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+          child: GestureDetector(
+            onTap: () {
+              showCountryPicker(
+                context: context,
+                showPhoneCode: true,
+                onSelect: (Country country) {
+                  setState(() {
+                    _selectedCountryCode = '+${country.phoneCode}';
+                  });
+                },
+              );
+            },
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _selectedCountryCode ?? '+1',
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.indigo.shade600,
+                  ),
+                ),
+                const Icon(Icons.arrow_drop_down, color: Colors.indigo),
+                Container(
+                  height: 24,
+                  width: 1,
+                  color: Colors.grey.shade300,
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+              ],
+            ),
+          ),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.indigo.shade600, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+      ),
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(10),
+      ],
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter mobile number';
+        }
+        if (value.length != 10) {
+          return 'Mobile number must be 10 digits';
+        }
+        return null;
+      },
     );
   }
 

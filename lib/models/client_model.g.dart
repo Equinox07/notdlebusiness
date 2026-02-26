@@ -14,6 +14,7 @@ ClientDto _$ClientDtoFromJson(Map<String, dynamic> json) => ClientDto(
       phoneNumber: json['phoneNumber'] as String,
       address: json['address'] as String,
       companyId: json['companyId'] as String?,
+      userId: json['userId'] as String?,
       createdAt: json['createdAt'] == null
           ? null
           : DateTime.parse(json['createdAt'] as String),
@@ -30,6 +31,7 @@ Map<String, dynamic> _$ClientDtoToJson(ClientDto instance) => <String, dynamic>{
       'phoneNumber': instance.phoneNumber,
       'address': instance.address,
       'companyId': instance.companyId,
+      'userId': instance.userId,
       'createdAt': instance.createdAt?.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
     };

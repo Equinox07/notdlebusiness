@@ -29,6 +29,7 @@ class Invoice {
   final String id;
   final String customerId; // Foreign key to Customer
   final String? companyId; // New field: companyId - now optional
+  final String? userId;
   final String status;
   final String? createdDate;
   final String? updatedDate;
@@ -56,6 +57,7 @@ class Invoice {
     String? id,
     required this.customerId,
     this.companyId, // Make optional in constructor
+    this.userId,
     required this.status,
     this.createdDate,
     this.updatedDate,
@@ -80,6 +82,7 @@ class Invoice {
   Invoice copyWith({
     String? customerId,
     String? companyId, // Make optional in copyWith
+    String? userId,
     String? status,
     String? createdDate,
     String? updatedDate,
@@ -104,6 +107,7 @@ class Invoice {
       id: id,
       customerId: customerId ?? this.customerId,
       companyId: companyId ?? this.companyId, // Update in copyWith
+      userId: userId ?? this.userId,
       status: status ?? this.status,
       createdDate: createdDate ?? this.createdDate,
       updatedDate: updatedDate ?? this.updatedDate,

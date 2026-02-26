@@ -8,15 +8,20 @@ class CreateMeasurementRequestDto {
   final String name;
   final Map<String, double> measurementValues;
   final String clientId;
+  final String? companyId;
+  final String? userId;
 
   CreateMeasurementRequestDto({
     this.externalId,
     required this.name,
     required this.measurementValues,
     required this.clientId,
+    this.companyId,
+    this.userId,
   });
 
-  factory CreateMeasurementRequestDto.fromJson(Map<String, dynamic> json) => _$CreateMeasurementRequestDtoFromJson(json);
+  factory CreateMeasurementRequestDto.fromJson(Map<String, dynamic> json) =>
+      _$CreateMeasurementRequestDtoFromJson(json);
   Map<String, dynamic> toJson() => _$CreateMeasurementRequestDtoToJson(this);
 }
 
@@ -28,6 +33,8 @@ class MeasurementResponseDto {
   final String clientId;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? companyId;
+  final String? userId;
 
   MeasurementResponseDto({
     required this.id,
@@ -36,8 +43,11 @@ class MeasurementResponseDto {
     required this.clientId,
     required this.createdAt,
     required this.updatedAt,
+    this.companyId,
+    this.userId,
   });
 
-  factory MeasurementResponseDto.fromJson(Map<String, dynamic> json) => _$MeasurementResponseDtoFromJson(json);
+  factory MeasurementResponseDto.fromJson(Map<String, dynamic> json) =>
+      _$MeasurementResponseDtoFromJson(json);
   Map<String, dynamic> toJson() => _$MeasurementResponseDtoToJson(this);
 }

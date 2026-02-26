@@ -1,7 +1,6 @@
 // lib/screens/login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:notdle/screens/company_registration_screen.dart';
 import 'package:notdle/screens/create_business_account_screen.dart';
 import 'package:notdle/screens/forget_password_screen.dart';
 import 'package:notdle/screens/personal_account_screen.dart';

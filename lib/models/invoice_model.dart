@@ -18,6 +18,8 @@ class InvoiceDto {
   final String projectId;
   final List<InvoiceItemDto> items;
   final List<PaymentDto> payments;
+  final String? companyId;
+  final String? userId;
 
   InvoiceDto({
     this.id,
@@ -34,9 +36,12 @@ class InvoiceDto {
     required this.projectId,
     required this.items,
     required this.payments,
+    this.companyId,
+    this.userId,
   });
 
-  factory InvoiceDto.fromJson(Map<String, dynamic> json) => _$InvoiceDtoFromJson(json);
+  factory InvoiceDto.fromJson(Map<String, dynamic> json) =>
+      _$InvoiceDtoFromJson(json);
   Map<String, dynamic> toJson() => _$InvoiceDtoToJson(this);
 }
 
@@ -50,6 +55,8 @@ class InvoiceItemDto {
   final double? taxRate;
   final double amount;
   final String? invoiceId;
+  final String? companyId;
+  final String? userId;
 
   InvoiceItemDto({
     this.id,
@@ -60,9 +67,12 @@ class InvoiceItemDto {
     this.taxRate,
     required this.amount,
     this.invoiceId,
+    this.companyId,
+    this.userId,
   });
 
-  factory InvoiceItemDto.fromJson(Map<String, dynamic> json) => _$InvoiceItemDtoFromJson(json);
+  factory InvoiceItemDto.fromJson(Map<String, dynamic> json) =>
+      _$InvoiceItemDtoFromJson(json);
   Map<String, dynamic> toJson() => _$InvoiceItemDtoToJson(this);
 }
 
@@ -77,6 +87,7 @@ class PaymentDto {
   final String status;
   final String invoiceId;
   final String companyId;
+  final String? userId;
 
   PaymentDto({
     this.id,
@@ -88,8 +99,10 @@ class PaymentDto {
     required this.status,
     required this.invoiceId,
     required this.companyId,
+    this.userId,
   });
 
-  factory PaymentDto.fromJson(Map<String, dynamic> json) => _$PaymentDtoFromJson(json);
+  factory PaymentDto.fromJson(Map<String, dynamic> json) =>
+      _$PaymentDtoFromJson(json);
   Map<String, dynamic> toJson() => _$PaymentDtoToJson(this);
 }

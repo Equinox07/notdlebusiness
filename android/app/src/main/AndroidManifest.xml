@@ -29,11 +29,18 @@
             </intent-filter>
 
             <!-- OAuth2 Redirect -->
-            <intent-filter android:label="notdle-login">
+            <!-- <intent-filter android:label="notdle-login">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="notdle" android:host="login-callback" />
+                <data android:scheme="notdle" android:host="oauth/callback" />
+            </intent-filter> -->
+
+             <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="notdle" android:host="oauth/callback" />
             </intent-filter>
 
         </activity>
@@ -46,7 +53,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="notdle" />
+                <data android:scheme="notdle" android:host="oauth/callback" />
             </intent-filter>
         </activity> -->
 

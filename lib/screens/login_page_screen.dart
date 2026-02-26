@@ -184,32 +184,85 @@ class _LoginScreenState extends State<LoginPageScreen> {
         }
 
         final String baseUrl = _apiService.getUrlBase();
-        final String authUrl = '$baseUrl/oauth2/authorization/google';
-        final String callbackUrlScheme = 'notdle';
 
-        final result = await FlutterWebAuth2.authenticate(
+        final String callbackUrlScheme = 'https';
+        final String callbackUrlScheme1 = 'https';
+
+        // App specific variables
+        final googleClientId =
+            '771814763529-neu8hs5dj6biebjoeo68kdp8d9e10i1t.apps.googleusercontent.com';
+
+        // Construct the url
+        // final url = Uri.https('accounts.google.com', '/o/oauth2/v2/auth', {
+        //   'response_type': 'code',
+        //   'client_id': googleClientId,
+        //   'redirect_uri':
+        //       '$callbackUrlScheme1://unreprovable-jacquelynn-unconceived.ngrok-free.dev/api/auth/oauth2/google/callback',
+        //   'scope': 'email',
+        // });
+
+        // // Present the dialog to the user
+        // final result = await FlutterWebAuth2.authenticate(
+        //   url: url.toString(),
+        //   callbackUrlScheme: callbackUrlScheme,
+        // );
+
+        // // Extract code from resulting url
+        // final code = Uri.parse(result).queryParameters['code'];
+
+        // debugPrint('Code: $code');
+
+        // // Construct an Uri to Google's oauth2 endpoint
+        // final url = Uri.https('www.googleapis.com', 'oauth2/v4/token');
+
+        // // Use this code to get an access token
+        // final response = await http.post(
+        //   url,
+        //   body: {
+        //     'client_id': googleClientId,
+        //     'redirect_uri': '$callbackUrlScheme:/',
+        //     'grant_type': 'authorization_code',
+        //     'code': code,
+        //   },
+        // );
+
+        final String authUrl = '$baseUrl/oauth2/authorization/google';
+
+        final deepLinkResponse = await FlutterWebAuth2.authenticate(
           url: authUrl,
-          callbackUrlScheme: callbackUrlScheme,
+          callbackUrlScheme: 'notdle',
         );
 
-        // Extract token from notdle://login-callback?token=xxx
-        final Uri uri = Uri.parse(result);
-        final String? token = uri.queryParameters['token'];
+        debugPrint('Result: $deepLinkResponse');
 
-        if (token == null) {
-          throw Exception(
-            'Failed to obtain authentication token from redirect',
-          );
+        // Extract token from myapp://oauth2/callback?token=xxx
+        final Uri uri = Uri.parse(deepLinkResponse);
+        final String? code = uri.queryParameters['code'];
+
+        if (code != null) {
+          debugPrint('Code: $code');
+        } else {
+          debugPrint('Code is null');
         }
 
-        String? deviceImei = await getDeviceImei();
-        if (deviceImei == null || deviceImei.isEmpty) {
-          deviceImei = await getDeviceId();
-        }
+        // // Extract token from notdle://login-callback?token=xxx
+        // final Uri uri = Uri.parse(result);
+        // final String? token = uri.queryParameters['token'];
 
-        final data = await _apiService.loginWithToken(token);
+        // if (token == null) {
+        //   throw Exception(
+        //     'Failed to obtain authentication token from redirect',
+        //   );
+        // }
 
-        await _handleLoginSuccess(data, deviceImei);
+        // String? deviceImei = await getDeviceImei();
+        // if (deviceImei == null || deviceImei.isEmpty) {
+        //   deviceImei = await getDeviceId();
+        // }
+
+        // final data = await _apiService.loginWithToken(token);
+
+        // await _handleLoginSuccess(data, deviceImei);
       } catch (e) {
         if (mounted) {
           if (Navigator.canPop(context)) Navigator.of(context).pop();

@@ -1,9 +1,8 @@
 // lib/screens/login_screen.dart
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/screens/company_registration_screen.dart';
+import 'package:notdle/screens/create_business_account_screen.dart';
 import 'package:notdle/screens/forget_password_screen.dart';
 import 'package:notdle/screens/personal_account_screen.dart';
 import 'package:notdle/services/api_service.dart';
@@ -14,7 +13,6 @@ import 'package:provider/provider.dart';
 import 'package:notdle/providers/company_provider.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-import 'package:http/http.dart' as http;
 
 class LoginPageScreen extends StatefulWidget {
   const LoginPageScreen({super.key});
@@ -157,7 +155,7 @@ class _LoginScreenState extends State<LoginPageScreen> {
           Navigator.of(context).pop();
           Navigator.of(
             context,
-          ).pushReplacementNamed(CompanyRegistrationScreen.tag);
+          ).pushReplacementNamed(CreateBusinessAccountScreen.tag);
         }
       }
     } catch (e) {
@@ -187,44 +185,6 @@ class _LoginScreenState extends State<LoginPageScreen> {
         }
 
         final String baseUrl = _apiService.getUrlBase();
-
-        // App specific variables
-        final googleClientId =
-            '771814763529-neu8hs5dj6biebjoeo68kdp8d9e10i1t.apps.googleusercontent.com';
-
-        // Construct the url
-        // final url = Uri.https('accounts.google.com', '/o/oauth2/v2/auth', {
-        //   'response_type': 'code',
-        //   'client_id': googleClientId,
-        //   'redirect_uri':
-        //       '$callbackUrlScheme1://unreprovable-jacquelynn-unconceived.ngrok-free.dev/api/auth/oauth2/google/callback',
-        //   'scope': 'email',
-        // });
-
-        // // Present the dialog to the user
-        // final result = await FlutterWebAuth2.authenticate(
-        //   url: url.toString(),
-        //   callbackUrlScheme: callbackUrlScheme,
-        // );
-
-        // // Extract code from resulting url
-        // final code = Uri.parse(result).queryParameters['code'];
-
-        // debugPrint('Code: $code');
-
-        // // Construct an Uri to Google's oauth2 endpoint
-        // final url = Uri.https('www.googleapis.com', 'oauth2/v4/token');
-
-        // // Use this code to get an access token
-        // final response = await http.post(
-        //   url,
-        //   body: {
-        //     'client_id': googleClientId,
-        //     'redirect_uri': '$callbackUrlScheme:/',
-        //     'grant_type': 'authorization_code',
-        //     'code': code,
-        //   },
-        // );
 
         final String authUrl = '$baseUrl/oauth2/authorization/google';
 

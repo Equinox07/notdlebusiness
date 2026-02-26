@@ -235,34 +235,22 @@ class _LoginScreenState extends State<LoginPageScreen> {
 
         debugPrint('Result: $deepLinkResponse');
 
-        // Extract token from myapp://oauth2/callback?token=xxx
+        // Extract code from notdle://oauth/callback?code=xxx
         final Uri uri = Uri.parse(deepLinkResponse);
         final String? code = uri.queryParameters['code'];
 
-        if (code != null) {
-          debugPrint('Code: $code');
-        } else {
-          debugPrint('Code is null');
+        if (code == null) {
+          throw Exception('Failed to obtain authentication code from redirect');
         }
 
-        // // Extract token from notdle://login-callback?token=xxx
-        // final Uri uri = Uri.parse(result);
-        // final String? token = uri.queryParameters['token'];
+        String? deviceImei = await getDeviceImei();
+        if (deviceImei == null || deviceImei.isEmpty) {
+          deviceImei = await getDeviceId();
+        }
 
-        // if (token == null) {
-        //   throw Exception(
-        //     'Failed to obtain authentication token from redirect',
-        //   );
-        // }
+        final data = await _apiService.googleSignin(code, deviceId: deviceImei);
 
-        // String? deviceImei = await getDeviceImei();
-        // if (deviceImei == null || deviceImei.isEmpty) {
-        //   deviceImei = await getDeviceId();
-        // }
-
-        // final data = await _apiService.loginWithToken(token);
-
-        // await _handleLoginSuccess(data, deviceImei);
+        await _handleLoginSuccess(data, deviceImei);
       } catch (e) {
         if (mounted) {
           if (Navigator.canPop(context)) Navigator.of(context).pop();

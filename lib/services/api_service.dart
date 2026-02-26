@@ -174,11 +174,11 @@ class ApiService {
 
   // Authentication
   Future<Map<String, dynamic>> login(
-    String email,
+    String identifier,
     String password, {
     String? deviceImei,
   }) async {
-    final body = {'email': email, 'password': password};
+    final body = {'identifier': identifier, 'password': password};
     if (deviceImei != null) {
       body['deviceId'] = deviceImei;
     }

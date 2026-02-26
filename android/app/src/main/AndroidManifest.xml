@@ -36,16 +36,11 @@
                 <data android:scheme="notdle" android:host="oauth/callback" />
             </intent-filter> -->
 
-             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="notdle" android:host="oauth/callback" />
-            </intent-filter>
+            <!-- Removed invalid intent filter -->
 
         </activity>
 
-        <!-- <activity
+        <activity
             android:name="com.linusu.flutter_web_auth_2.CallbackActivity"
             android:exported="true"
             android:taskAffinity="">
@@ -53,9 +48,9 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="notdle" android:host="oauth/callback" />
+                <data android:scheme="notdle" android:host="oauth" android:path="/callback" />
             </intent-filter>
-        </activity> -->
+        </activity>
 
         
         <!-- Don't delete the meta-data below.

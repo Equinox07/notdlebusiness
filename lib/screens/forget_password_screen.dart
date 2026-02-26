@@ -76,7 +76,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
               const SizedBox(height: 16),
               // Description
               Text(
-                'Enter your email or phone number and we will send you a recovery link to access your account.',
+                'Enter your email or phone number and we will send you a reset code to access your account.',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 15,
@@ -173,7 +173,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                                     SnackBar(
                                       content: Text(
                                         response['message'] ??
-                                            'Failed to send recovery link. Please try again.',
+                                            'Failed to send reset code. Please try again.',
                                       ),
                                     ),
                                   );
@@ -215,7 +215,7 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'Send Recovery Link',
+                                'Send Reset Code',
                                 style: GoogleFonts.inter(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,

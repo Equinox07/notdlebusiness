@@ -13,8 +13,6 @@ import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/screens/invoice_details_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 
 const _kPurple = Color(0xFF6200EE);
 const _kBg = Color(0xFFF5F4F8);
@@ -44,7 +42,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   String _outfitType = "Evening Gown";
   String _fabric = "";
   int _quantity = 1;
-  List<XFile> _inspirationImages = [];
 
   // ── Pricing state ────────────────────────────────────────────────────────
   double _materialCost = 0;
@@ -143,32 +140,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     if (picked != null && picked != _startDate) {
       setState(() => _startDate = picked);
     }
-  }
-
-  Future<void> _pickImageFromCamera() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.camera);
-    if (image != null) {
-      setState(() {
-        _inspirationImages.add(image);
-      });
-    }
-  }
-
-  Future<void> _pickImageFromGallery() async {
-    final ImagePicker picker = ImagePicker();
-    final List<XFile> images = await picker.pickMultiImage();
-    if (images.isNotEmpty) {
-      setState(() {
-        _inspirationImages.addAll(images);
-      });
-    }
-  }
-
-  void _removeImage(int index) {
-    setState(() {
-      _inspirationImages.removeAt(index);
-    });
   }
 
   void _submitForm() async {
@@ -390,13 +361,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                     onNotesSaved: (v) => _notes = v,
                   ),
                   const SizedBox(height: 16),
-                  _DesignInspirationCard(
-                    inspirationImages: _inspirationImages,
-                    onPickFromCamera: _pickImageFromCamera,
-                    onPickFromGallery: _pickImageFromGallery,
-                    onRemoveImage: _removeImage,
-                  ),
+                  _DesignInspirationCard(),
                   const SizedBox(height: 16),
+                  _FabricSamplesCard(),
+                  const SizedBox(height: 24),
                   // ── Step 3: Pricing & Payments ─────────────────────────────
                   _SectionStepLabel(
                     step: 3,
@@ -1316,98 +1284,135 @@ class _DashedLinePainter extends CustomPainter {
   bool shouldRepaint(_DashedLinePainter old) => false;
 }
 
-class _DesignInspirationCard extends StatelessWidget {
-  final List<XFile> inspirationImages;
-  final VoidCallback onPickFromCamera;
-  final VoidCallback onPickFromGallery;
-  final Function(int) onRemoveImage;
+// ── FABRIC SAMPLES CARD ─────────────────────────────────────────────────────
 
-  const _DesignInspirationCard({
-    required this.inspirationImages,
-    required this.onPickFromCamera,
-    required this.onPickFromGallery,
-    required this.onRemoveImage,
-  });
-
-  void _showImageSourceDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: Text(
-            "Add Inspiration",
-            style: GoogleFonts.poppins(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
+class _FabricSamplesCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return _SectionCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: _kPurple.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.camera_alt_outlined, color: _kPurple),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                title: Text(
-                  "Take Photo",
-                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                child: Icon(
+                  Icons.colorize_outlined,
+                  color: Colors.amber.shade700,
+                  size: 18,
                 ),
-                subtitle: Text(
-                  "Use camera to capture inspiration",
-                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600),
-                ),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  onPickFromCamera();
-                },
               ),
-              const SizedBox(height: 8),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: _kPurple.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.photo_library_outlined, color: _kPurple),
+              const SizedBox(width: 10),
+              Text(
+                "Fabric Samples",
+                style: GoogleFonts.poppins(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
                 ),
-                title: Text(
-                  "Choose from Gallery",
-                  style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                  "Select multiple photos from gallery",
-                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey.shade600),
-                ),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  onPickFromGallery();
-                },
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                "Cancel",
-                style: GoogleFonts.poppins(color: Colors.grey.shade600),
+          const SizedBox(height: 4),
+          Text(
+            "Attach physical fabric swatches or colour references",
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              color: Colors.grey.shade500,
+            ),
+          ),
+          const SizedBox(height: 14),
+          // Upload zone
+          GestureDetector(
+            onTap: () {},
+            child: Container(
+              width: double.infinity,
+              height: 140,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.amber.shade300, width: 1.5),
+                color: Colors.amber.shade50.withValues(alpha: 0.5),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade600,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.upload_file_outlined,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Upload Fabric Sample",
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "JPG, PNG or PDF · Max 10 MB",
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        );
-      },
+          ),
+          const SizedBox(height: 14),
+          // Thumbnail strip
+          Row(
+            children: [
+              Container(
+                width: 70,
+                height: 70,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.amber.shade100,
+                ),
+                child: Icon(
+                  Icons.texture,
+                  color: Colors.amber.shade700,
+                  size: 30,
+                ),
+              ),
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: () {},
+                child: Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.grey.shade100,
+                    border: Border.all(color: Colors.grey.shade300, width: 1.5),
+                  ),
+                  child: const Icon(Icons.add, color: Colors.grey, size: 28),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
+}
 
+class _DesignInspirationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _SectionCard(
@@ -1421,187 +1426,94 @@ class _DesignInspirationCard extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            "Add fabric swatches, design sketches, or mood board photos",
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: Colors.grey.shade500,
+          const SizedBox(height: 14),
+          // Dashed upload zone
+          GestureDetector(
+            onTap: () {},
+            child: Container(
+              width: double.infinity,
+              height: 160,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: _kPurple.withValues(alpha: 0.3),
+                  width: 1.5,
+                  // Flutter doesn't support dashed borders natively; use a
+                  // solid thin border with a very light fill as an approximation.
+                ),
+                color: _kPurple.withValues(alpha: 0.03),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: const BoxDecoration(
+                      color: _kPurple,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.cloud_upload_outlined,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "Upload Reference",
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Add fabric swatches, design sketches,\nor mood board photos",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 14),
-          
-          // Upload zone or image grid
-          if (inspirationImages.isEmpty)
-            GestureDetector(
-              onTap: () => _showImageSourceDialog(context),
-              child: Container(
-                width: double.infinity,
-                height: 160,
+          Row(
+            children: [
+              // Placeholder thumbnail
+              Container(
+                width: 70,
+                height: 70,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: _kPurple.withValues(alpha: 0.3),
-                    width: 1.5,
+                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.grey.shade200,
+                  image: const DecorationImage(
+                    image: AssetImage('assets/images/fabric_sample.png'),
+                    fit: BoxFit.cover,
+                    onError: _imageErrorHandler,
                   ),
-                  color: _kPurple.withValues(alpha: 0.03),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: const BoxDecoration(
-                        color: _kPurple,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.add_photo_alternate_outlined,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      "Add Inspiration Photos",
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "Tap to choose from camera or gallery",
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.grey.shade500,
-                      ),
-                    ),
-                  ],
                 ),
               ),
-            )
-          else
-            Column(
-              children: [
-                // Image grid
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 1,
+              const SizedBox(width: 10),
+              // Add more button
+              GestureDetector(
+                onTap: () {},
+                child: Container(
+                  width: 70,
+                  height: 70,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.grey.shade100,
+                    border: Border.all(color: Colors.grey.shade300, width: 1.5),
                   ),
-                  itemCount: inspirationImages.length + 1, // +1 for add button
-                  itemBuilder: (context, index) {
-                    if (index == inspirationImages.length) {
-                      // Add more button
-                      return GestureDetector(
-                        onTap: () => _showImageSourceDialog(context),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            color: Colors.grey.shade100,
-                            border: Border.all(color: Colors.grey.shade300, width: 1.5),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.add, color: Colors.grey.shade600, size: 28),
-                              const SizedBox(height: 4),
-                              Text(
-                                "Add More",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 10,
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    }
-                    
-                    // Image thumbnail
-                    return Stack(
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          height: double.infinity,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            color: Colors.grey.shade200,
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.file(
-                              File(inspirationImages[index].path),
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Container(
-                                  color: Colors.grey.shade200,
-                                  child: Icon(
-                                    Icons.broken_image,
-                                    color: Colors.grey.shade400,
-                                    size: 30,
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        // Remove button
-                        Positioned(
-                          top: 4,
-                          right: 4,
-                          child: GestureDetector(
-                            onTap: () => onRemoveImage(index),
-                            child: Container(
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                                border: Border.all(color: Colors.white, width: 2),
-                              ),
-                              child: const Icon(
-                                Icons.close,
-                                color: Colors.white,
-                                size: 14,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                  child: const Icon(Icons.add, color: Colors.grey, size: 28),
                 ),
-                const SizedBox(height: 12),
-                // Quick add button
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () => _showImageSourceDialog(context),
-                    icon: const Icon(Icons.add, size: 18),
-                    label: Text(
-                      "Add More Photos",
-                      style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      side: BorderSide(color: _kPurple.withValues(alpha: 0.3)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -1894,10 +1806,10 @@ class _ProductionTimelineCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
-          _FieldLabel("Production Phases"),
-          const SizedBox(height: 12),
-          _ProductionPhasesTimeline(startDate: startDate, dueDate: dueDate),
+          const SizedBox(height: 20),
+          _FieldLabel("Timeline Visualization"),
+          const SizedBox(height: 8),
+          _TimelineVisualizer(startDate: startDate, dueDate: dueDate),
         ],
       ),
     );
@@ -1964,258 +1876,91 @@ class _DateTile extends StatelessWidget {
   }
 }
 
-class _ProductionPhasesTimeline extends StatelessWidget {
+class _TimelineVisualizer extends StatelessWidget {
   final DateTime? startDate;
   final DateTime? dueDate;
 
-  const _ProductionPhasesTimeline({this.startDate, this.dueDate});
-
-  List<Map<String, dynamic>> _getPhases() {
-    if (startDate == null || dueDate == null) {
-      return [
-        {'name': 'Design', 'icon': Icons.design_services, 'status': 'pending'},
-        {'name': 'Cutting', 'icon': Icons.content_cut, 'status': 'pending'},
-        {'name': 'Sewing', 'icon': Icons.mode_edit, 'status': 'pending'},
-        {'name': 'Fittings', 'icon': Icons.accessibility, 'status': 'pending'},
-        {'name': 'Final Touches', 'icon': Icons.auto_fix_high, 'status': 'pending'},
-        {'name': 'Quality Check', 'icon': Icons.verified, 'status': 'pending'},
-      ];
-    }
-
-    final totalDays = dueDate!.difference(startDate!).inDays;
-    final currentPhase = _getCurrentPhase(totalDays);
-    
-    return [
-      {'name': 'Design', 'icon': Icons.design_services, 'status': currentPhase >= 0 ? 'completed' : 'pending'},
-      {'name': 'Cutting', 'icon': Icons.content_cut, 'status': currentPhase >= 1 ? 'completed' : currentPhase == 0 ? 'active' : 'pending'},
-      {'name': 'Sewing', 'icon': Icons.mode_edit, 'status': currentPhase >= 2 ? 'completed' : currentPhase == 1 ? 'active' : 'pending'},
-      {'name': 'Fittings', 'icon': Icons.accessibility, 'status': currentPhase >= 3 ? 'completed' : currentPhase == 2 ? 'active' : 'pending'},
-      {'name': 'Final Touches', 'icon': Icons.auto_fix_high, 'status': currentPhase >= 4 ? 'completed' : currentPhase == 3 ? 'active' : 'pending'},
-      {'name': 'Quality Check', 'icon': Icons.verified, 'status': currentPhase >= 5 ? 'completed' : currentPhase == 4 ? 'active' : 'pending'},
-    ];
-  }
-
-  int _getCurrentPhase(int totalDays) {
-    if (totalDays <= 0) return -1;
-    final daysPerPhase = (totalDays / 6).floor();
-    final elapsedDays = DateTime.now().difference(startDate!).inDays;
-    return (elapsedDays / daysPerPhase).floor().clamp(0, 5);
-  }
-
-  String _getPhaseDate(int phaseIndex) {
-    if (startDate == null || dueDate == null) return '';
-    final totalDays = dueDate!.difference(startDate!).inDays;
-    final daysPerPhase = (totalDays / 6).ceil();
-    final phaseDate = startDate!.add(Duration(days: phaseIndex * daysPerPhase));
-    return DateFormat('MMM d').format(phaseDate);
-  }
+  const _TimelineVisualizer({this.startDate, this.dueDate});
 
   @override
   Widget build(BuildContext context) {
     if (startDate == null || dueDate == null) {
       return Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         width: double.infinity,
         decoration: BoxDecoration(
           color: Colors.grey.shade100,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Column(
-          children: [
-            Icon(Icons.calendar_today_outlined, size: 32, color: Colors.grey.shade400),
-            const SizedBox(height: 8),
-            Text(
-              "Select dates to see production phases",
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                color: Colors.grey.shade500,
-              ),
-              textAlign: TextAlign.center,
+        child: Center(
+          child: Text(
+            "Select dates to see timeline",
+            style: GoogleFonts.poppins(
+              fontSize: 13,
+              color: Colors.grey.shade500,
             ),
-          ],
+          ),
         ),
       );
     }
 
-    final phases = _getPhases();
-    final totalDays = dueDate!.difference(startDate!).inDays;
+    final diff = dueDate!.difference(startDate!).inDays;
+    final isNegative = diff < 0;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _kPurple.withValues(alpha: 0.03),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _kPurple.withValues(alpha: 0.08)),
+        color: _kPurple.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _kPurple.withValues(alpha: 0.1)),
       ),
       child: Column(
         children: [
-          // Duration info
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Total Duration",
+                "Estimated Duration",
                 style: GoogleFonts.poppins(
                   fontSize: 13,
-                  color: Colors.grey.shade600,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               Text(
-                "$totalDays Days",
+                isNegative ? "Invalid Dates" : "$diff Days",
                 style: GoogleFonts.poppins(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
-                  color: _kPurple,
+                  color: isNegative ? Colors.red : _kPurple,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          
-          // Phases timeline
-          Column(
-            children: phases.asMap().entries.map((entry) {
-              final index = entry.key;
-              final phase = entry.value;
-              final isLast = index == phases.length - 1;
-              final status = phase['status'] as String;
-              
-              return _PhaseItem(
-                name: phase['name'] as String,
-                icon: phase['icon'] as IconData,
-                status: status,
-                date: _getPhaseDate(index),
-                showConnector: !isLast,
-                isActive: status == 'active',
-              );
-            }).toList(),
+          const SizedBox(height: 12),
+          Stack(
+            children: [
+              Container(
+                height: 8,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              if (!isNegative && diff > 0)
+                Container(
+                  height: 8,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [_kPurple, Color(0xFF9162E4)],
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+            ],
           ),
         ],
       ),
-    );
-  }
-}
-
-class _PhaseItem extends StatelessWidget {
-  final String name;
-  final IconData icon;
-  final String status;
-  final String date;
-  final bool showConnector;
-  final bool isActive;
-
-  const _PhaseItem({
-    required this.name,
-    required this.icon,
-    required this.status,
-    required this.date,
-    required this.showConnector,
-    required this.isActive,
-  });
-
-  Color get _statusColor {
-    switch (status) {
-      case 'completed':
-        return _kPurple;
-      case 'active':
-        return const Color(0xFF6200EE);
-      default:
-        return Colors.grey.shade300;
-    }
-  }
-
-  Color get _textColor {
-    switch (status) {
-      case 'completed':
-        return Colors.black87;
-      case 'active':
-        return _kPurple;
-      default:
-        return Colors.grey.shade500;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Icon with connector
-        Column(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: _statusColor.withValues(alpha: status == 'pending' ? 0.1 : 0.15),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: _statusColor,
-                  width: status == 'active' ? 2 : 1.5,
-                ),
-              ),
-              child: Icon(
-                icon,
-                size: 16,
-                color: _statusColor,
-              ),
-            ),
-            if (showConnector)
-              Container(
-                width: 2,
-                height: 32,
-                margin: const EdgeInsets.only(top: 4),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(1),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(width: 12),
-        
-        // Phase info
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: _textColor,
-                      ),
-                    ),
-                    if (isActive)
-                      Text(
-                        "In Progress",
-                        style: GoogleFonts.poppins(
-                          fontSize: 11,
-                          color: _kPurple,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                  ],
-                ),
-                Text(
-                  date,
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: Colors.grey.shade500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

@@ -11,7 +11,7 @@ class Company {
   final String ownerName;
   final String email;
   final String mobile;
-  final int yearsOfExperience;
+  final int? yearsOfExperience;
   final String registrationNumber;
   final String countryCode;
   final String address;
@@ -21,10 +21,10 @@ class Company {
   final String currency;
   final String country;
   final String? deviceId;
-  final String businessType;
-  final bool enablePushNotifications;
-  final bool enableSmsNotifications;
-  final bool enableEmailNotifications;
+  final String? businessType;
+  final bool? enablePushNotifications;
+  final bool? enableSmsNotifications;
+  final bool? enableEmailNotifications;
   final String? measurementSystem;
   final String? appAppearance;
   final String? genderSpecialty;
@@ -36,7 +36,7 @@ class Company {
     required this.ownerName,
     required this.email,
     required this.mobile,
-    required this.yearsOfExperience,
+    this.yearsOfExperience,
     required this.registrationNumber,
     required this.countryCode,
     required this.address,
@@ -46,10 +46,10 @@ class Company {
     this.currency = 'GHS',
     this.country = 'Ghana',
     this.deviceId,
-    this.businessType = "",
-    this.enablePushNotifications = false,
-    this.enableSmsNotifications = false,
-    this.enableEmailNotifications = false,
+    this.businessType,
+    this.enablePushNotifications,
+    this.enableSmsNotifications,
+    this.enableEmailNotifications,
     this.measurementSystem,
     this.appAppearance,
     this.genderSpecialty,
@@ -64,7 +64,10 @@ class Company {
       ownerName: map['ownerName'] as String? ?? "",
       email: map['email'] as String,
       mobile: map['mobile'] as String,
-      yearsOfExperience: (map['yearsOfExperience'] as num?)?.toInt() ?? 0,
+      yearsOfExperience:
+          map['yearsOfExperience'] == null
+              ? 0
+              : (map['yearsOfExperience'] as num).toInt(),
       registrationNumber: map['registrationNumber'] as String? ?? "na",
       countryCode: map['countryCode'] as String,
       address: map['address'] as String,
@@ -74,7 +77,7 @@ class Company {
       currency: map['currency'] as String? ?? 'GHS',
       country: map['country'] as String? ?? 'Ghana',
       deviceId: map['deviceId'] as String?,
-      businessType: map['businessType'] as String? ?? "",
+      businessType: map['businessType'] as String?,
       enablePushNotifications: map['enablePushNotifications'] as bool? ?? false,
       enableSmsNotifications: map['enableSmsNotifications'] as bool? ?? false,
       enableEmailNotifications:

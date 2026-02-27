@@ -116,8 +116,9 @@ class _LoginScreenState extends State<LoginPageScreen> {
           );
         }
       }
-
+      debugPrint('User: $user');
       if (user.hasCompany && user.companyId != null) {
+        debugPrint('User has company');
         if (await SessionHelper.shouldSyncCompanyData(user, context)) {
           try {
             final companyData = await _apiService.getCompanyById(
@@ -132,6 +133,7 @@ class _LoginScreenState extends State<LoginPageScreen> {
               await companyProvider.companyDao.insertCompany(companyData);
             }
           } catch (e) {
+            debugPrint('Failed to load company data: ${e.toString()}');
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -144,12 +146,13 @@ class _LoginScreenState extends State<LoginPageScreen> {
             }
           }
         }
-
+        debugPrint('Navigating to dashboard');
         if (mounted) {
           Navigator.of(context).pop();
           Navigator.of(context).pushReplacementNamed('dashboard');
         }
       } else {
+        debugPrint('User does not have company');
         if (mounted) {
           Navigator.of(context).pop();
           Navigator.of(

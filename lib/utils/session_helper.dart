@@ -7,7 +7,10 @@ import 'package:provider/provider.dart';
 
 class SessionHelper {
   static Future<void> checkCompanySession(BuildContext context) async {
-    final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
+    final companyProvider = Provider.of<CompanyProvider>(
+      context,
+      listen: false,
+    );
     final sessionCompany = await SessionManager.getCompany();
 
     if (sessionCompany != null && sessionCompany.id.isNotEmpty) {
@@ -16,10 +19,10 @@ class SessionHelper {
 
       if (dbCompany != null) {
         if (dbCompany.id != sessionCompany.id) {
-           _showSessionMismatchDialog(context);
+          _showSessionMismatchDialog(context);
         }
       } else {
-         _showNoCompanyAccountDialog(context);
+        _showNoCompanyAccountDialog(context);
       }
     }
   }
@@ -28,21 +31,24 @@ class SessionHelper {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text("Session Mismatch"),
-        content: const Text("Your session data does not match the stored company data. Please log in again."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              // Clear session and navigate to login
-              SessionManager.clearSession();
-              Navigator.of(context).pop();
-              AppNavigator.toLogin2();
-            },
-            child: const Text("OK"),
+      builder:
+          (context) => AlertDialog(
+            title: const Text("Session Mismatch"),
+            content: const Text(
+              "Your session data does not match the stored company data. Please log in again.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  // Clear session and navigate to login
+                  SessionManager.clearSession();
+                  Navigator.of(context).pop();
+                  AppNavigator.toLogin2();
+                },
+                child: const Text("OK"),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -50,19 +56,22 @@ class SessionHelper {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text("No Company Account Found"),
-        content: const Text("No company account was found associated with this session. Please register a company to proceed."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              AppNavigator.toRegisterCompany();
-            },
-            child: const Text("Register"),
+      builder:
+          (context) => AlertDialog(
+            title: const Text("No Company Account Found"),
+            content: const Text(
+              "No company account was found associated with this session. Please register a company to proceed.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  AppNavigator.toRegisterCompany();
+                },
+                child: const Text("Register"),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -73,19 +82,33 @@ class SessionHelper {
     return false;
   }
 
-  static Future<bool> shouldSyncCompanyData(User user, BuildContext context) async {
-    final companyProvider = Provider.of<CompanyProvider>(context, listen: false);
+  static Future<bool> shouldSyncCompanyData(
+    User user,
+    BuildContext context,
+  ) async {
+    debugPrint('Checking if company data should be synced');
+
+    final companyProvider = Provider.of<CompanyProvider>(
+      context,
+      listen: false,
+    );
     final companyDao = companyProvider.companyDao;
-    
+
     if (user.companyId != null) {
       // Check if company exists in local DB
       final dbCompany = await companyDao.findCompanyById(user.companyId!);
-      
+
       // Check if company exists in session
       final sessionCompany = await SessionManager.getCompany();
-      
+
+      debugPrint('DB Company: $dbCompany');
+      debugPrint('Session Company: $sessionCompany');
+      debugPrint('User Company ID: ${user.companyId}');
+
       // Sync if missing in either DB or Session
-      return dbCompany == null || sessionCompany == null || sessionCompany.id != user.companyId;
+      return dbCompany == null ||
+          sessionCompany == null ||
+          sessionCompany.id != user.companyId;
     }
     return false;
   }

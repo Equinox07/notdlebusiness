@@ -108,7 +108,7 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `company` (`id` TEXT NOT NULL, `businessName` TEXT NOT NULL, `ownerName` TEXT NOT NULL, `email` TEXT NOT NULL, `mobile` TEXT NOT NULL, `yearsOfExperience` INTEGER NOT NULL, `registrationNumber` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `address` TEXT NOT NULL, `logoUrl` TEXT, `imagePath` TEXT, `active` INTEGER NOT NULL, `currency` TEXT NOT NULL, `country` TEXT NOT NULL, `deviceId` TEXT, `businessType` TEXT NOT NULL, `enablePushNotifications` INTEGER NOT NULL, `enableSmsNotifications` INTEGER NOT NULL, `enableEmailNotifications` INTEGER NOT NULL, `measurementSystem` TEXT, `appAppearance` TEXT, `genderSpecialty` TEXT, `locationName` TEXT, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `company` (`id` TEXT NOT NULL, `businessName` TEXT NOT NULL, `ownerName` TEXT NOT NULL, `email` TEXT NOT NULL, `mobile` TEXT NOT NULL, `yearsOfExperience` INTEGER, `registrationNumber` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `address` TEXT NOT NULL, `logoUrl` TEXT, `imagePath` TEXT, `active` INTEGER NOT NULL, `currency` TEXT NOT NULL, `country` TEXT NOT NULL, `deviceId` TEXT, `businessType` TEXT, `enablePushNotifications` INTEGER, `enableSmsNotifications` INTEGER, `enableEmailNotifications` INTEGER, `measurementSystem` TEXT, `appAppearance` TEXT, `genderSpecialty` TEXT, `locationName` TEXT, PRIMARY KEY (`id`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `customers` (`id` TEXT, `name` TEXT NOT NULL, `phone` TEXT NOT NULL, `email` TEXT, `lastVisit` INTEGER NOT NULL, `gender` TEXT NOT NULL, `address` TEXT, `imagePath` TEXT, `profileImageUrl` TEXT, `createdDate` INTEGER NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, PRIMARY KEY (`id`))');
         await database.execute(
@@ -195,10 +195,16 @@ class _$CompanyDao extends CompanyDao {
                   'deviceId': item.deviceId,
                   'businessType': item.businessType,
                   'enablePushNotifications':
-                      item.enablePushNotifications ? 1 : 0,
-                  'enableSmsNotifications': item.enableSmsNotifications ? 1 : 0,
+                      item.enablePushNotifications == null
+                          ? null
+                          : (item.enablePushNotifications! ? 1 : 0),
+                  'enableSmsNotifications': item.enableSmsNotifications == null
+                      ? null
+                      : (item.enableSmsNotifications! ? 1 : 0),
                   'enableEmailNotifications':
-                      item.enableEmailNotifications ? 1 : 0,
+                      item.enableEmailNotifications == null
+                          ? null
+                          : (item.enableEmailNotifications! ? 1 : 0),
                   'measurementSystem': item.measurementSystem,
                   'appAppearance': item.appAppearance,
                   'genderSpecialty': item.genderSpecialty,
@@ -226,10 +232,16 @@ class _$CompanyDao extends CompanyDao {
                   'deviceId': item.deviceId,
                   'businessType': item.businessType,
                   'enablePushNotifications':
-                      item.enablePushNotifications ? 1 : 0,
-                  'enableSmsNotifications': item.enableSmsNotifications ? 1 : 0,
+                      item.enablePushNotifications == null
+                          ? null
+                          : (item.enablePushNotifications! ? 1 : 0),
+                  'enableSmsNotifications': item.enableSmsNotifications == null
+                      ? null
+                      : (item.enableSmsNotifications! ? 1 : 0),
                   'enableEmailNotifications':
-                      item.enableEmailNotifications ? 1 : 0,
+                      item.enableEmailNotifications == null
+                          ? null
+                          : (item.enableEmailNotifications! ? 1 : 0),
                   'measurementSystem': item.measurementSystem,
                   'appAppearance': item.appAppearance,
                   'genderSpecialty': item.genderSpecialty,
@@ -255,7 +267,7 @@ class _$CompanyDao extends CompanyDao {
             ownerName: row['ownerName'] as String,
             email: row['email'] as String,
             mobile: row['mobile'] as String,
-            yearsOfExperience: row['yearsOfExperience'] as int,
+            yearsOfExperience: row['yearsOfExperience'] as int?,
             registrationNumber: row['registrationNumber'] as String,
             countryCode: row['countryCode'] as String,
             address: row['address'] as String,
@@ -265,12 +277,16 @@ class _$CompanyDao extends CompanyDao {
             currency: row['currency'] as String,
             country: row['country'] as String,
             deviceId: row['deviceId'] as String?,
-            businessType: row['businessType'] as String,
-            enablePushNotifications:
-                (row['enablePushNotifications'] as int) != 0,
-            enableSmsNotifications: (row['enableSmsNotifications'] as int) != 0,
-            enableEmailNotifications:
-                (row['enableEmailNotifications'] as int) != 0,
+            businessType: row['businessType'] as String?,
+            enablePushNotifications: row['enablePushNotifications'] == null
+                ? null
+                : (row['enablePushNotifications'] as int) != 0,
+            enableSmsNotifications: row['enableSmsNotifications'] == null
+                ? null
+                : (row['enableSmsNotifications'] as int) != 0,
+            enableEmailNotifications: row['enableEmailNotifications'] == null
+                ? null
+                : (row['enableEmailNotifications'] as int) != 0,
             measurementSystem: row['measurementSystem'] as String?,
             appAppearance: row['appAppearance'] as String?,
             genderSpecialty: row['genderSpecialty'] as String?,
@@ -286,7 +302,7 @@ class _$CompanyDao extends CompanyDao {
             ownerName: row['ownerName'] as String,
             email: row['email'] as String,
             mobile: row['mobile'] as String,
-            yearsOfExperience: row['yearsOfExperience'] as int,
+            yearsOfExperience: row['yearsOfExperience'] as int?,
             registrationNumber: row['registrationNumber'] as String,
             countryCode: row['countryCode'] as String,
             address: row['address'] as String,
@@ -296,12 +312,16 @@ class _$CompanyDao extends CompanyDao {
             currency: row['currency'] as String,
             country: row['country'] as String,
             deviceId: row['deviceId'] as String?,
-            businessType: row['businessType'] as String,
-            enablePushNotifications:
-                (row['enablePushNotifications'] as int) != 0,
-            enableSmsNotifications: (row['enableSmsNotifications'] as int) != 0,
-            enableEmailNotifications:
-                (row['enableEmailNotifications'] as int) != 0,
+            businessType: row['businessType'] as String?,
+            enablePushNotifications: row['enablePushNotifications'] == null
+                ? null
+                : (row['enablePushNotifications'] as int) != 0,
+            enableSmsNotifications: row['enableSmsNotifications'] == null
+                ? null
+                : (row['enableSmsNotifications'] as int) != 0,
+            enableEmailNotifications: row['enableEmailNotifications'] == null
+                ? null
+                : (row['enableEmailNotifications'] as int) != 0,
             measurementSystem: row['measurementSystem'] as String?,
             appAppearance: row['appAppearance'] as String?,
             genderSpecialty: row['genderSpecialty'] as String?,
@@ -317,7 +337,7 @@ class _$CompanyDao extends CompanyDao {
             ownerName: row['ownerName'] as String,
             email: row['email'] as String,
             mobile: row['mobile'] as String,
-            yearsOfExperience: row['yearsOfExperience'] as int,
+            yearsOfExperience: row['yearsOfExperience'] as int?,
             registrationNumber: row['registrationNumber'] as String,
             countryCode: row['countryCode'] as String,
             address: row['address'] as String,
@@ -327,12 +347,16 @@ class _$CompanyDao extends CompanyDao {
             currency: row['currency'] as String,
             country: row['country'] as String,
             deviceId: row['deviceId'] as String?,
-            businessType: row['businessType'] as String,
-            enablePushNotifications:
-                (row['enablePushNotifications'] as int) != 0,
-            enableSmsNotifications: (row['enableSmsNotifications'] as int) != 0,
-            enableEmailNotifications:
-                (row['enableEmailNotifications'] as int) != 0,
+            businessType: row['businessType'] as String?,
+            enablePushNotifications: row['enablePushNotifications'] == null
+                ? null
+                : (row['enablePushNotifications'] as int) != 0,
+            enableSmsNotifications: row['enableSmsNotifications'] == null
+                ? null
+                : (row['enableSmsNotifications'] as int) != 0,
+            enableEmailNotifications: row['enableEmailNotifications'] == null
+                ? null
+                : (row['enableEmailNotifications'] as int) != 0,
             measurementSystem: row['measurementSystem'] as String?,
             appAppearance: row['appAppearance'] as String?,
             genderSpecialty: row['genderSpecialty'] as String?,
@@ -349,7 +373,7 @@ class _$CompanyDao extends CompanyDao {
             ownerName: row['ownerName'] as String,
             email: row['email'] as String,
             mobile: row['mobile'] as String,
-            yearsOfExperience: row['yearsOfExperience'] as int,
+            yearsOfExperience: row['yearsOfExperience'] as int?,
             registrationNumber: row['registrationNumber'] as String,
             countryCode: row['countryCode'] as String,
             address: row['address'] as String,
@@ -359,12 +383,16 @@ class _$CompanyDao extends CompanyDao {
             currency: row['currency'] as String,
             country: row['country'] as String,
             deviceId: row['deviceId'] as String?,
-            businessType: row['businessType'] as String,
-            enablePushNotifications:
-                (row['enablePushNotifications'] as int) != 0,
-            enableSmsNotifications: (row['enableSmsNotifications'] as int) != 0,
-            enableEmailNotifications:
-                (row['enableEmailNotifications'] as int) != 0,
+            businessType: row['businessType'] as String?,
+            enablePushNotifications: row['enablePushNotifications'] == null
+                ? null
+                : (row['enablePushNotifications'] as int) != 0,
+            enableSmsNotifications: row['enableSmsNotifications'] == null
+                ? null
+                : (row['enableSmsNotifications'] as int) != 0,
+            enableEmailNotifications: row['enableEmailNotifications'] == null
+                ? null
+                : (row['enableEmailNotifications'] as int) != 0,
             measurementSystem: row['measurementSystem'] as String?,
             appAppearance: row['appAppearance'] as String?,
             genderSpecialty: row['genderSpecialty'] as String?,
@@ -382,7 +410,7 @@ class _$CompanyDao extends CompanyDao {
             ownerName: row['ownerName'] as String,
             email: row['email'] as String,
             mobile: row['mobile'] as String,
-            yearsOfExperience: row['yearsOfExperience'] as int,
+            yearsOfExperience: row['yearsOfExperience'] as int?,
             registrationNumber: row['registrationNumber'] as String,
             countryCode: row['countryCode'] as String,
             address: row['address'] as String,
@@ -392,12 +420,16 @@ class _$CompanyDao extends CompanyDao {
             currency: row['currency'] as String,
             country: row['country'] as String,
             deviceId: row['deviceId'] as String?,
-            businessType: row['businessType'] as String,
-            enablePushNotifications:
-                (row['enablePushNotifications'] as int) != 0,
-            enableSmsNotifications: (row['enableSmsNotifications'] as int) != 0,
-            enableEmailNotifications:
-                (row['enableEmailNotifications'] as int) != 0,
+            businessType: row['businessType'] as String?,
+            enablePushNotifications: row['enablePushNotifications'] == null
+                ? null
+                : (row['enablePushNotifications'] as int) != 0,
+            enableSmsNotifications: row['enableSmsNotifications'] == null
+                ? null
+                : (row['enableSmsNotifications'] as int) != 0,
+            enableEmailNotifications: row['enableEmailNotifications'] == null
+                ? null
+                : (row['enableEmailNotifications'] as int) != 0,
             measurementSystem: row['measurementSystem'] as String?,
             appAppearance: row['appAppearance'] as String?,
             genderSpecialty: row['genderSpecialty'] as String?,
@@ -418,7 +450,7 @@ class _$CompanyDao extends CompanyDao {
             ownerName: row['ownerName'] as String,
             email: row['email'] as String,
             mobile: row['mobile'] as String,
-            yearsOfExperience: row['yearsOfExperience'] as int,
+            yearsOfExperience: row['yearsOfExperience'] as int?,
             registrationNumber: row['registrationNumber'] as String,
             countryCode: row['countryCode'] as String,
             address: row['address'] as String,
@@ -428,12 +460,16 @@ class _$CompanyDao extends CompanyDao {
             currency: row['currency'] as String,
             country: row['country'] as String,
             deviceId: row['deviceId'] as String?,
-            businessType: row['businessType'] as String,
-            enablePushNotifications:
-                (row['enablePushNotifications'] as int) != 0,
-            enableSmsNotifications: (row['enableSmsNotifications'] as int) != 0,
-            enableEmailNotifications:
-                (row['enableEmailNotifications'] as int) != 0,
+            businessType: row['businessType'] as String?,
+            enablePushNotifications: row['enablePushNotifications'] == null
+                ? null
+                : (row['enablePushNotifications'] as int) != 0,
+            enableSmsNotifications: row['enableSmsNotifications'] == null
+                ? null
+                : (row['enableSmsNotifications'] as int) != 0,
+            enableEmailNotifications: row['enableEmailNotifications'] == null
+                ? null
+                : (row['enableEmailNotifications'] as int) != 0,
             measurementSystem: row['measurementSystem'] as String?,
             appAppearance: row['appAppearance'] as String?,
             genderSpecialty: row['genderSpecialty'] as String?,

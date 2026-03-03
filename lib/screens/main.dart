@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:notdle/pages/dashboards/dashboard_app.dart';
 import 'package:notdle/screens/placeholder_screen.dart';
+import 'package:notdle/screens/business_profile_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -20,7 +21,7 @@ class _MainScreenState extends State<MainScreen> {
     DashboardAppScreen(),
     PlaceholderScreen(title: 'Orders'),
     PlaceholderScreen(title: 'Customers'),
-    PlaceholderScreen(title: 'Settings'),
+    BusinessProfileScreen(),
   ];
 
   void _onItemTapped(int index) {

@@ -392,7 +392,7 @@ class _NotificationBell extends StatelessWidget {
       children: [
         IconButton(
           icon: const Icon(Icons.notifications_outlined, color: Colors.black87),
-          onPressed: () => AppNavigator.toNotifications(),
+          onPressed: () => AppNavigator.toNotificationList(),
         ),
         if (notificationProvider.unreadCount > 0)
           Positioned(
@@ -438,7 +438,7 @@ class _ProfileIcon extends StatelessWidget {
           child: const Icon(Icons.person, color: Colors.black54, size: 24),
         ),
       ),
-      onPressed: () => AppNavigator.toProfile(),
+      onPressed: () => AppNavigator.toBusinessProfile(),
     );
   }
 }

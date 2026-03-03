@@ -50,12 +50,12 @@ class _DashboardScreenState extends State<DashboardAppScreen> {
         title: 'Dashboard',
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.white),
-            onPressed: () => AppNavigator.toNotifications(),
+            icon: const Icon(Icons.notifications, color: Colors.white),
+            onPressed: () => AppNavigator.toNotificationList(),
           ),
           IconButton(
             icon: const Icon(Icons.account_circle, color: Colors.white),
-            onPressed: () => AppNavigator.toProfile(),
+            onPressed: () => AppNavigator.toBusinessProfile(),
           ),
         ],
       ),

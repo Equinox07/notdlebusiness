@@ -21,6 +21,11 @@ import 'package:notdle/screens/notification_screen.dart';
 import 'package:notdle/screens/orders_screen.dart';
 import 'package:notdle/pages/signup_page.dart';
 import 'package:notdle/screens/profile_screen.dart';
+import 'package:notdle/screens/business_profile_screen.dart';
+import 'package:notdle/screens/notification_list_screen.dart';
+import 'package:notdle/screens/company_profile_screen.dart';
+import 'package:notdle/screens/notification_settings_screen.dart';
+import 'package:notdle/screens/subscription_billing_screen.dart';
 import 'package:notdle/screens/settings_screen.dart';
 import 'package:notdle/screens/onboarding_screen.dart';
 import 'package:notdle/services/api_service.dart';
@@ -59,6 +64,13 @@ class IndexPage extends StatelessWidget {
         OrdersScreen.tag: (context) => const OrdersScreen(),
         MainScreen.tag: (context) => const MainScreen(),
         ProfileScreen.tag: (context) => const ProfileScreen(),
+        BusinessProfileScreen.tag: (context) => const BusinessProfileScreen(),
+        NotificationListScreen.tag: (context) => const NotificationListScreen(),
+        CompanyProfileScreen.tag: (context) => const CompanyProfileScreen(),
+        NotificationSettingsScreen.tag:
+            (context) => const NotificationSettingsScreen(),
+        SubscriptionBillingScreen.tag:
+            (context) => const SubscriptionBillingScreen(),
         CreateOrderScreen.tag: (context) => const CreateOrderScreen(),
         InvoicesScreen.tag: (context) => const InvoicesScreen(),
         NotificationScreen.tag: (context) => const NotificationScreen(),

@@ -26,6 +26,11 @@ import 'package:notdle/pages/signup_page.dart';
 import 'package:notdle/pages/signup_success_screen.dart';
 import 'package:notdle/screens/measurement_detail_page.dart';
 import 'package:notdle/screens/profile_screen.dart';
+import 'package:notdle/screens/business_profile_screen.dart';
+import 'package:notdle/screens/notification_list_screen.dart';
+import 'package:notdle/screens/company_profile_screen.dart';
+import 'package:notdle/screens/notification_settings_screen.dart';
+import 'package:notdle/screens/subscription_billing_screen.dart';
 
 class AppNavigator {
   static final GlobalKey<NavigatorState> navigatorKey =
@@ -262,6 +267,26 @@ class AppNavigator {
 
   static void toProfile() {
     navigatorKey.currentState?.pushNamed(ProfileScreen.tag);
+  }
+
+  static void toBusinessProfile() {
+    navigatorKey.currentState?.pushNamed(BusinessProfileScreen.tag);
+  }
+
+  static void toCompanyProfile() {
+    navigatorKey.currentState?.pushNamed(CompanyProfileScreen.tag);
+  }
+
+  static void toNotificationSettings() {
+    navigatorKey.currentState?.pushNamed(NotificationSettingsScreen.tag);
+  }
+
+  static void toSubscriptionBilling() {
+    navigatorKey.currentState?.pushNamed(SubscriptionBillingScreen.tag);
+  }
+
+  static void toNotificationList() {
+    navigatorKey.currentState?.pushNamed(NotificationListScreen.tag);
   }
 
   static void toOrders() {

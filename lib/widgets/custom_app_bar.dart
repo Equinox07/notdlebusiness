@@ -8,6 +8,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Widget? leading;
   final bool automaticallyImplyLeading;
   final bool centerTitle;
+  final bool isLight;
+  final Color? backgroundColor;
+  final Color? textColor;
+  final Color? iconColor;
 
   const CustomAppBar({
     super.key,
@@ -17,10 +21,21 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.automaticallyImplyLeading = true,
     this.centerTitle = false,
+    this.isLight = false,
+    this.backgroundColor,
+    this.textColor,
+    this.iconColor,
   }) : assert(title != null || titleWidget != null);
 
   @override
   Widget build(BuildContext context) {
+    final effectiveTextColor =
+        textColor ?? (isLight ? Colors.black87 : Colors.white);
+    final effectiveIconColor =
+        iconColor ?? (isLight ? Colors.black87 : Colors.white);
+    final effectiveBgColor =
+        backgroundColor ?? (isLight ? Colors.white : Colors.transparent);
+
     return AppBar(
       title:
           titleWidget ??
@@ -28,18 +43,29 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             title!,
             style: GoogleFonts.poppins(
               fontWeight: FontWeight.w700,
-              color: Colors.white,
-              fontSize: 24,
+              color: effectiveTextColor,
+              fontSize: 20, // Reduced from 24 for more modern feel
             ),
           ),
       leading: leading,
       automaticallyImplyLeading: automaticallyImplyLeading,
-      backgroundColor: Colors.transparent,
+      backgroundColor: effectiveBgColor,
       elevation: 0,
       centerTitle: centerTitle,
-      flexibleSpace: _buildAbstractBackground(),
+      flexibleSpace: isLight ? null : _buildAbstractBackground(),
       actions: actions,
-      iconTheme: const IconThemeData(color: Colors.white),
+      iconTheme: IconThemeData(color: effectiveIconColor),
+      bottom:
+          isLight
+              ? PreferredSize(
+                preferredSize: const Size.fromHeight(1),
+                child: Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: Colors.grey.shade100,
+                ),
+              )
+              : null,
     );
   }
 
@@ -96,5 +122,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize =>
+      Size.fromHeight(isLight ? kToolbarHeight + 1 : kToolbarHeight);
 }

@@ -86,6 +86,8 @@ class _$AppDatabase extends AppDatabase {
 
   PaymentDao? _paymentDaoInstance;
 
+  AppImageDao? _appImageDaoInstance;
+
   Future<sqflite.Database> open(
     String path,
     List<Migration> migrations, [
@@ -110,7 +112,7 @@ class _$AppDatabase extends AppDatabase {
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `company` (`id` TEXT NOT NULL, `businessName` TEXT NOT NULL, `ownerName` TEXT NOT NULL, `email` TEXT NOT NULL, `mobile` TEXT NOT NULL, `yearsOfExperience` INTEGER, `registrationNumber` TEXT NOT NULL, `countryCode` TEXT NOT NULL, `address` TEXT NOT NULL, `logoUrl` TEXT, `imagePath` TEXT, `active` INTEGER NOT NULL, `currency` TEXT NOT NULL, `country` TEXT NOT NULL, `deviceId` TEXT, `businessType` TEXT, `enablePushNotifications` INTEGER, `enableSmsNotifications` INTEGER, `enableEmailNotifications` INTEGER, `measurementSystem` TEXT, `appAppearance` TEXT, `genderSpecialty` TEXT, `locationName` TEXT, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `customers` (`id` TEXT, `name` TEXT NOT NULL, `phone` TEXT NOT NULL, `email` TEXT, `lastVisit` INTEGER NOT NULL, `gender` TEXT NOT NULL, `address` TEXT, `imagePath` TEXT, `profileImageUrl` TEXT, `createdDate` INTEGER NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `customers` (`id` TEXT, `name` TEXT NOT NULL, `phone` TEXT NOT NULL, `email` TEXT, `instagram` TEXT, `lastVisit` INTEGER NOT NULL, `gender` TEXT NOT NULL, `address` TEXT, `imagePath` TEXT, `profileImageUrl` TEXT, `stylePreferences` TEXT, `favoriteFabrics` TEXT, `notes` TEXT, `createdDate` INTEGER NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, PRIMARY KEY (`id`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `orders` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `customerId` TEXT NOT NULL, `status` TEXT NOT NULL, `paymentStatus` TEXT NOT NULL, `paymentAmount` REAL, `dueDate` TEXT, `notes` TEXT, `createdDate` TEXT NOT NULL, `orderNumber` TEXT, `subtotal` REAL, `total` REAL, `tax` REAL, `expectedDeliveryDate` INTEGER, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, PRIMARY KEY (`id`))');
         await database.execute(
@@ -125,6 +127,8 @@ class _$AppDatabase extends AppDatabase {
             'CREATE TABLE IF NOT EXISTS `invoice_items` (`id` TEXT NOT NULL, `invoiceId` TEXT NOT NULL, `description` TEXT NOT NULL, `quantity` INTEGER NOT NULL, `unitPrice` REAL NOT NULL, `taxRate` REAL, `amount` REAL NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, FOREIGN KEY (`invoiceId`) REFERENCES `invoices` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`id`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `projects` (`id` TEXT NOT NULL, `company_id` TEXT NOT NULL, `client_id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `status` INTEGER NOT NULL, `start_date` INTEGER, `deadline` INTEGER, `completed_date` INTEGER, `budget` REAL NOT NULL, `spent` REAL NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `is_synced` INTEGER NOT NULL, `sync_date` INTEGER, `user_id` TEXT, PRIMARY KEY (`id`))');
+        await database.execute(
+            'CREATE TABLE IF NOT EXISTS `app_images` (`id` TEXT NOT NULL, `localPath` TEXT NOT NULL, `cloudUrl` TEXT, `ownerId` TEXT NOT NULL, `ownerType` TEXT NOT NULL, `syncStatus` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY (`id`))');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -166,6 +170,11 @@ class _$AppDatabase extends AppDatabase {
   @override
   PaymentDao get paymentDao {
     return _paymentDaoInstance ??= _$PaymentDao(database, changeListener);
+  }
+
+  @override
+  AppImageDao get appImageDao {
+    return _appImageDaoInstance ??= _$AppImageDao(database, changeListener);
   }
 }
 
@@ -502,11 +511,15 @@ class _$CustomerDao extends CustomerDao {
                   'name': item.name,
                   'phone': item.phone,
                   'email': item.email,
+                  'instagram': item.instagram,
                   'lastVisit': _dateTimeConvertor.encode(item.lastVisit),
                   'gender': item.gender,
                   'address': item.address,
                   'imagePath': item.imagePath,
                   'profileImageUrl': item.profileImageUrl,
+                  'stylePreferences': item.stylePreferences,
+                  'favoriteFabrics': item.favoriteFabrics,
+                  'notes': item.notes,
                   'createdDate': _dateTimeConvertor.encode(item.createdDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
                   'isSynced': item.isSynced ? 1 : 0,
@@ -522,11 +535,15 @@ class _$CustomerDao extends CustomerDao {
                   'name': item.name,
                   'phone': item.phone,
                   'email': item.email,
+                  'instagram': item.instagram,
                   'lastVisit': _dateTimeConvertor.encode(item.lastVisit),
                   'gender': item.gender,
                   'address': item.address,
                   'imagePath': item.imagePath,
                   'profileImageUrl': item.profileImageUrl,
+                  'stylePreferences': item.stylePreferences,
+                  'favoriteFabrics': item.favoriteFabrics,
+                  'notes': item.notes,
                   'createdDate': _dateTimeConvertor.encode(item.createdDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
                   'isSynced': item.isSynced ? 1 : 0,
@@ -542,11 +559,15 @@ class _$CustomerDao extends CustomerDao {
                   'name': item.name,
                   'phone': item.phone,
                   'email': item.email,
+                  'instagram': item.instagram,
                   'lastVisit': _dateTimeConvertor.encode(item.lastVisit),
                   'gender': item.gender,
                   'address': item.address,
                   'imagePath': item.imagePath,
                   'profileImageUrl': item.profileImageUrl,
+                  'stylePreferences': item.stylePreferences,
+                  'favoriteFabrics': item.favoriteFabrics,
+                  'notes': item.notes,
                   'createdDate': _dateTimeConvertor.encode(item.createdDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
                   'isSynced': item.isSynced ? 1 : 0,
@@ -574,11 +595,15 @@ class _$CustomerDao extends CustomerDao {
             name: row['name'] as String,
             phone: row['phone'] as String,
             email: row['email'] as String?,
+            instagram: row['instagram'] as String?,
             lastVisit: _dateTimeConvertor.decode(row['lastVisit'] as int),
             gender: row['gender'] as String,
             address: row['address'] as String?,
             imagePath: row['imagePath'] as String?,
             profileImageUrl: row['profileImageUrl'] as String?,
+            stylePreferences: row['stylePreferences'] as String?,
+            favoriteFabrics: row['favoriteFabrics'] as String?,
+            notes: row['notes'] as String?,
             createdDate: _dateTimeConvertor.decode(row['createdDate'] as int),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
             isSynced: (row['isSynced'] as int) != 0,
@@ -594,11 +619,15 @@ class _$CustomerDao extends CustomerDao {
             name: row['name'] as String,
             phone: row['phone'] as String,
             email: row['email'] as String?,
+            instagram: row['instagram'] as String?,
             lastVisit: _dateTimeConvertor.decode(row['lastVisit'] as int),
             gender: row['gender'] as String,
             address: row['address'] as String?,
             imagePath: row['imagePath'] as String?,
             profileImageUrl: row['profileImageUrl'] as String?,
+            stylePreferences: row['stylePreferences'] as String?,
+            favoriteFabrics: row['favoriteFabrics'] as String?,
+            notes: row['notes'] as String?,
             createdDate: _dateTimeConvertor.decode(row['createdDate'] as int),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
             isSynced: (row['isSynced'] as int) != 0,
@@ -915,11 +944,15 @@ class _$OrderDao extends OrderDao {
             name: row['name'] as String,
             phone: row['phone'] as String,
             email: row['email'] as String?,
+            instagram: row['instagram'] as String?,
             lastVisit: _dateTimeConvertor.decode(row['lastVisit'] as int),
             gender: row['gender'] as String,
             address: row['address'] as String?,
             imagePath: row['imagePath'] as String?,
             profileImageUrl: row['profileImageUrl'] as String?,
+            stylePreferences: row['stylePreferences'] as String?,
+            favoriteFabrics: row['favoriteFabrics'] as String?,
+            notes: row['notes'] as String?,
             createdDate: _dateTimeConvertor.decode(row['createdDate'] as int),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
             isSynced: (row['isSynced'] as int) != 0,
@@ -1938,6 +1971,106 @@ class _$PaymentDao extends PaymentDao {
   @override
   Future<void> deletePayment(Payment payment) async {
     await _paymentDeletionAdapter.delete(payment);
+  }
+}
+
+class _$AppImageDao extends AppImageDao {
+  _$AppImageDao(
+    this.database,
+    this.changeListener,
+  )   : _queryAdapter = QueryAdapter(database),
+        _appImageInsertionAdapter = InsertionAdapter(
+            database,
+            'app_images',
+            (AppImage item) => <String, Object?>{
+                  'id': item.id,
+                  'localPath': item.localPath,
+                  'cloudUrl': item.cloudUrl,
+                  'ownerId': item.ownerId,
+                  'ownerType': item.ownerType,
+                  'syncStatus': item.syncStatus,
+                  'createdAt': _dateTimeConvertor.encode(item.createdAt)
+                }),
+        _appImageUpdateAdapter = UpdateAdapter(
+            database,
+            'app_images',
+            ['id'],
+            (AppImage item) => <String, Object?>{
+                  'id': item.id,
+                  'localPath': item.localPath,
+                  'cloudUrl': item.cloudUrl,
+                  'ownerId': item.ownerId,
+                  'ownerType': item.ownerType,
+                  'syncStatus': item.syncStatus,
+                  'createdAt': _dateTimeConvertor.encode(item.createdAt)
+                }),
+        _appImageDeletionAdapter = DeletionAdapter(
+            database,
+            'app_images',
+            ['id'],
+            (AppImage item) => <String, Object?>{
+                  'id': item.id,
+                  'localPath': item.localPath,
+                  'cloudUrl': item.cloudUrl,
+                  'ownerId': item.ownerId,
+                  'ownerType': item.ownerType,
+                  'syncStatus': item.syncStatus,
+                  'createdAt': _dateTimeConvertor.encode(item.createdAt)
+                });
+
+  final sqflite.DatabaseExecutor database;
+
+  final StreamController<String> changeListener;
+
+  final QueryAdapter _queryAdapter;
+
+  final InsertionAdapter<AppImage> _appImageInsertionAdapter;
+
+  final UpdateAdapter<AppImage> _appImageUpdateAdapter;
+
+  final DeletionAdapter<AppImage> _appImageDeletionAdapter;
+
+  @override
+  Future<List<AppImage>> getImages(
+    String ownerId,
+    String ownerType,
+  ) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM app_images WHERE ownerId = ?1 AND ownerType = ?2',
+        mapper: (Map<String, Object?> row) => AppImage(
+            id: row['id'] as String,
+            localPath: row['localPath'] as String,
+            cloudUrl: row['cloudUrl'] as String?,
+            ownerId: row['ownerId'] as String,
+            ownerType: row['ownerType'] as String,
+            syncStatus: row['syncStatus'] as String,
+            createdAt: _dateTimeConvertor.decode(row['createdAt'] as int)),
+        arguments: [ownerId, ownerType]);
+  }
+
+  @override
+  Future<void> deleteByOwner(
+    String ownerId,
+    String ownerType,
+  ) async {
+    await _queryAdapter.queryNoReturn(
+        'DELETE FROM app_images WHERE ownerId = ?1 AND ownerType = ?2',
+        arguments: [ownerId, ownerType]);
+  }
+
+  @override
+  Future<void> insertImage(AppImage image) async {
+    await _appImageInsertionAdapter.insert(image, OnConflictStrategy.abort);
+  }
+
+  @override
+  Future<void> updateImage(AppImage image) async {
+    await _appImageUpdateAdapter.update(image, OnConflictStrategy.abort);
+  }
+
+  @override
+  Future<void> deleteImage(AppImage image) async {
+    await _appImageDeletionAdapter.delete(image);
   }
 }
 

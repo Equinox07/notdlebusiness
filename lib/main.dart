@@ -10,9 +10,12 @@ import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
 import 'package:notdle/providers/invoice_provider.dart';
 import 'package:notdle/providers/measurement_provider.dart';
+import 'package:notdle/models/repository/image_repository.dart';
+import 'package:notdle/providers/image_provider.dart';
 import 'package:notdle/providers/notification_provider.dart';
 import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/providers/payment_provider.dart';
+import 'package:notdle/services/image_storage_service.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -209,6 +212,15 @@ void main() async {
         ChangeNotifierProvider(create: (context) => NotificationProvider()),
         ChangeNotifierProvider(
           create: (context) => PaymentProvider(paymentDao: db.paymentDao),
+        ),
+        ChangeNotifierProvider(
+          create:
+              (context) => AppImageProvider(
+                repository: ImageRepository(
+                  db.appImageDao,
+                  ImageStorageService(),
+                ),
+              ),
         ),
       ],
       child: const IndexPage(),

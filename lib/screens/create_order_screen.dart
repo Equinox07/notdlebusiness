@@ -3,16 +3,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:notdle/models/customer.dart';
+import 'package:notdle/models/image_owner_types.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
+import 'package:notdle/providers/image_provider.dart';
 import 'package:notdle/providers/invoice_provider.dart';
 import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/screens/invoice_details_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:io';
 
 const _kPurple = Color(0xFF6200EE);
 const _kBg = Color(0xFFF5F4F8);
@@ -42,6 +46,17 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   String _outfitType = "Evening Gown";
   String _fabric = "";
   int _quantity = 1;
+  final List<File> _designImages = [];
+
+  Future<void> _pickDesignImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _designImages.add(File(pickedFile.path));
+      });
+    }
+  }
 
   // ── Pricing state ────────────────────────────────────────────────────────
   double _materialCost = 0;
@@ -187,6 +202,23 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     final orderProvider = Provider.of<OrderProvider>(context, listen: false);
     final dashProvider = Provider.of<DashBoardProvider>(context, listen: false);
     await orderProvider.addOrder(newOrder);
+
+    // Save design images
+    if (_designImages.isNotEmpty) {
+      if (!mounted) return;
+      final imageProvider = Provider.of<AppImageProvider>(
+        context,
+        listen: false,
+      );
+      for (final imageFile in _designImages) {
+        await imageProvider.saveMultipleImage(
+          ownerId: newOrder.id,
+          ownerType: ImageOwnerTypes.order,
+          file: imageFile,
+        );
+      }
+    }
+
     dashProvider.fetchCounts();
 
     if (!mounted) return;
@@ -361,7 +393,15 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                     onNotesSaved: (v) => _notes = v,
                   ),
                   const SizedBox(height: 16),
-                  _DesignInspirationCard(),
+                  _DesignInspirationCard(
+                    images: _designImages,
+                    onPickImage: _pickDesignImage,
+                    onRemoveImage: (index) {
+                      setState(() {
+                        _designImages.removeAt(index);
+                      });
+                    },
+                  ),
                   const SizedBox(height: 16),
                   _FabricSamplesCard(),
                   const SizedBox(height: 24),
@@ -1413,33 +1453,58 @@ class _FabricSamplesCard extends StatelessWidget {
 }
 
 class _DesignInspirationCard extends StatelessWidget {
+  final List<File> images;
+  final VoidCallback onPickImage;
+  final Function(int) onRemoveImage;
+
+  const _DesignInspirationCard({
+    required this.images,
+    required this.onPickImage,
+    required this.onRemoveImage,
+  });
+
   @override
   Widget build(BuildContext context) {
     return _SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Design Inspiration",
-            style: GoogleFonts.poppins(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: _kPurple.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.lightbulb_outline,
+                  color: _kPurple,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                "Design Inspiration",
+                style: GoogleFonts.poppins(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 14),
-          // Dashed upload zone
+          const SizedBox(height: 16),
+          // Upload Area
           GestureDetector(
-            onTap: () {},
+            onTap: onPickImage,
             child: Container(
               width: double.infinity,
-              height: 160,
+              padding: const EdgeInsets.symmetric(vertical: 24),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: _kPurple.withValues(alpha: 0.3),
                   width: 1.5,
-                  // Flutter doesn't support dashed borders natively; use a
-                  // solid thin border with a very light fill as an approximation.
                 ),
                 color: _kPurple.withValues(alpha: 0.03),
               ),
@@ -1480,47 +1545,82 @@ class _DesignInspirationCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              // Placeholder thumbnail
-              Container(
-                width: 70,
-                height: 70,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.grey.shade200,
-                  image: const DecorationImage(
-                    image: AssetImage('assets/images/fabric_sample.png'),
-                    fit: BoxFit.cover,
-                    onError: _imageErrorHandler,
+          if (images.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  ...images.asMap().entries.map((entry) {
+                    int idx = entry.key;
+                    File file = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Stack(
+                        children: [
+                          Container(
+                            width: 70,
+                            height: 70,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              image: DecorationImage(
+                                image: FileImage(file),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: GestureDetector(
+                              onTap: () => onRemoveImage(idx),
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.close,
+                                  size: 10,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                  GestureDetector(
+                    onTap: onPickImage,
+                    child: Container(
+                      width: 70,
+                      height: 70,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.grey.shade100,
+                        border: Border.all(
+                          color: Colors.grey.shade300,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.add,
+                        color: Colors.grey,
+                        size: 28,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-              const SizedBox(width: 10),
-              // Add more button
-              GestureDetector(
-                onTap: () {},
-                child: Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.grey.shade100,
-                    border: Border.all(color: Colors.grey.shade300, width: 1.5),
-                  ),
-                  child: const Icon(Icons.add, color: Colors.grey, size: 28),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ],
       ),
     );
   }
 }
-
-void _imageErrorHandler(Object exception, StackTrace? stackTrace) {}
 
 // ── BOTTOM CTA ────────────────────────────────────────────────────────────────
 
@@ -1773,8 +1873,11 @@ class _ProductionTimelineCard extends StatelessWidget {
                   color: _kPurple.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child:
-                    const Icon(Icons.timer_outlined, color: _kPurple, size: 18),
+                child: const Icon(
+                  Icons.timer_outlined,
+                  color: _kPurple,
+                  size: 18,
+                ),
               ),
               const SizedBox(width: 10),
               Text(

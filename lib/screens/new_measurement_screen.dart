@@ -4,8 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/measurement.dart';
-import 'package:notdle/providers/measurement_provider.dart';
+import 'package:notdle/models/image_owner_types.dart';
 import 'package:notdle/providers/customer_provider.dart';
+import 'package:notdle/providers/image_provider.dart';
+import 'package:notdle/providers/measurement_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:notdle/widgets/custom_app_bar.dart';
@@ -146,6 +148,22 @@ class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
 
     final provider = Provider.of<MeasurementProvider>(context, listen: false);
     await provider.addMeasurement(newMeasurement);
+
+    // Save design images
+    if (_designImages.isNotEmpty) {
+      if (!mounted) return;
+      final imageProvider = Provider.of<AppImageProvider>(
+        context,
+        listen: false,
+      );
+      for (final imageFile in _designImages) {
+        await imageProvider.saveMultipleImage(
+          ownerId: measurementId,
+          ownerType: ImageOwnerTypes.measurement,
+          file: imageFile,
+        );
+      }
+    }
 
     // Refresh history so it shows up in the profile screen immediately
     await provider.fetchMeasurementsWithCustomer(widget.customer.id!);

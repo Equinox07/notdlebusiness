@@ -1,7 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:notdle/models/company.dart';
+import 'package:notdle/providers/company_provider.dart';
+import 'package:notdle/providers/image_provider.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/api_provider.dart';
 import 'package:notdle/services/session_manager.dart';
@@ -23,7 +26,45 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _companyFuture = SessionManager.getCompany();
+    _loadCompany();
+  }
+
+  Future<void> _loadCompany() async {
+    setState(() {
+      _companyFuture = SessionManager.getCompany();
+    });
+  }
+
+  Future<void> _pickImage(Company company) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      if (!mounted) return;
+      final imageProvider = Provider.of<AppImageProvider>(
+        context,
+        listen: false,
+      );
+      await imageProvider.saveSingleImage(
+        ownerId: company.id,
+        ownerType: "user",
+        file: File(pickedFile.path),
+      );
+
+      final images = await imageProvider.getImages(company.id, "user");
+      if (images.isNotEmpty) {
+        final updatedCompany = company.copyWith(
+          imagePath: images.last.localPath,
+        );
+        if (!mounted) return;
+        final companyProvider = Provider.of<CompanyProvider>(
+          context,
+          listen: false,
+        );
+        await companyProvider.update(updatedCompany);
+        await SessionManager.saveCompany(updatedCompany);
+        _loadCompany();
+      }
+    }
   }
 
   @override
@@ -89,52 +130,59 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   Widget _buildProfileHeader(Company? company) {
     return Column(
       children: [
-        Stack(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-                border: Border.all(
-                  color: const Color(0xFFD4AF37), // Accurate Gold
-                  width: 2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: CircleAvatar(
-                radius: 40,
-                backgroundColor: Colors.grey.shade200,
-                backgroundImage:
-                    company?.imagePath != null
-                        ? FileImage(File(company!.imagePath!))
-                        : null,
-                child:
-                    company?.imagePath == null
-                        ? const Icon(Icons.person, size: 40, color: Colors.grey)
-                        : null,
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              right: 0,
-              child: Container(
-                padding: const EdgeInsets.all(6),
+        GestureDetector(
+          onTap: company != null ? () => _pickImage(company) : null,
+          child: Stack(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF6200EE), // Primary Purple
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
+                  color: Colors.white,
+                  border: Border.all(
+                    color: const Color(0xFFD4AF37), // Accurate Gold
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                child: const Icon(Icons.edit, color: Colors.white, size: 14),
+                child: CircleAvatar(
+                  radius: 40,
+                  backgroundColor: Colors.grey.shade200,
+                  backgroundImage:
+                      company?.imagePath != null
+                          ? FileImage(File(company!.imagePath!))
+                          : null,
+                  child:
+                      company?.imagePath == null
+                          ? const Icon(
+                            Icons.person,
+                            size: 40,
+                            color: Colors.grey,
+                          )
+                          : null,
+                ),
               ),
-            ),
-          ],
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6200EE), // Primary Purple
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: const Icon(Icons.edit, color: Colors.white, size: 14),
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 12),
         Text(

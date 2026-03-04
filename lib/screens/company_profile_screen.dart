@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:notdle/models/company.dart';
 import 'package:notdle/providers/company_provider.dart';
+import 'package:notdle/providers/image_provider.dart';
 import 'package:notdle/services/session_manager.dart';
 import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
@@ -80,10 +81,25 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null && _company != null) {
-      final updatedCompany = _company!.copyWith(imagePath: pickedFile.path);
-      setState(() {
-        _company = updatedCompany;
-      });
+      final imageProvider = Provider.of<AppImageProvider>(
+        context,
+        listen: false,
+      );
+      await imageProvider.saveSingleImage(
+        ownerId: _company!.id,
+        ownerType: "company",
+        file: File(pickedFile.path),
+      );
+
+      final images = await imageProvider.getImages(_company!.id, "company");
+      if (images.isNotEmpty) {
+        final updatedCompany = _company!.copyWith(
+          imagePath: images.last.localPath,
+        );
+        setState(() {
+          _company = updatedCompany;
+        });
+      }
     }
   }
 

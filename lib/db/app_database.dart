@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'package:floor/floor.dart';
+import 'package:notdle/models/dao/app_image_dao.dart';
 import 'package:notdle/models/dao/company_dao.dart';
 import 'package:notdle/models/dao/customer_dao.dart';
 import 'package:notdle/models/dao/invoice_dao.dart';
@@ -23,6 +24,7 @@ import 'package:notdle/models/order.dart';
 import 'package:notdle/models/measurement.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/project_model.dart';
+import 'package:notdle/models/app_image.dart';
 
 part 'app_database.g.dart'; // The file that will be generated
 
@@ -43,6 +45,7 @@ part 'app_database.g.dart'; // The file that will be generated
     OrderItem,
     InvoiceItem,
     Project,
+    AppImage,
   ],
 )
 abstract class AppDatabase extends FloorDatabase {
@@ -53,6 +56,7 @@ abstract class AppDatabase extends FloorDatabase {
   InvoiceDao get invoiceDao;
   ProjectDao get projectDao;
   PaymentDao get paymentDao;
+  AppImageDao get appImageDao;
 
   Future<void> truncateAllTables() async {
     await (database as sqflite.Database).transaction((txn) async {
@@ -68,6 +72,7 @@ abstract class AppDatabase extends FloorDatabase {
       await txn.execute(
         "DELETE FROM sqlite_sequence WHERE name='measurements'",
       );
+      await txn.execute('DELETE FROM app_images');
     });
   }
 }

@@ -6,14 +6,6 @@ class OrderWithDetails {
   final Order order;
   final Customer? customer;
   final Invoice? invoice;
-  final String? companyId;
-  final String? userId;
 
-  OrderWithDetails(
-    this.order,
-    this.customer,
-    this.invoice, {
-    this.companyId,
-    this.userId,
-  });
+  OrderWithDetails(this.order, this.customer, this.invoice);
 }

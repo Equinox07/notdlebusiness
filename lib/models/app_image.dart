@@ -7,6 +7,7 @@ class AppImage {
 
   final String localPath;
   final String? cloudUrl;
+  final String? publicId;
 
   final String ownerId; // ID of User / Order / etc
   final String ownerType; // user, order, chatMessage...
@@ -18,6 +19,7 @@ class AppImage {
     required this.id,
     required this.localPath,
     this.cloudUrl,
+    this.publicId,
     required this.ownerId,
     required this.ownerType,
     required this.syncStatus,

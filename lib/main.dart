@@ -150,6 +150,12 @@ void main() async {
     await database.execute('ALTER TABLE projects ADD COLUMN user_id TEXT');
   });
 
+  final migration6to7 = Migration(6, 7, (database) async {
+    await database.execute(
+      'CREATE TABLE IF NOT EXISTS `app_images` (`id` TEXT NOT NULL, `localPath` TEXT NOT NULL, `cloudUrl` TEXT, `publicId` TEXT, `ownerId` TEXT NOT NULL, `ownerType` TEXT NOT NULL, `syncStatus` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY (`id`))',
+    );
+  });
+
   final db =
       await $FloorAppDatabase
           .databaseBuilder('app_database')
@@ -159,6 +165,7 @@ void main() async {
             migration3to4,
             migration4to5,
             migration5to6,
+            migration6to7,
           ])
           .addCallback(
             Callback(

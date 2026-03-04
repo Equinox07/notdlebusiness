@@ -94,7 +94,7 @@ class _$AppDatabase extends AppDatabase {
     Callback? callback,
   ]) async {
     final databaseOptions = sqflite.OpenDatabaseOptions(
-      version: 6,
+      version: 7,
       onConfigure: (database) async {
         await database.execute('PRAGMA foreign_keys = ON');
         await callback?.onConfigure?.call(database);
@@ -128,7 +128,7 @@ class _$AppDatabase extends AppDatabase {
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `projects` (`id` TEXT NOT NULL, `company_id` TEXT NOT NULL, `client_id` TEXT NOT NULL, `title` TEXT NOT NULL, `description` TEXT, `status` INTEGER NOT NULL, `start_date` INTEGER, `deadline` INTEGER, `completed_date` INTEGER, `budget` REAL NOT NULL, `spent` REAL NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `is_synced` INTEGER NOT NULL, `sync_date` INTEGER, `user_id` TEXT, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `app_images` (`id` TEXT NOT NULL, `localPath` TEXT NOT NULL, `cloudUrl` TEXT, `ownerId` TEXT NOT NULL, `ownerType` TEXT NOT NULL, `syncStatus` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `app_images` (`id` TEXT NOT NULL, `localPath` TEXT NOT NULL, `cloudUrl` TEXT, `publicId` TEXT, `ownerId` TEXT NOT NULL, `ownerType` TEXT NOT NULL, `syncStatus` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY (`id`))');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -1986,6 +1986,7 @@ class _$AppImageDao extends AppImageDao {
                   'id': item.id,
                   'localPath': item.localPath,
                   'cloudUrl': item.cloudUrl,
+                  'publicId': item.publicId,
                   'ownerId': item.ownerId,
                   'ownerType': item.ownerType,
                   'syncStatus': item.syncStatus,
@@ -1999,6 +2000,7 @@ class _$AppImageDao extends AppImageDao {
                   'id': item.id,
                   'localPath': item.localPath,
                   'cloudUrl': item.cloudUrl,
+                  'publicId': item.publicId,
                   'ownerId': item.ownerId,
                   'ownerType': item.ownerType,
                   'syncStatus': item.syncStatus,
@@ -2012,6 +2014,7 @@ class _$AppImageDao extends AppImageDao {
                   'id': item.id,
                   'localPath': item.localPath,
                   'cloudUrl': item.cloudUrl,
+                  'publicId': item.publicId,
                   'ownerId': item.ownerId,
                   'ownerType': item.ownerType,
                   'syncStatus': item.syncStatus,
@@ -2041,6 +2044,7 @@ class _$AppImageDao extends AppImageDao {
             id: row['id'] as String,
             localPath: row['localPath'] as String,
             cloudUrl: row['cloudUrl'] as String?,
+            publicId: row['publicId'] as String?,
             ownerId: row['ownerId'] as String,
             ownerType: row['ownerType'] as String,
             syncStatus: row['syncStatus'] as String,

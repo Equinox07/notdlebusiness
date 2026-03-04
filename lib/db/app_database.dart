@@ -34,7 +34,7 @@ part 'app_database.g.dart'; // The file that will be generated
   DateTimeNullConvertor,
 ])
 @Database(
-  version: 6, // Increment version for schema changes
+  version: 7, // Increment version for schema changes
   entities: [
     Company,
     Customer,

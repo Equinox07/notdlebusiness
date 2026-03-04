@@ -1,14 +1,14 @@
+// lib/screens/customer_detail_screen.dart
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/navigation/app_navigation.dart';
-import 'package:notdle/screens/create_order_screen.dart';
-import 'package:notdle/screens/customer_orders_screen.dart';
 import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class CustomerDetailScreen extends StatelessWidget {
+class CustomerDetailScreen extends StatefulWidget {
   final Customer customer;
 
   static const String tag = "customer_details";
@@ -16,206 +16,302 @@ class CustomerDetailScreen extends StatelessWidget {
   const CustomerDetailScreen({super.key, required this.customer});
 
   @override
+  State<CustomerDetailScreen> createState() => _CustomerDetailScreenState();
+}
+
+class _CustomerDetailScreenState extends State<CustomerDetailScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: const CustomAppBar(title: "Customer Details"),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header Section (Profile Image & Name)
-              _CustomerHeader(customer: customer),
+      backgroundColor: const Color(0xFFF8F8FA),
+      appBar: CustomAppBar(
+        title: "Client Profile",
+        centerTitle: true,
+        isLight: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_horiz, color: Color(0xFF6200EE)),
+            onPressed: () {},
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: Column(
+        children: [
+          _buildHeader(),
+          const SizedBox(height: 24),
+          _buildQuickActions(),
+          const SizedBox(height: 24),
+          _buildTabBar(),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildDetailsTab(),
+                _buildOrdersTab(),
+                _buildMeasurementsTab(),
+              ],
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => AppNavigator.toCreateNewOrder(),
+        backgroundColor: const Color(0xFF6200EE),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
 
-              const SizedBox(height: 16),
-
-              // Contact Actions
-              _ContactActionsCard(customer: customer),
-
-              const SizedBox(height: 16),
-
-              // Quick Actions
-              _QuickActionsCard(customer: customer),
-
-              const SizedBox(height: 16),
-
-              // Recent Orders
-              // _RecentOrdersCard(),
-
-              // const SizedBox(height: 40),
-            ],
+  Widget _buildHeader() {
+    return Column(
+      children: [
+        const SizedBox(height: 12),
+        Stack(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFF3E8FF), width: 3),
+              ),
+              child: CircleAvatar(
+                radius: 54, // slightly smaller avatar
+                backgroundColor: const Color(0xFFF3E8FF),
+                backgroundImage:
+                    widget.customer.imagePath != null
+                        ? FileImage(File(widget.customer.imagePath!))
+                        : null,
+                child:
+                    widget.customer.imagePath == null
+                        ? const Icon(
+                          Icons.person,
+                          size: 54,
+                          color: Color(0xFF6200EE),
+                        )
+                        : null,
+              ),
+            ),
+            Positioned(
+              bottom: 2,
+              right: 2,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF6200EE),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: Text(
+                  "VIP",
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(
+          widget.customer.name,
+          style: GoogleFonts.poppins(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
         ),
+        const SizedBox(height: 2),
+        Text(
+          widget.customer.phone,
+          style: GoogleFonts.poppins(
+            fontSize: 15,
+            color: const Color(0xFF6200EE),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickActions() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildActionItem(
+          Icons.call,
+          "Call",
+          () => launchUrl(Uri(scheme: 'tel', path: widget.customer.phone)),
+        ),
+        const SizedBox(width: 20),
+        _buildActionItem(
+          Icons.chat_bubble,
+          "Message",
+          () => launchUrl(Uri(scheme: 'sms', path: widget.customer.phone)),
+        ),
+        const SizedBox(width: 20),
+        _buildActionItem(
+          Icons.email,
+          "Email",
+          () =>
+              widget.customer.email != null
+                  ? launchUrl(
+                    Uri(scheme: 'mailto', path: widget.customer.email!),
+                  )
+                  : null,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionItem(IconData icon, String label, VoidCallback onTap) {
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: 80, // wider button
+            height: 70, // proportional height
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.02),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(icon, color: const Color(0xFF6200EE), size: 26),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTabBar() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        dividerColor: Colors.transparent,
+        indicatorColor: const Color(0xFF6200EE),
+        indicatorWeight: 3,
+        labelColor: const Color(0xFF6200EE),
+        unselectedLabelColor: Colors.black45,
+        labelStyle: GoogleFonts.poppins(
+          fontWeight: FontWeight.bold,
+          fontSize: 15,
+        ),
+        unselectedLabelStyle: GoogleFonts.poppins(
+          fontWeight: FontWeight.w500,
+          fontSize: 15,
+        ),
+        tabs: const [
+          Tab(text: "Details"),
+          Tab(text: "Orders"),
+          Tab(text: "Measurements"),
+        ],
       ),
     );
   }
-}
 
-// Reusable Widget for the Customer Header
-class _CustomerHeader extends StatelessWidget {
-  final Customer customer;
+  Widget _buildDetailsTab() {
+    final styles =
+        widget.customer.stylePreferences
+            ?.split(", ")
+            .where((s) => s.isNotEmpty)
+            .toList() ??
+        [];
 
-  const _CustomerHeader({required this.customer});
-
-  @override
-  Widget build(BuildContext context) {
-    // The `isTablet` variable is now correctly placed inside the build method
-    // so it can access the runtime context.
-    final isTablet = (MediaQuery.of(context).size.width > 600);
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 16,
+      ), // reduced from 24
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: isTablet ? 60 : 50,
-            backgroundColor: Colors.indigo.shade100,
-            backgroundImage:
-                customer.imagePath != null
-                    ? FileImage(File(customer.imagePath!)) as ImageProvider
-                    : null,
-            child:
-                (customer.imagePath == null)
-                    ? Icon(
-                      Icons.person,
-                      size: isTablet ? 70 : 60,
-                      color: Colors.indigo.shade600,
-                    )
-                    : null,
+          Row(
+            children: [
+              Expanded(
+                child: _buildMetricCard("TOTAL SPENT", "\$4,250.00"),
+              ), // Could be calculated from orders
+              const SizedBox(width: 12), // reduced from 16
+              Expanded(child: _buildMetricCard("LAST ORDER", "Oct 12")),
+            ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            customer.name,
-            style: GoogleFonts.poppins(
-              fontSize: isTablet ? 22 : 20,
-              fontWeight: FontWeight.bold,
+          const SizedBox(height: 16), // reduced from 20/24
+          if (styles.isNotEmpty ||
+              widget.customer.stylePreferences == null) ...[
+            // show default if empty for design matching
+            _buildStylePreferences(
+              styles.isEmpty
+                  ? [
+                    "Minimalist",
+                    "Silk Fabrics",
+                    "Neutral Palette",
+                    "Tailored Fit",
+                    "Sustainable",
+                  ]
+                  : styles,
             ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            customer.email ?? "",
-            style: GoogleFonts.poppins(
-              fontSize: isTablet ? 16 : 14,
-              color: Colors.grey.shade600,
-            ),
-          ),
+            const SizedBox(height: 16), // reduced from 24
+          ],
+          if (widget.customer.notes != null &&
+              widget.customer.notes!.isNotEmpty) ...[
+            _buildNotesSection(),
+            const SizedBox(height: 20), // reduced from 32
+          ],
+          _buildRecentOrders(),
         ],
       ),
     );
   }
-}
 
-// Reusable Widget for Contact Actions
-class _ContactActionsCard extends StatelessWidget {
-  final Customer customer;
-
-  const _ContactActionsCard({required this.customer});
-
-  Future<void> _makePhoneCall(String phoneNumber) async {
-    final Uri uri = Uri(scheme: 'tel', path: phoneNumber);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
-  }
-
-  Future<void> _sendSMS(String phoneNumber) async {
-    final Uri uri = Uri(scheme: 'sms', path: phoneNumber);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
-  }
-
-  Future<void> _sendEmail(String email) async {
-    final Uri uri = Uri(
-      scheme: 'mailto',
-      path: email,
-      query: Uri.encodeFull('subject=Hello ${customer.name}&body=Hi,'),
-    );
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isTablet = (MediaQuery.of(context).size.width > 600);
-
+  Widget _buildMetricCard(String label, String value) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16), // reduced from 20
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20), // reduced from 24
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _ContactActionButton(
-            icon: Icons.call,
-            label: "Call",
-            color: Colors.green,
-            onTap: () => _makePhoneCall(customer.phone),
-          ),
-          _ContactActionButton(
-            icon: Icons.message,
-            label: "Message",
-            color: Colors.blue,
-            onTap: () => _sendSMS(customer.phone),
-          ),
-          _ContactActionButton(
-            icon: Icons.email,
-            label: "Email",
-            color: Colors.red,
-            onTap: () => _sendEmail(customer.email ?? ""),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// Reusable Widget for Quick Actions
-class _QuickActionsCard extends StatelessWidget {
-  final Customer customer;
-  const _QuickActionsCard({required this.customer});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
+            color: Colors.black.withOpacity(0.015),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -223,101 +319,35 @@ class _QuickActionsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Quick Actions',
+            label,
             style: GoogleFonts.poppins(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade800,
+              fontSize: 10,
+              fontWeight: FontWeight.w600, // less bold
+              color: const Color(0xFF717171), // darker grey
+              letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _ActionButton(
-                  icon: Icons.straighten,
-                  label: 'Measurements',
-                  color: Colors.blue.shade600,
-                  onTap: () => AppNavigator.toMeasurement2(customer: customer),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _ActionButton(
-                  icon: Icons.add_shopping_cart,
-                  label: 'New Order',
-                  color: Colors.green.shade600,
-                  onTap:
-                      () => Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder:
-                              (context) =>
-                                  CreateOrderScreen(customer: customer),
-                        ),
-                      ),
-                  //AppNavigator.toCreateOrder(customer: customer),
-                  // AppNavigator.toOrders(),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _ActionButton(
-                  icon: Icons.history,
-                  label: 'Order History',
-                  color: Colors.orange.shade600,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder:
-                            (context) =>
-                                CustomerOrdersScreen(customer: customer),
-                      ),
-                    );
-                  }, // AppNavigator.toOrders(),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _ActionButton(
-                  icon: Icons.call,
-                  label: 'Call Customer',
-                  color: Colors.purple.shade600,
-                  onTap:
-                      () => launchUrl(Uri(scheme: 'tel', path: customer.phone)),
-                ),
-              ),
-            ],
+          const SizedBox(height: 6), // reduced from 8
+          Text(
+            value,
+            style: GoogleFonts.poppins(
+              fontSize: 18, // reduced from 20
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
           ),
         ],
       ),
     );
   }
-}
 
-// Reusable Widget for Recent Orders
-class _RecentOrdersCard extends StatelessWidget {
-  const _RecentOrdersCard();
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildStylePreferences(List<String> styles) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20), // reduced from 24
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(20), // reduced from 24
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -326,177 +356,250 @@ class _RecentOrdersCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Recent Orders',
+                "Style Preferences",
                 style: GoogleFonts.poppins(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade800,
+                  fontSize: 16, // reduced from 18
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
                 ),
               ),
-              TextButton(onPressed: () {}, child: const Text('View All')),
+              const Icon(Icons.edit, color: Color(0xFF6200EE), size: 18),
             ],
           ),
-          const SizedBox(height: 8),
-          _OrderItem(
-            title: 'Formal Suit',
-            status: 'Completed',
-            statusColor: Colors.green,
-          ),
-          _OrderItem(
-            title: 'Wedding Dress',
-            status: 'In Progress',
-            statusColor: Colors.orange,
-          ),
-          _OrderItem(
-            title: 'Casual Shirt',
-            status: 'Pending',
-            statusColor: Colors.blue,
+          const SizedBox(height: 12), // reduced from 16
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: styles.map((s) => _buildTag(s)).toList(),
           ),
         ],
       ),
     );
   }
-}
 
-// Reusable Action Button
-class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: GoogleFonts.poppins(
-                color: color,
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+  Widget _buildTag(String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFAF5FF), // very soft purple background
+        border: Border.all(
+          color: const Color(0xFFE9D8F4),
+        ), // darker purple border
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.poppins(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: const Color(0xFF6200EE),
         ),
       ),
     );
   }
-}
 
-// Reusable Contact Action Button
-class _ContactActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
+  Widget _buildNotesSection() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20), // reduced from 24
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20), // reduced from 24
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Client Notes",
+            style: GoogleFonts.poppins(
+              fontSize: 16, // reduced
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 10), // reduced
+          Text(
+            widget.customer.notes!,
+            style: GoogleFonts.poppins(
+              fontSize: 13, // reduced
+              color: const Color(0xFF717171),
+              height: 1.4,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-  const _ContactActionButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildRecentOrders() {
     return Column(
       children: [
-        InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(50),
-          child: Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              shape: BoxShape.circle,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Recent Orders",
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.w600, // slightly less bold
+                color: Colors.black,
+              ),
             ),
-            child: Icon(icon, color: color, size: 28),
-          ),
+            Text(
+              "See all",
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF6200EE),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 6),
-        Text(
-          label,
-          style: GoogleFonts.poppins(fontSize: 13, color: Colors.grey.shade700),
+        const SizedBox(height: 16),
+        _buildOrderItem(
+          "Custom Silk Blouse",
+          "Order #SF-1204",
+          "\$320.00",
+          "Oct 12, 2023",
+          "COMPLETED",
+          const Color(0xFFE6F4EA), // Soft green bg
+          const Color(0xFF1E8E3E), // Dark green text
+        ),
+        const SizedBox(height: 12),
+        _buildOrderItem(
+          "Tailored Wool Blazer",
+          "Order #SF-1188",
+          "\$850.00",
+          "Sep 28, 2023",
+          "IN PROGRESS",
+          const Color(0xFFF3E8FF), // Soft purple bg
+          const Color(0xFF6200EE), // Purple text
         ),
       ],
     );
   }
-}
 
-// Reusable Order Item
-class _OrderItem extends StatelessWidget {
-  final String title;
-  final String status;
-  final Color statusColor;
-
-  const _OrderItem({
-    required this.title,
-    required this.status,
-    required this.statusColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+  Widget _buildOrderItem(
+    String title,
+    String subtitle,
+    String price,
+    String date,
+    String status,
+    Color statusBg,
+    Color statusText,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20), // slightly more rounded
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.015),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start, // Align to top
         children: [
           Container(
-            width: 8,
-            height: 8,
+            width: 72, // Larger image area
+            height: 72,
             decoration: BoxDecoration(
-              color: statusColor,
-              borderRadius: BorderRadius.circular(4),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              title,
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w500,
-                color: Colors.grey.shade800,
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: const Color(0xFFF3F4F6),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Text(
-              status,
-              style: GoogleFonts.poppins(
-                color: statusColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+            child: const Icon(Icons.image_outlined, color: Colors.black26),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: GoogleFonts.poppins(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusBg,
+                        borderRadius: BorderRadius.circular(
+                          20,
+                        ), // Pill shape for status
+                      ),
+                      child: Text(
+                        status,
+                        style: GoogleFonts.poppins(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: statusText,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: const Color(0xFF9095A0),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      price,
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Text(
+                      date,
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        color: const Color(0xFFBCC1CC),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildOrdersTab() {
+    return const Center(child: Text("Orders Tab Content"));
+  }
+
+  Widget _buildMeasurementsTab() {
+    return const Center(child: Text("Measurements Tab Content"));
   }
 }

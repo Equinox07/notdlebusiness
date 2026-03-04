@@ -3,17 +3,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/customer.dart';
+
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/customer_provider.dart';
-import 'package:provider/provider.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import 'package:notdle/widgets/custom_app_bar.dart';
-import 'package:image_picker/image_picker.dart'; // Import image_picker
-import 'dart:io';
-
 import 'package:uuid/uuid.dart';
-import 'package:notdle/utils/image_utils.dart';
 
 class AddCustomerScreen extends StatefulWidget {
   const AddCustomerScreen({super.key});
@@ -27,429 +24,502 @@ class AddCustomerScreen extends StatefulWidget {
 class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  // Personal Info
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _addressController = TextEditingController();
+  String _selectedGender = "Female"; // Default
 
-  String? _selectedGender;
-  File? _profileImage; // Stores the selected image file
+  // Style Preferences
+  final List<String> _selectedStyles = ["Minimalist"];
+  final List<String> _availableStyles = ["Minimalist", "Avant-Garde", "Bridal"];
+  final _fabricsController = TextEditingController();
 
-  final ImagePicker _picker = ImagePicker(); // Image picker instance
+  // Client Notes
+  final _notesController = TextEditingController();
 
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _profileImage = File(pickedFile.path);
-      });
-    }
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _addressController.dispose();
+    _fabricsController.dispose();
+    _notesController.dispose();
+    super.dispose();
   }
 
-  Future<Customer?> _saveCustomer() async {
-    if (!_formKey.currentState!.validate()) return null;
-
-    if (_selectedGender == null || _selectedGender == "Other") {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "Please select a valid gender.",
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return null;
-    }
+  Future<void> _save(bool withMeasurements) async {
+    if (!_formKey.currentState!.validate()) return;
 
     final customerId = const Uuid().v4();
-    String? savedImagePath;
-
-    if (_profileImage != null) {
-      savedImagePath = await ImageUtils.saveImagePermanently(
-        _profileImage!.path,
-        'customer',
-        customerId,
-      );
-    }
+    final now = DateTime.now();
 
     final newCustomer = Customer(
       id: customerId,
       name: _nameController.text.trim(),
-      gender: _selectedGender!,
       phone: _phoneController.text.trim(),
-      email: _emailController.text.trim(),
-      address: _addressController.text.trim(),
-      lastVisit: DateTime.now(),
-      createdDate: DateTime.now(),
-      imagePath: savedImagePath, // Save permanent image path if available
+      email:
+          _emailController.text.trim().isEmpty
+              ? null
+              : _emailController.text.trim(),
+      address:
+          _addressController.text.trim().isEmpty
+              ? null
+              : _addressController.text.trim(),
+      lastVisit: now,
+      gender: _selectedGender,
+      createdDate: now,
+      stylePreferences: _selectedStyles.join(", "),
+      favoriteFabrics: _fabricsController.text.trim(),
+      notes: _notesController.text.trim(),
     );
 
-    // final savedCustomer = await DatabaseHelper.instance.insertCustomer(
-    //   newCustomer,
-    // );
-    final savedCustomer = await Provider.of<CustomerProvider>(
+    // Save Customer
+    await Provider.of<CustomerProvider>(
       context,
       listen: false,
     ).addNewCustomer(newCustomer);
 
     if (mounted) {
       Provider.of<DashBoardProvider>(context, listen: false).fetchCounts();
+      if (withMeasurements) {
+        AppNavigator.toNewMeasurement(newCustomer);
+      } else {
+        Navigator.pop(context, newCustomer);
+      }
     }
-
-    return savedCustomer;
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus(); // Dismiss keyboard on tap outside
-      },
-      child: Scaffold(
-        backgroundColor: Colors.grey.shade50, // Lighter background
-        appBar: CustomAppBar(
-          title: "Add New Customer",
-          actions: [
-            IconButton(
-              onPressed: () async {
-                final saved = await _saveCustomer();
-                if (saved != null) {
-                  Navigator.pop(context, saved);
-                }
-              },
-              icon: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.check, color: Colors.white, size: 20),
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F8FA),
+      appBar: CustomAppBar(
+        title: "Add New Client",
+        centerTitle: true,
+        isLight: true,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.close, color: Color(0xFF6200EE)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => _save(false),
+            child: Text(
+              "Save",
+              style: GoogleFonts.poppins(
+                color: const Color(0xFF6200EE),
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
               ),
             ),
-            const SizedBox(width: 8),
-          ],
-        ),
-        body: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: Column(
-              children: [
-                // Description
-                Text(
-                  "Enter customer details below to create a new profile.",
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Image Picker Area
-                Center(
-                  child: GestureDetector(
-                    onTap: _pickImage,
-                    child: Stack(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.indigo.withOpacity(0.2),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                            border: Border.all(color: Colors.white, width: 4),
-                          ),
-                          child: CircleAvatar(
-                            radius: 50,
-                            backgroundColor: Colors.indigo.shade50,
-                            backgroundImage:
-                                _profileImage != null
-                                    ? FileImage(_profileImage!)
-                                    : null,
-                            child:
-                                _profileImage == null
-                                    ? Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.person_outline,
-                                          size: 32,
-                                          color: Colors.indigo.shade300,
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          "Add Photo",
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 10,
-                                            color: Colors.indigo.shade300,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                    : null,
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.indigo.shade600,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 3),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.camera_alt_rounded,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                // Form Fields Container
-                Column(
-                  children: [
-                    _buildInputField(
-                      controller: _nameController,
-                      label: "Full Name",
-                      icon: Icons.person_outline_rounded,
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ), // unified padding
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSectionHeader(Icons.person, "PERSONAL INFORMATION"),
+              const SizedBox(height: 12),
+              _buildInputField(
+                label: "Full Name",
+                controller: _nameController,
+                hintText: "Sarah Jenkins",
+                validator:
+                    (val) => val == null || val.isEmpty ? "Required" : null,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildInputField(
+                      label: "Mobile Number",
+                      controller: _phoneController,
+                      hintText: "+1 (555) 000-0000",
+                      keyboardType: TextInputType.phone,
                       validator:
                           (val) =>
-                              val == null || val.isEmpty ? "Enter name" : null,
+                              val == null || val.isEmpty ? "Required" : null,
                     ),
-                    const SizedBox(height: 16),
-                    _buildInputField(
-                      controller: _phoneController,
-                      label: "Phone Number",
-                      icon: Icons.phone_outlined,
-                      keyboardType: TextInputType.phone,
-                      maxLength: 10,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      validator: (val) {
-                        if (val == null || val.isEmpty) {
-                          return "Enter phone number";
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildDropdownField(
+                      label: "Gender",
+                      value: _selectedGender,
+                      items: ["Female", "Male", "Other"],
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() => _selectedGender = val);
                         }
-                        if (val.length != 10) {
-                          return "Phone number must be 10 digits";
-                        }
-                        return null;
                       },
                     ),
-                    const SizedBox(height: 16),
-                    _buildInputField(
-                      controller: _emailController,
-                      label: "Email Address (Optional)",
-                      icon: Icons.email_outlined,
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (val) {
-                        if (val == null || val.isEmpty) {
-                          return null; // Optional
-                        }
-                        if (!val.contains("@") || !val.contains(".")) {
-                          return "Enter a valid email address";
-                        }
-                        return null;
-                      },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _buildInputField(
+                label: "Email Address (Optional)",
+                controller: _emailController,
+                hintText: "sarah.j@example.com",
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 12),
+              _buildInputField(
+                label: "Address",
+                controller: _addressController,
+                hintText: "123 Main St, City, Country",
+                keyboardType: TextInputType.streetAddress,
+                validator:
+                    (val) => val == null || val.isEmpty ? "Required" : null,
+              ),
+              const SizedBox(height: 24), // reduced from 32
+
+              _buildSectionHeader(Icons.auto_awesome, "STYLE PREFERENCES"),
+              const SizedBox(height: 12), // reduced
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16), // reduced from 20
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: const Color(0xFFF0F0F0),
+                  ), // added faint border
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Primary Styles",
+                      style: GoogleFonts.poppins(
+                        fontSize: 13, // slightly smaller
+                        color: Colors.black87, // slightly darker
+                        fontWeight: FontWeight.w500, // added weight
+                      ),
                     ),
-                    const SizedBox(height: 16),
-                    _buildGenderDropdown(),
-                    const SizedBox(height: 16),
-                    _buildInputField(
-                      controller: _addressController,
-                      label: "Address",
-                      icon: Icons.location_on_outlined,
-                      maxLines: 3,
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        ..._availableStyles.map(
+                          (style) => _buildStyleTag(style),
+                        ),
+                        _buildAddTag(),
+                      ],
+                    ),
+                    const SizedBox(height: 16), // reduced
+                    Text(
+                      "Favorite Fabrics",
+                      style: GoogleFonts.poppins(
+                        fontSize: 13, // slightly smaller
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(12), // tighter padding
+                      decoration: BoxDecoration(
+                        color: const Color(
+                          0xFFF9FAFB,
+                        ), // light gray background from design
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: TextField(
+                        controller: _fabricsController,
+                        maxLines: 2,
+                        decoration: InputDecoration(
+                          hintText: "Silk, Linen, Sustainable Cotton...",
+                          hintStyle: GoogleFonts.poppins(
+                            color: Colors.black26,
+                            fontSize: 14,
+                          ),
+                          border: InputBorder.none,
+                          isDense: true,
+                        ),
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.black87,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 40),
-              ],
-            ),
+              ),
+              const SizedBox(height: 24), // reduced from 32
+
+              _buildSectionHeader(Icons.notes, "CLIENT NOTES"),
+              const SizedBox(height: 12), // reduced
+              Container(
+                padding: const EdgeInsets.all(16), // tighter padding
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: const Color(0xFFF0F0F0),
+                  ), // added faint border
+                ),
+                child: TextField(
+                  controller: _notesController,
+                  maxLines: 3, // slightly reduced
+                  decoration: InputDecoration(
+                    hintText:
+                        "Mention any specific fitting history, allergies to certain materials, or preferred seam finishes...",
+                    hintStyle: GoogleFonts.poppins(
+                      color: Colors.black26,
+                      fontSize: 14,
+                    ),
+                    border: InputBorder.none,
+                  ),
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 80), // Keep some spacing for bottom sheet
+            ],
           ),
         ),
-        bottomNavigationBar: _buildBottomActionButton(),
       ),
+      bottomSheet: _buildBottomButtons(),
+    );
+  }
+
+  Widget _buildSectionHeader(IconData icon, String title) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: const Color(0xFF6200EE)),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF5C6280),
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdownField({
+    required String label,
+    required String value,
+    required List<String> items,
+    required void Function(String?) onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(fontSize: 13, color: Colors.black54),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: value,
+          items:
+              items.map((String item) {
+                return DropdownMenuItem<String>(value: item, child: Text(item));
+              }).toList(),
+          onChanged: onChanged,
+          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF6200EE)),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Color(0xFF6200EE),
+                width: 1.5,
+              ),
+            ),
+          ),
+          style: GoogleFonts.poppins(
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildInputField({
     required String label,
     required TextEditingController controller,
-    IconData? icon,
+    String? hintText,
     TextInputType keyboardType = TextInputType.text,
-    int maxLines = 1,
-    int? maxLength,
-    List<TextInputFormatter>? inputFormatters,
     String? Function(String?)? validator,
   }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      maxLines: maxLines,
-      maxLength: maxLength,
-      inputFormatters: inputFormatters,
-      style: GoogleFonts.poppins(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Colors.black87,
-      ),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: GoogleFonts.poppins(color: Colors.grey.shade600),
-        prefixIcon:
-            icon != null
-                ? Icon(icon, color: Colors.indigo.shade400, size: 22)
-                : null,
-        filled: true,
-        fillColor: Colors.grey.shade200,
-        counterText: "",
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.poppins(fontSize: 13, color: Colors.black54),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          validator: validator,
+          cursorColor: const Color(0xFF6200EE),
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: GoogleFonts.poppins(color: Colors.black26),
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14, // slightly tighter
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Color(0xFFE5E7EB),
+                width: 1,
+              ), // faint border
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Color(0xFFE5E7EB),
+                width: 1,
+              ), // faint border
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Color(0xFF6200EE),
+                width: 1.5,
+              ),
+            ),
+          ),
+          style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w500),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.indigo.shade600, width: 2),
-        ),
-      ),
-      validator: validator,
+      ],
     );
   }
 
-  Widget _buildGenderDropdown() {
-    return DropdownButtonFormField<String>(
-      value: _selectedGender,
-      decoration: InputDecoration(
-        labelText: "Gender",
-        labelStyle: GoogleFonts.poppins(color: Colors.grey.shade600),
-        prefixIcon: Icon(
-          Icons.transgender,
-          color: Colors.indigo.shade400,
-          size: 22,
-        ),
-        filled: true,
-        fillColor: Colors.grey.shade200,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.indigo.shade600, width: 2),
-        ),
-      ),
-      items:
-          ["Male", "Female"].map((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(
-                value,
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            );
-          }).toList(),
-      onChanged: (String? newValue) {
+  Widget _buildStyleTag(String style) {
+    bool isSelected = _selectedStyles.contains(style);
+    return GestureDetector(
+      onTap: () {
         setState(() {
-          _selectedGender = newValue;
+          if (isSelected) {
+            _selectedStyles.remove(style);
+          } else {
+            _selectedStyles.add(style);
+          }
         });
       },
-      validator: (val) => val == null ? "Select gender" : null,
-      dropdownColor: Colors.white,
-      icon: const Icon(Icons.keyboard_arrow_down_rounded),
-      isExpanded: true,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF6200EE) : const Color(0xFFF3E8FF),
+          borderRadius: BorderRadius.circular(100),
+        ),
+        child: Text(
+          style,
+          style: GoogleFonts.poppins(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: isSelected ? Colors.white : const Color(0xFF6200EE),
+          ),
+        ),
+      ),
     );
   }
 
-  Widget _buildBottomActionButton() {
+  Widget _buildAddTag() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
-          ),
-        ],
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+        color: const Color(0xFFF3E8FF), // updated to light purple
+        borderRadius: BorderRadius.circular(100),
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.indigo.shade600, Colors.indigo.shade400],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.indigo.withOpacity(0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
+      child: Text(
+        "+ Add",
+        style: GoogleFonts.poppins(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: const Color(0xFF6200EE),
         ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () async {
-              final saved = await _saveCustomer();
-              if (saved != null) {
-                AppNavigator.toMeasurement2(customer: saved, replacement: true);
-              }
-            },
-            borderRadius: BorderRadius.circular(16),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 18),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.straighten, color: Colors.white, size: 24),
-                  const SizedBox(width: 12),
-                  Text(
-                    "Save & Take Measurement",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ],
+      ),
+    );
+  }
+
+  Widget _buildBottomButtons() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32), // unified padding
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(color: Color(0xFFF0F0F0)),
+        ), // faint border
+      ),
+      child: GestureDetector(
+        onTap: () => _save(true),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 16), // tighter
+          decoration: BoxDecoration(
+            color: const Color(0xFF6200EE),
+            borderRadius: BorderRadius.circular(20), // smooth radius
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF6200EE).withOpacity(0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
-            ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.straighten,
+                color: Colors.white,
+                size: 20,
+              ), // slightly smaller
+              const SizedBox(height: 6),
+              Text(
+                "Save & Take Measurements",
+                style: GoogleFonts.poppins(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
         ),
       ),

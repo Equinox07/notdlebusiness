@@ -31,6 +31,7 @@ import 'package:notdle/screens/notification_list_screen.dart';
 import 'package:notdle/screens/company_profile_screen.dart';
 import 'package:notdle/screens/notification_settings_screen.dart';
 import 'package:notdle/screens/subscription_billing_screen.dart';
+import 'package:notdle/screens/new_measurement_screen.dart';
 
 class AppNavigator {
   static final GlobalKey<NavigatorState> navigatorKey =
@@ -81,6 +82,16 @@ class AppNavigator {
           return MaterialPageRoute(
             builder:
                 (context) => CustomerMeasurementScreen(
+                  customer: settings.arguments as Customer,
+                ),
+          );
+        }
+        return null;
+      case NewMeasurementScreen.tag:
+        if (settings.arguments is Customer) {
+          return MaterialPageRoute(
+            builder:
+                (context) => NewMeasurementScreen(
                   customer: settings.arguments as Customer,
                 ),
           );
@@ -229,6 +240,13 @@ class AppNavigator {
     } else {
       navigatorKey.currentState?.pushNamed(AllMeasurementScreen.tag);
     }
+  }
+
+  static void toNewMeasurement(Customer customer) {
+    navigatorKey.currentState?.pushNamed(
+      NewMeasurementScreen.tag,
+      arguments: customer,
+    );
   }
 
   static void toMeasurementDetails({Measurement? measurement}) {

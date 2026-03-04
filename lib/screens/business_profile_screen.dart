@@ -64,9 +64,54 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
 
   Future<void> _pickImage() async {
     if (_currentUser == null) return;
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder:
+          (context) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(
+                    Icons.camera_alt_rounded,
+                    color: Color(0xFF6200EE),
+                  ),
+                  title: Text(
+                    "Take a photo",
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _getImage(ImageSource.camera);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(
+                    Icons.photo_library_rounded,
+                    color: Color(0xFF6200EE),
+                  ),
+                  title: Text(
+                    "Choose from gallery",
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _getImage(ImageSource.gallery);
+                  },
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+    );
+  }
 
+  Future<void> _getImage(ImageSource source) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(source: source);
     if (pickedFile != null) {
       if (!mounted) return;
       final imageProvider = Provider.of<AppImageProvider>(

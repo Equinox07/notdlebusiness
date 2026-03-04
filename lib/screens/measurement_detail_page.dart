@@ -1,377 +1,436 @@
-//MeasurementDetailPage
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/measurement.dart';
-import 'package:notdle/screens/customer_measurement.dart';
-import 'package:notdle/widgets/custom_app_bar.dart';
 
-// Assuming your Customer and Measurement models are correctly defined.
-
-class MeasurementDetailPage extends StatelessWidget {
+class MeasurementDetailPage extends StatefulWidget {
   final Measurement measurement;
   static const String tag = "measurement_details";
 
   const MeasurementDetailPage({super.key, required this.measurement});
 
   @override
-  Widget build(BuildContext context) {
-    final customer = measurement.customer!;
-    final isTablet = MediaQuery.of(context).size.width > 600;
-    final measurementName =
-        measurement.name.isNotEmpty ? measurement.name : "Untitled Measurement";
-    final date = measurement.createdDate;
-
-    final femaleFields = {
-      "Bust": "Bust",
-      "Niple to Niple": "Niple to Niple",
-      "Under Bust": "Under Bust",
-      "Waist": "Waist",
-      "Shoulder to Shoulder": "Shoulder to Shoulder",
-      "Full Blouse Length": "Full Blouse Length",
-      "Across Back": "Across Back",
-      "Around Arm": "Around Arm",
-      "Sleeve Length": "Sleeve Length",
-      "Sleeve Measurement": "Sleeve Measurement",
-      "Trouser Waist": "Trouser Waist",
-      "Thigh": "Thigh",
-      "Hip": "Hip",
-      "Knee": "Knee",
-      "Base": "Base",
-      "Cloth Type": "Cloth Type",
-    };
-
-    final maleFields = {
-      "Chest": "Chest",
-      "Across Back": "Across Back",
-      "Sleeve": "Sleeve",
-      "Cuff": "Cuff",
-      "Shirt": "Shirt",
-      "Waist": "Waist",
-      "Thigh": "Thigh",
-      "Knee": "Knee",
-      "Base": "Base",
-      "Trouser": "Trouser",
-      "Chin": "Chin",
-    };
-
-    final fields =
-        customer.gender.toLowerCase() == "female" ? femaleFields : maleFields;
-    final displayFields = measurement.measurementValues.keys.toList();
-
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      appBar: const CustomAppBar(title: "Details"),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Section (Name & Date)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    measurementName,
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                      height: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_today_outlined,
-                        size: 16,
-                        color: Colors.grey.shade600,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        "Created on ${_formatDate(date)}",
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            // Customer Card
-            _CustomerHeader(customer: customer),
-
-            const SizedBox(height: 24),
-
-            // Measurements Grid
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0, bottom: 16),
-                    child: Text(
-                      "Measurements",
-                      style: GoogleFonts.playfairDisplay(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                  GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: isTablet ? 3 : 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 1.1,
-                    children:
-                        displayFields.map((field) {
-                          String label = fields[field] ?? field;
-                          String valueText;
-                          if (field == "Sleeve Length" &&
-                              customer.gender.toLowerCase() == "female") {
-                            final sleeveOptions = [
-                              "None",
-                              "Short",
-                              "3 Quarters",
-                              "Full",
-                            ];
-                            final index =
-                                measurement.measurementValues[field]?.toInt() ??
-                                0;
-                            valueText = sleeveOptions[index];
-                          } else if (field == "Cloth Type" &&
-                              customer.gender.toLowerCase() == "female") {
-                            final clothOptions = [
-                              "None",
-                              "Trouser",
-                              "Skirt",
-                              "Full Dress",
-                            ];
-                            final index =
-                                measurement.measurementValues[field]?.toInt() ??
-                                0;
-                            final val =
-                                measurement.measurementValues["Cloth"] ?? 0.0;
-                            valueText = "${clothOptions[index]}: $val";
-                          } else {
-                            final val = measurement.measurementValues[field];
-                            valueText =
-                                val != null ? val.toStringAsFixed(1) : "N/A";
-                          }
-
-                          return _MeasurementCard(
-                            label: label,
-                            value: valueText,
-                          );
-                        }).toList(),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 100), // Space for FAB
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => CustomerMeasurementScreen(customer: customer),
-            ),
-          );
-        },
-        backgroundColor: Colors.indigo,
-        elevation: 4,
-        icon: const Icon(Icons.edit_outlined, color: Colors.white),
-        label: Text(
-          "Edit Measurements",
-          style: GoogleFonts.poppins(
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    const months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    return "${months[date.month - 1]} ${date.day}, ${date.year}";
-  }
+  State<MeasurementDetailPage> createState() => _MeasurementDetailPageState();
 }
 
-class _CustomerHeader extends StatelessWidget {
-  final dynamic customer;
-
-  const _CustomerHeader({required this.customer});
+class _MeasurementDetailPageState extends State<MeasurementDetailPage> {
+  bool _isMetric = true;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+    final customer = widget.measurement.customer!;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF9F9F9),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: Color(0xFF6200EE),
           ),
-        ],
-        border: Border.all(color: Colors.grey.shade100),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.grey.shade200, width: 2),
-            ),
-            child: CircleAvatar(
-              radius: 30,
-              backgroundColor: Colors.indigo.shade50,
-              backgroundImage:
-                  customer.imagePath != null
-                      ? FileImage(File(customer.imagePath!))
-                      : null,
-              child:
-                  customer.imagePath == null
-                      ? Text(
-                        customer.name.isNotEmpty
-                            ? customer.name[0].toUpperCase()
-                            : "?",
-                        style: GoogleFonts.playfairDisplay(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.indigo.shade400,
-                        ),
-                      )
-                      : null,
-            ),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  "Customer",
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey.shade500,
-                    letterSpacing: 1,
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 160),
+                  child: Text(
+                    customer.name,
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF1A1C1E),
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  customer.name,
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 18,
-                    color: Colors.black87,
+                const SizedBox(width: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 1,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF3E8FF),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    "VIP",
+                    style: GoogleFonts.poppins(
+                      fontSize: 8,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF6200EE),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 4),
+              ],
+            ),
+            Text(
+              "RAPID ENTRY MODE",
+              style: GoogleFonts.poppins(
+                fontSize: 10,
+                color: const Color(0xFFADADAD),
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          _buildGuideButton(),
+          const SizedBox(width: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6200EE),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              child: Text(
+                "SAVE",
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Unit toggle and Search
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F5F5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      _buildUnitOption("CM", _isMetric),
+                      _buildUnitOption("IN", !_isMetric),
+                    ],
+                  ),
+                ),
                 Row(
                   children: [
-                    Icon(
-                      Icons.phone_outlined,
-                      size: 14,
-                      color: Colors.grey.shade600,
-                    ),
-                    const SizedBox(width: 4),
                     Text(
-                      customer.phone,
+                      "SEARCH:",
                       style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFFADADAD),
                       ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(
+                      Icons.search,
+                      color: Color(0xFFADADAD),
+                      size: 24,
                     ),
                   ],
                 ),
               ],
             ),
           ),
+          const Divider(height: 1, color: Color(0xFFEEEEEE)),
+
+          // Measurement Sections
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              children: [
+                _buildSection("UPPER BODY", Icons.person_rounded, [
+                  _MeasurementItem(
+                    label: "Neck",
+                    value: "34.5",
+                    hasHistory: true,
+                  ),
+                  _MeasurementItem(
+                    label: "Shoulder",
+                    value: "42.0",
+                    hasHistory: true,
+                  ),
+                  _MeasurementItem(
+                    label: "Bust",
+                    value:
+                        widget.measurement.measurementValues["Bust"]
+                            ?.toStringAsFixed(1) ??
+                        "92.4",
+                    hasHistory: true,
+                  ),
+                ]),
+                const SizedBox(height: 20),
+                _buildSection("LOWER BODY", Icons.straighten_rounded, [
+                  _MeasurementItem(
+                    label: "Waist",
+                    value:
+                        widget.measurement.measurementValues["Waist"]
+                            ?.toStringAsFixed(1) ??
+                        "70.2",
+                    hasHistory: true,
+                  ),
+                  _MeasurementItem(
+                    label: "Hips",
+                    value:
+                        widget.measurement.measurementValues["Hip"]
+                            ?.toStringAsFixed(1) ??
+                        "96.8",
+                    hasHistory: true,
+                  ),
+                  _MeasurementItem(
+                    label: "Inseam",
+                    value: "78.0",
+                    hasHistory: true,
+                  ),
+                ]),
+                const SizedBox(height: 20),
+                _buildSection("ARMS & LEGS", Icons.architecture_rounded, [
+                  _MeasurementItem(
+                    label: "Sleeve",
+                    value:
+                        widget.measurement.measurementValues["Sleeve"]
+                            ?.toStringAsFixed(1) ??
+                        "58.5",
+                    hasHistory: true,
+                  ),
+                  _MeasurementItem(
+                    label: "Thigh",
+                    value:
+                        widget.measurement.measurementValues["Thigh"]
+                            ?.toStringAsFixed(1) ??
+                        "54.2",
+                    hasHistory: true,
+                  ),
+                  _MeasurementItem(
+                    label: "Ankle",
+                    value: "23.0",
+                    hasHistory: true,
+                  ),
+                ]),
+              ],
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: _buildBottomActions(),
+    );
+  }
+
+  Widget _buildUnitOption(String label, bool isActive) {
+    return GestureDetector(
+      onTap: () => setState(() => _isMetric = label == "CM"),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow:
+              isActive
+                  ? [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                  : null,
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: isActive ? const Color(0xFF6200EE) : const Color(0xFFADADAD),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGuideButton() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "GUIDE",
+          style: GoogleFonts.poppins(
+            fontSize: 8,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFFD48806),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF7E6),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: const Color(0xFFFFE58F)),
+          ),
+          child: const Icon(
+            Icons.accessibility_new_rounded,
+            size: 20,
+            color: Color(0xFFD48806),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSection(String title, IconData icon, List<Widget> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            children: [
+              Icon(icon, size: 20, color: const Color(0xFF6200EE)),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF6200EE),
+                  letterSpacing: 1,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(child: Divider(color: Color(0xFFEEEEEE))),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        ...items,
+      ],
+    );
+  }
+
+  Widget _buildBottomActions() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Colors.grey.shade100)),
+      ),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildBottomActionItem(Icons.edit_note_rounded, "RECORD", true),
+          _buildBottomActionItem(
+            Icons.compare_arrows_rounded,
+            "COMPARE",
+            false,
+          ),
+          _buildBottomActionItem(Icons.file_upload_outlined, "EXPORT", false),
+          _buildBottomActionItem(Icons.print_outlined, "PRINT TAG", false),
         ],
       ),
     );
   }
+
+  Widget _buildBottomActionItem(IconData icon, String label, bool isActive) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          color: isActive ? const Color(0xFF6200EE) : const Color(0xFFADADAD),
+          size: 28,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: isActive ? const Color(0xFF6200EE) : const Color(0xFFADADAD),
+            letterSpacing: 0.5,
+          ),
+        ),
+      ],
+    );
+  }
 }
 
-class _MeasurementCard extends StatelessWidget {
+class _MeasurementItem extends StatelessWidget {
   final String label;
   final String value;
+  final bool hasHistory;
 
-  const _MeasurementCard({required this.label, required this.value});
+  const _MeasurementItem({
+    required this.label,
+    required this.value,
+    required this.hasHistory,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: Colors.grey.shade100),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: GoogleFonts.poppins(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey.shade500,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          Text(
-            value,
-            style: GoogleFonts.playfairDisplay(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: Colors.indigo.shade900,
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: GoogleFonts.poppins(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF1A1C1E),
+                ),
+              ),
             ),
-          ),
-        ],
+            if (hasHistory)
+              const Icon(
+                Icons.history_rounded,
+                color: Color(0xFFD1D5DB),
+                size: 20,
+              ),
+            const SizedBox(width: 16),
+            Text(
+              value,
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF6200EE),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

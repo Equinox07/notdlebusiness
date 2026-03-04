@@ -90,7 +90,6 @@ class _CustomerMeasurementScreenState
 
   @override
   void initState() {
-    debugPrint("*****onCustomerMeasurement*******");
     super.initState();
     _fields =
         widget.customer.gender.toLowerCase() == "female"

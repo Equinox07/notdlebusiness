@@ -1,9 +1,8 @@
-// lib/screens/add_customer_screen.dart
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:notdle/models/customer.dart';
-
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
@@ -30,6 +29,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final _emailController = TextEditingController();
   final _addressController = TextEditingController();
   String _selectedGender = "Female"; // Default
+  String? _imagePath;
 
   @override
   void dispose() {
@@ -38,6 +38,62 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     _emailController.dispose();
     _addressController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder:
+          (context) => SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(
+                    Icons.camera_alt_rounded,
+                    color: Color(0xFF6200EE),
+                  ),
+                  title: Text(
+                    "Take a photo",
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _getImage(ImageSource.camera);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(
+                    Icons.photo_library_rounded,
+                    color: Color(0xFF6200EE),
+                  ),
+                  title: Text(
+                    "Choose from gallery",
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _getImage(ImageSource.gallery);
+                  },
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+    );
+  }
+
+  Future<void> _getImage(ImageSource source) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: source);
+    if (pickedFile != null) {
+      setState(() {
+        _imagePath = pickedFile.path;
+      });
+    }
   }
 
   Future<void> _save(bool withMeasurements) async {
@@ -60,6 +116,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               : _addressController.text.trim(),
       lastVisit: now,
       gender: _selectedGender,
+      imagePath: _imagePath,
       createdDate: now,
     );
 
@@ -116,8 +173,72 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionHeader(Icons.person, "PERSONAL INFORMATION"),
-              const SizedBox(height: 12),
+              Center(
+                child: Column(
+                  children: [
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: Stack(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.08),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: CircleAvatar(
+                              radius: 50,
+                              backgroundColor: const Color(0xFFF3E8FF),
+                              backgroundImage:
+                                  _imagePath != null
+                                      ? FileImage(File(_imagePath!))
+                                      : null,
+                              child:
+                                  _imagePath == null
+                                      ? const Icon(
+                                        Icons.person_add_rounded,
+                                        size: 40,
+                                        color: Color(0xFF6200EE),
+                                      )
+                                      : null,
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF6200EE),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 2,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt_rounded,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    _buildSectionHeader(Icons.person, "PERSONAL INFORMATION"),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
               _buildInputField(
                 label: "Full Name",
                 controller: _nameController,
@@ -132,11 +253,15 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                     child: _buildInputField(
                       label: "Mobile Number",
                       controller: _phoneController,
-                      hintText: "+1 (555) 000-0000",
+                      hintText: "5550000000",
                       keyboardType: TextInputType.phone,
-                      validator:
-                          (val) =>
-                              val == null || val.isEmpty ? "Required" : null,
+                      maxLength: 10,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      validator: (val) {
+                        if (val == null || val.isEmpty) return "Required";
+                        if (val.length != 10) return "Must be 10 digits";
+                        return null;
+                      },
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -181,6 +306,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
 
   Widget _buildSectionHeader(IconData icon, String title) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(icon, size: 20, color: const Color(0xFF6200EE)),
         const SizedBox(width: 8),
@@ -257,6 +383,8 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     required TextEditingController controller,
     String? hintText,
     TextInputType keyboardType = TextInputType.text,
+    int? maxLength,
+    List<TextInputFormatter>? inputFormatters,
     String? Function(String?)? validator,
   }) {
     return Column(
@@ -270,10 +398,13 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
+          maxLength: maxLength,
+          inputFormatters: inputFormatters,
           validator: validator,
           cursorColor: const Color(0xFF6200EE),
           decoration: InputDecoration(
             hintText: hintText,
+            counterText: "", // Hide character counter
             hintStyle: GoogleFonts.poppins(color: Colors.black26),
             filled: true,
             fillColor: Colors.white,
@@ -328,7 +459,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
             borderRadius: BorderRadius.circular(20), // smooth radius
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF6200EE).withOpacity(0.3),
+                color: const Color(0xFF6200EE).withValues(alpha: 0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),

@@ -52,10 +52,11 @@ class _DashboardHomeState extends State<DashboardHome> {
                 color: const Color(0xFF6200EE).withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
-                Icons.polyline_outlined,
-                color: Color(0xFF6200EE),
-                size: 20,
+              child: Image.asset(
+                'assets/icon/app_ico.png',
+                width: 20,
+                height: 20,
+                fit: BoxFit.contain,
               ),
             ),
             const SizedBox(width: 14),

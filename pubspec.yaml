@@ -104,6 +104,7 @@ flutter:
     - assets/images/bgplain.png
     - assets/images/us_flag.png
     - assets/images/app_icon.png
+    - assets/icon/app_ico.png
     - assets/splash_screen.png
     - assets/db/app_database.db
     - assets/images/onboarding_digital_solution.png

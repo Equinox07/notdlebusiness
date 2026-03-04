@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:notdle/models/customer.dart';
+import 'package:notdle/models/enum/measurement_category.dart';
 import 'package:notdle/models/measurement.dart';
+import 'package:notdle/models/measurement_field.dart';
 import 'package:notdle/models/image_owner_types.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/image_provider.dart';
@@ -25,13 +27,14 @@ class NewMeasurementScreen extends StatefulWidget {
 class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
   bool _isMetric = false;
   final _nameController = TextEditingController();
-  final _bustController = TextEditingController();
-  final _waistController = TextEditingController();
-  final _shouldersController = TextEditingController();
-  final _sleeveController = TextEditingController();
+
+  // Dynamic fields from MeasurementField model
+  late List<MeasurementField> _fields;
+  late Map<String, TextEditingController> _controllers;
+  late Map<MeasurementCategory, List<MeasurementField>> _grouped;
 
   bool _upperBodyExpanded = true;
-  bool _lowerBodyExpanded = false;
+  bool _lowerBodyExpanded = true;
 
   // Style Preferences
   final List<String> _selectedStyles = [];
@@ -50,6 +53,17 @@ class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
     super.initState();
     _nameController.text =
         "Measurement - ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}";
+
+    // Pick gender-appropriate fields
+    final gender = widget.customer.gender.toLowerCase();
+    _fields = (gender == 'female') ? femaleMeasurements : maleMeasurements;
+
+    // Build a controller for every field
+    _controllers = {for (final f in _fields) f.name: TextEditingController()};
+
+    // Group fields by category (upperBody, lowerBody, other)
+    _grouped = _fields.groupByCategory();
+
     if (widget.customer.stylePreferences != null &&
         widget.customer.stylePreferences!.isNotEmpty) {
       _selectedStyles.addAll(
@@ -63,10 +77,9 @@ class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
   @override
   void dispose() {
     _nameController.dispose();
-    _bustController.dispose();
-    _waistController.dispose();
-    _shouldersController.dispose();
-    _sleeveController.dispose();
+    for (final c in _controllers.values) {
+      c.dispose();
+    }
     _fabricsController.dispose();
     _notesController.dispose();
     super.dispose();
@@ -127,13 +140,34 @@ class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
   }
 
   Future<void> _saveMeasurements() async {
+    // Validate: at least 2 measurement fields must be filled
+    final filledCount =
+        _controllers.values.where((c) => c.text.trim().isNotEmpty).length;
+
+    if (filledCount < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Please fill in at least 2 measurements before saving.",
+            style: GoogleFonts.poppins(fontSize: 13),
+          ),
+          backgroundColor: const Color(0xFF6200EE),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      );
+      return;
+    }
+
     final measurementId = const Uuid().v4();
-    final values = {
-      "Bust": double.tryParse(_bustController.text) ?? 0.0,
-      "Waist": double.tryParse(_waistController.text) ?? 0.0,
-      "Shoulders": double.tryParse(_shouldersController.text) ?? 0.0,
-      "Sleeve": double.tryParse(_sleeveController.text) ?? 0.0,
-    };
+
+    // Build values map from all dynamic controllers
+    final values = <String, double>{};
+    for (final entry in _controllers.entries) {
+      values[entry.key] = double.tryParse(entry.value.text) ?? 0.0;
+    }
 
     final newMeasurement = Measurement(
       id: measurementId,
@@ -168,16 +202,16 @@ class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
     // Refresh history so it shows up in the profile screen immediately
     await provider.fetchMeasurementsWithCustomer(widget.customer.id!);
 
-    final updatedCustomer = widget.customer.copyWith(
-      stylePreferences: _selectedStyles.join(", "),
-      favoriteFabrics: _fabricsController.text.trim(),
-      notes: _notesController.text.trim(),
-    );
+    // final updatedCustomer = widget.customer.copyWith(
+    //   stylePreferences: _selectedStyles.join(", "),
+    //   favoriteFabrics: _fabricsController.text.trim(),
+    //   notes: _notesController.text.trim(),
+    // );
 
-    await Provider.of<CustomerProvider>(
-      context,
-      listen: false,
-    ).updateCustomer(updatedCustomer);
+    // await Provider.of<CustomerProvider>(
+    //   context,
+    //   listen: false,
+    // ).updateCustomer(updatedCustomer);
 
     if (!mounted) return;
     Navigator.pop(context);
@@ -285,58 +319,31 @@ class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            _buildExpandableSection(
-              title: "Upper Body",
-              isExpanded: _upperBodyExpanded,
-              onToggle:
-                  () =>
-                      setState(() => _upperBodyExpanded = !_upperBodyExpanded),
-              content: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildMeasurementField("BUST", _bustController),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildMeasurementField(
-                          "WAIST",
-                          _waistController,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildMeasurementField(
-                          "SHOULDERS",
-                          _shouldersController,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildMeasurementField(
-                          "SLEEVE",
-                          _sleeveController,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+            // ── Upper Body ──
+            if (_grouped.containsKey(MeasurementCategory.upperBody))
+              _buildExpandableSection(
+                title: "Upper Body",
+                icon: Icons.accessibility_new_rounded,
+                isExpanded: _upperBodyExpanded,
+                onToggle:
+                    () => setState(
+                      () => _upperBodyExpanded = !_upperBodyExpanded,
+                    ),
+                fields: _grouped[MeasurementCategory.upperBody]!,
               ),
-            ),
             const SizedBox(height: 12),
-            _buildExpandableSection(
-              title: "Lower Body",
-              isExpanded: _lowerBodyExpanded,
-              onToggle:
-                  () =>
-                      setState(() => _lowerBodyExpanded = !_lowerBodyExpanded),
-              content: const SizedBox.shrink(),
-            ),
+            // ── Lower Body ──
+            if (_grouped.containsKey(MeasurementCategory.lowerBody))
+              _buildExpandableSection(
+                title: "Lower Body",
+                icon: Icons.airline_seat_legroom_normal_rounded,
+                isExpanded: _lowerBodyExpanded,
+                onToggle:
+                    () => setState(
+                      () => _lowerBodyExpanded = !_lowerBodyExpanded,
+                    ),
+                fields: _grouped[MeasurementCategory.lowerBody]!,
+              ),
             const SizedBox(height: 24),
             _buildSectionHeader(Icons.auto_awesome, "STYLE PREFERENCES"),
             const SizedBox(height: 12),
@@ -636,10 +643,50 @@ class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
 
   Widget _buildExpandableSection({
     required String title,
+    required IconData icon,
     required bool isExpanded,
     required VoidCallback onToggle,
-    required Widget content,
+    required List<MeasurementField> fields,
   }) {
+    // Build a true 2-column grid using rows of Expanded pairs
+    final rows = <Widget>[];
+    for (int i = 0; i < fields.length; i += 2) {
+      final left = fields[i];
+      final hasRight = i + 1 < fields.length;
+      final right = hasRight ? fields[i + 1] : null;
+
+      rows.add(
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: _buildMeasurementField(
+                left.name.toUpperCase(),
+                _controllers[left.name]!,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child:
+                  right != null
+                      ? _buildMeasurementField(
+                        right.name.toUpperCase(),
+                        _controllers[right.name]!,
+                      )
+                      : const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      );
+
+      if (i + 2 < fields.length) rows.add(const SizedBox(height: 12));
+    }
+
+    Widget content = Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Column(children: rows),
+    );
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -654,24 +701,32 @@ class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
               horizontal: 20,
               vertical: 4,
             ),
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3E8FF),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, size: 18, color: const Color(0xFF6200EE)),
+            ),
             title: Text(
               title,
               style: GoogleFonts.poppins(
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: Colors.black87,
               ),
+            ),
+            subtitle: Text(
+              "${fields.length} measurements",
+              style: GoogleFonts.poppins(fontSize: 11, color: Colors.black38),
             ),
             trailing: Icon(
               isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
               color: isExpanded ? const Color(0xFF6200EE) : Colors.black38,
             ),
           ),
-          if (isExpanded)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              child: content,
-            ),
+          if (isExpanded) content,
         ],
       ),
     );

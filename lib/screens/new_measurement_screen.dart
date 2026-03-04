@@ -22,6 +22,7 @@ class NewMeasurementScreen extends StatefulWidget {
 
 class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
   bool _isMetric = false;
+  final _nameController = TextEditingController();
   final _bustController = TextEditingController();
   final _waistController = TextEditingController();
   final _shouldersController = TextEditingController();
@@ -45,6 +46,8 @@ class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
   @override
   void initState() {
     super.initState();
+    _nameController.text =
+        "Measurement - ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}";
     if (widget.customer.stylePreferences != null &&
         widget.customer.stylePreferences!.isNotEmpty) {
       _selectedStyles.addAll(
@@ -57,6 +60,7 @@ class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _bustController.dispose();
     _waistController.dispose();
     _shouldersController.dispose();
@@ -132,15 +136,19 @@ class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
     final newMeasurement = Measurement(
       id: measurementId,
       customerId: widget.customer.id!,
-      name: "Initial Profile Measurement",
+      name:
+          _nameController.text.trim().isEmpty
+              ? "Unnamed Measurement"
+              : _nameController.text.trim(),
       measurementValues: values,
       createdDate: DateTime.now(),
     );
 
-    await Provider.of<MeasurementProvider>(
-      context,
-      listen: false,
-    ).addMeasurement(newMeasurement);
+    final provider = Provider.of<MeasurementProvider>(context, listen: false);
+    await provider.addMeasurement(newMeasurement);
+
+    // Refresh history so it shows up in the profile screen immediately
+    await provider.fetchMeasurementsWithCustomer(widget.customer.id!);
 
     final updatedCustomer = widget.customer.copyWith(
       stylePreferences: _selectedStyles.join(", "),
@@ -153,11 +161,8 @@ class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
       listen: false,
     ).updateCustomer(updatedCustomer);
 
-    if (mounted) {
-      Navigator.pop(
-        context,
-      ); // Also potentially pop to specific route, but pop is fine.
-    }
+    if (!mounted) return;
+    Navigator.pop(context);
   }
 
   @override
@@ -224,6 +229,33 @@ class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
                     ),
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            _buildSectionHeader(Icons.label_outline, "MEASUREMENT NAME"),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFF0F0F0)),
+              ),
+              child: TextField(
+                controller: _nameController,
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+                decoration: InputDecoration(
+                  hintText: "e.g., Wedding Suit, Office Wear...",
+                  hintStyle: GoogleFonts.poppins(
+                    color: Colors.black26,
+                    fontSize: 14,
+                  ),
+                  border: InputBorder.none,
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -377,10 +409,10 @@ class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: const Color(0xFF6200EE).withOpacity(0.3),
+                          color: const Color(0xFF6200EE).withValues(alpha: 0.3),
                           width: 1.5,
                         ),
-                        color: const Color(0xFF6200EE).withOpacity(0.03),
+                        color: const Color(0xFF6200EE).withValues(alpha: 0.03),
                       ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -737,7 +769,7 @@ class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF6200EE).withOpacity(0.3),
+                color: const Color(0xFF6200EE).withValues(alpha: 0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),

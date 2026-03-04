@@ -6,6 +6,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/widgets/custom_app_bar.dart';
+import 'package:intl/intl.dart';
+import 'package:notdle/models/measurement.dart';
+import 'package:notdle/providers/measurement_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CustomerDetailScreen extends StatefulWidget {
@@ -27,6 +31,14 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.customer.id != null) {
+        Provider.of<MeasurementProvider>(
+          context,
+          listen: false,
+        ).fetchMeasurementsWithCustomer(widget.customer.id!);
+      }
+    });
   }
 
   @override
@@ -188,7 +200,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -347,7 +359,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
         borderRadius: BorderRadius.circular(20), // reduced from 24
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.015),
+            color: Colors.black.withValues(alpha: 0.015),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -533,7 +545,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
         borderRadius: BorderRadius.circular(20), // slightly more rounded
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.015),
+            color: Colors.black.withValues(alpha: 0.015),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -638,6 +650,112 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
   }
 
   Widget _buildMeasurementsTab() {
-    return const Center(child: Text("Measurements Tab Content"));
+    return Consumer<MeasurementProvider>(
+      builder: (context, provider, child) {
+        final measurements = provider.customerMeasurements;
+
+        if (measurements.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.straighten, size: 48, color: Colors.grey.shade300),
+                const SizedBox(height: 16),
+                Text(
+                  "No measurements recorded yet",
+                  style: GoogleFonts.poppins(color: Colors.grey.shade500),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.all(20),
+          itemCount: measurements.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final m = measurements[index];
+            return _buildMeasurementItem(m);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildMeasurementItem(Measurement m) {
+    final dateStr = DateFormat('MMM d, yyyy').format(m.createdDate);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.015),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  m.name,
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Text(
+                dateStr,
+                style: GoogleFonts.poppins(
+                  fontSize: 11,
+                  color: const Color(0xFFBCC1CC),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 24,
+            runSpacing: 12,
+            children:
+                m.measurementValues.entries.map((entry) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        entry.key.toUpperCase(),
+                        style: GoogleFonts.poppins(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF9095A0),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      Text(
+                        entry.value.toStringAsFixed(1),
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
+          ),
+        ],
+      ),
+    );
   }
 }

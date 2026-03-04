@@ -403,8 +403,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  _FabricSamplesCard(),
-                  const SizedBox(height: 24),
+                  // _FabricSamplesCard(),
+                  // const SizedBox(height: 24),
                   // ── Step 3: Pricing & Payments ─────────────────────────────
                   _SectionStepLabel(
                     step: 3,
@@ -1326,131 +1326,131 @@ class _DashedLinePainter extends CustomPainter {
 
 // ── FABRIC SAMPLES CARD ─────────────────────────────────────────────────────
 
-class _FabricSamplesCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return _SectionCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.amber.shade50,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  Icons.colorize_outlined,
-                  color: Colors.amber.shade700,
-                  size: 18,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Text(
-                "Fabric Samples",
-                style: GoogleFonts.poppins(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            "Attach physical fabric swatches or colour references",
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: Colors.grey.shade500,
-            ),
-          ),
-          const SizedBox(height: 14),
-          // Upload zone
-          GestureDetector(
-            onTap: () {},
-            child: Container(
-              width: double.infinity,
-              height: 140,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.amber.shade300, width: 1.5),
-                color: Colors.amber.shade50.withValues(alpha: 0.5),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: Colors.amber.shade600,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.upload_file_outlined,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    "Upload Fabric Sample",
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "JPG, PNG or PDF · Max 10 MB",
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Colors.grey.shade500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 14),
-          // Thumbnail strip
-          Row(
-            children: [
-              Container(
-                width: 70,
-                height: 70,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.amber.shade100,
-                ),
-                child: Icon(
-                  Icons.texture,
-                  color: Colors.amber.shade700,
-                  size: 30,
-                ),
-              ),
-              const SizedBox(width: 10),
-              GestureDetector(
-                onTap: () {},
-                child: Container(
-                  width: 70,
-                  height: 70,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.grey.shade100,
-                    border: Border.all(color: Colors.grey.shade300, width: 1.5),
-                  ),
-                  child: const Icon(Icons.add, color: Colors.grey, size: 28),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
+// class _FabricSamplesCard extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return _SectionCard(
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Row(
+//             children: [
+//               Container(
+//                 padding: const EdgeInsets.all(8),
+//                 decoration: BoxDecoration(
+//                   color: Colors.amber.shade50,
+//                   borderRadius: BorderRadius.circular(10),
+//                 ),
+//                 child: Icon(
+//                   Icons.colorize_outlined,
+//                   color: Colors.amber.shade700,
+//                   size: 18,
+//                 ),
+//               ),
+//               const SizedBox(width: 10),
+//               Text(
+//                 "Fabric Samples",
+//                 style: GoogleFonts.poppins(
+//                   fontSize: 17,
+//                   fontWeight: FontWeight.bold,
+//                 ),
+//               ),
+//             ],
+//           ),
+//           const SizedBox(height: 4),
+//           Text(
+//             "Attach physical fabric swatches or colour references",
+//             style: GoogleFonts.poppins(
+//               fontSize: 12,
+//               color: Colors.grey.shade500,
+//             ),
+//           ),
+//           const SizedBox(height: 14),
+//           // Upload zone
+//           GestureDetector(
+//             onTap: () {},
+//             child: Container(
+//               width: double.infinity,
+//               height: 140,
+//               decoration: BoxDecoration(
+//                 borderRadius: BorderRadius.circular(16),
+//                 border: Border.all(color: Colors.amber.shade300, width: 1.5),
+//                 color: Colors.amber.shade50.withValues(alpha: 0.5),
+//               ),
+//               child: Column(
+//                 mainAxisAlignment: MainAxisAlignment.center,
+//                 children: [
+//                   Container(
+//                     width: 48,
+//                     height: 48,
+//                     decoration: BoxDecoration(
+//                       color: Colors.amber.shade600,
+//                       shape: BoxShape.circle,
+//                     ),
+//                     child: const Icon(
+//                       Icons.upload_file_outlined,
+//                       color: Colors.white,
+//                       size: 24,
+//                     ),
+//                   ),
+//                   const SizedBox(height: 10),
+//                   Text(
+//                     "Upload Fabric Sample",
+//                     style: GoogleFonts.poppins(
+//                       fontSize: 14,
+//                       fontWeight: FontWeight.bold,
+//                     ),
+//                   ),
+//                   const SizedBox(height: 4),
+//                   Text(
+//                     "JPG, PNG or PDF · Max 10 MB",
+//                     style: GoogleFonts.poppins(
+//                       fontSize: 12,
+//                       color: Colors.grey.shade500,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//           const SizedBox(height: 14),
+//           // Thumbnail strip
+//           Row(
+//             children: [
+//               Container(
+//                 width: 70,
+//                 height: 70,
+//                 decoration: BoxDecoration(
+//                   borderRadius: BorderRadius.circular(12),
+//                   color: Colors.amber.shade100,
+//                 ),
+//                 child: Icon(
+//                   Icons.texture,
+//                   color: Colors.amber.shade700,
+//                   size: 30,
+//                 ),
+//               ),
+//               const SizedBox(width: 10),
+//               GestureDetector(
+//                 onTap: () {},
+//                 child: Container(
+//                   width: 70,
+//                   height: 70,
+//                   decoration: BoxDecoration(
+//                     borderRadius: BorderRadius.circular(12),
+//                     color: Colors.grey.shade100,
+//                     border: Border.all(color: Colors.grey.shade300, width: 1.5),
+//                   ),
+//                   child: const Icon(Icons.add, color: Colors.grey, size: 28),
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
 
 class _DesignInspirationCard extends StatelessWidget {
   final List<File> images;

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:notdle/models/company.dart';
-import 'package:notdle/providers/company_provider.dart';
+import 'package:notdle/models/user_model.dart';
 import 'package:notdle/providers/image_provider.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/api_provider.dart';
@@ -22,20 +22,49 @@ class BusinessProfileScreen extends StatefulWidget {
 
 class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   late Future<Company?> _companyFuture;
+  User? _currentUser;
+  String? _userImagePath;
 
   @override
   void initState() {
     super.initState();
-    _loadCompany();
+    _companyFuture = SessionManager.getCompany();
+    _loadData();
   }
 
-  Future<void> _loadCompany() async {
-    setState(() {
-      _companyFuture = SessionManager.getCompany();
-    });
+  Future<void> _loadData() async {
+    final apiProvider = Provider.of<ApiProvider>(context, listen: false);
+    final imageProvider = Provider.of<AppImageProvider>(context, listen: false);
+
+    final company = await SessionManager.getCompany();
+    final user = await apiProvider.apiService.getStoredUser();
+
+    String? userImagePath;
+    if (user != null) {
+      final images = await imageProvider.getImages(user.id, "user");
+      if (images.isNotEmpty) {
+        userImagePath = images.last.localPath;
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        _companyFuture = Future.value(company);
+        _currentUser = user;
+        _userImagePath = userImagePath;
+      });
+    }
   }
 
-  Future<void> _pickImage(Company company) async {
+  // Future<void> _loadCompany() async {
+  //   setState(() {
+  //     _companyFuture = SessionManager.getCompany();
+  //   });
+  // }
+
+  Future<void> _pickImage() async {
+    if (_currentUser == null) return;
+
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -45,24 +74,17 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
         listen: false,
       );
       await imageProvider.saveSingleImage(
-        ownerId: company.id,
+        ownerId: _currentUser!.id,
         ownerType: "user",
         file: File(pickedFile.path),
       );
 
-      final images = await imageProvider.getImages(company.id, "user");
+      final images = await imageProvider.getImages(_currentUser!.id, "user");
       if (images.isNotEmpty) {
-        final updatedCompany = company.copyWith(
-          imagePath: images.last.localPath,
-        );
         if (!mounted) return;
-        final companyProvider = Provider.of<CompanyProvider>(
-          context,
-          listen: false,
-        );
-        await companyProvider.update(updatedCompany);
-        await SessionManager.saveCompany(updatedCompany);
-        _loadCompany();
+        setState(() {
+          _userImagePath = images.last.localPath;
+        });
       }
     }
   }
@@ -131,7 +153,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
     return Column(
       children: [
         GestureDetector(
-          onTap: company != null ? () => _pickImage(company) : null,
+          onTap: _currentUser != null ? () => _pickImage() : null,
           child: Stack(
             children: [
               Container(
@@ -155,11 +177,11 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                   radius: 40,
                   backgroundColor: Colors.grey.shade200,
                   backgroundImage:
-                      company?.imagePath != null
-                          ? FileImage(File(company!.imagePath!))
+                      _userImagePath != null
+                          ? FileImage(File(_userImagePath!))
                           : null,
                   child:
-                      company?.imagePath == null
+                      _userImagePath == null
                           ? const Icon(
                             Icons.person,
                             size: 40,

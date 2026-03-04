@@ -40,80 +40,86 @@ class _DashboardHomeState extends State<DashboardHome> {
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(80),
-        child: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          flexibleSpace: const _AbstractAppBarBackground(),
-          title: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF6200EE),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.polyline_outlined,
-                  color: Colors.white,
-                  size: 20,
-                ),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6200EE).withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Good Morning, ${companyName.isNotEmpty ? companyName.split(' ')[0] : 'Sarah'}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+              child: const Icon(
+                Icons.polyline_outlined,
+                color: Color(0xFF6200EE),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Hello, ${companyName.isNotEmpty ? companyName.split(' ')[0] : 'Designer'}',
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Text(
+                      "Studio Manager",
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black38,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        "Notdle Designer",
+                    const SizedBox(width: 6),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6200EE).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        "PRO",
                         style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF311B92),
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF6200EE),
                         ),
                       ),
-                      const SizedBox(width: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.amber.shade100,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          "Basic",
-                          style: GoogleFonts.poppins(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.amber.shade900,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            _NotificationBell(notificationProvider: notificationProvider),
-            const SizedBox(width: 8),
-            const _ProfileIcon(),
-            const SizedBox(width: 12),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ],
+        ),
+        actions: [
+          _NotificationBell(notificationProvider: notificationProvider),
+          const SizedBox(width: 4),
+          const _ProfileIcon(),
+          const SizedBox(width: 16),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: Colors.black.withValues(alpha: 0.02),
+          ),
         ),
       ),
       body: SafeArea(
@@ -280,106 +286,7 @@ class _DashboardHomeState extends State<DashboardHome> {
 
 // ➡️ Reusable Widgets
 
-class _AbstractAppBarBackground extends StatelessWidget {
-  const _AbstractAppBarBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            const Color(0xFF6200EE).withOpacity(0.05),
-            Colors.grey.shade50,
-          ],
-        ),
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: -50,
-            top: -20,
-            child: _AbstractBlob(
-              color: const Color(0xFF6200EE).withOpacity(0.03),
-              size: 150,
-            ),
-          ),
-          Positioned(
-            left: -30,
-            bottom: -40,
-            child: _AbstractBlob(
-              color: Colors.amber.withOpacity(0.02),
-              size: 120,
-            ),
-          ),
-          CustomPaint(size: Size.infinite, painter: _AppBarPatternPainter()),
-        ],
-      ),
-    );
-  }
-}
-
-class _AbstractBlob extends StatelessWidget {
-  final Color color;
-  final double size;
-
-  const _AbstractBlob({required this.color, required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-    );
-  }
-}
-
-class _AppBarPatternPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = const Color(0xFF6200EE).withOpacity(0.05)
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.0;
-
-    final path = Path();
-    // Subtle organic wave mimicking thread
-    path.moveTo(0, size.height * 0.7);
-    path.quadraticBezierTo(
-      size.width * 0.25,
-      size.height * 0.4,
-      size.width * 0.5,
-      size.height * 0.7,
-    );
-    path.quadraticBezierTo(
-      size.width * 0.75,
-      size.height * 1.0,
-      size.width,
-      size.height * 0.7,
-    );
-
-    canvas.drawPath(path, paint);
-
-    // Another intersecting curve
-    final path2 = Path();
-    path2.moveTo(size.width * 0.1, 0);
-    path2.quadraticBezierTo(
-      size.width * 0.4,
-      size.height * 0.5,
-      size.width * 0.1,
-      size.height,
-    );
-    canvas.drawPath(path2, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
+// Removed _AbstractAppBarBackground and sub-widgets as the AppBar is now simplified.
 
 class _NotificationBell extends StatelessWidget {
   final NotificationProvider notificationProvider;
@@ -426,19 +333,23 @@ class _ProfileIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: Container(
+    return GestureDetector(
+      onTap: () => AppNavigator.toBusinessProfile(),
+      child: Container(
+        padding: const EdgeInsets.all(2),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+          border: Border.all(
+            color: const Color(0xFF6200EE).withValues(alpha: 0.1),
+            width: 1.5,
+          ),
         ),
         child: CircleAvatar(
-          radius: 20,
-          backgroundColor: Colors.grey.shade200,
-          child: const Icon(Icons.person, color: Colors.black54, size: 24),
+          radius: 16,
+          backgroundColor: Colors.grey.shade100,
+          child: const Icon(Icons.person, color: Color(0xFF6200EE), size: 18),
         ),
       ),
-      onPressed: () => AppNavigator.toBusinessProfile(),
     );
   }
 }
@@ -488,7 +399,7 @@ class _DashboardStatCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -500,7 +411,7 @@ class _DashboardStatCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 24),
@@ -566,7 +477,7 @@ class _DeadlineListItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -582,7 +493,7 @@ class _DeadlineListItem extends StatelessWidget {
             ),
             child: Icon(
               icon,
-              color: const Color(0xFF6200EE).withOpacity(0.7),
+              color: const Color(0xFF6200EE).withValues(alpha: 0.7),
               size: 24,
             ),
           ),
@@ -660,7 +571,7 @@ class _StatusCard extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: textColor.withOpacity(0.8),
+              color: textColor.withValues(alpha: 0.8),
             ),
           ),
           const SizedBox(height: 4),
@@ -669,7 +580,7 @@ class _StatusCard extends StatelessWidget {
             style: GoogleFonts.poppins(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: textColor.withOpacity(0.6),
+              color: textColor.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -830,9 +741,9 @@ class _FinancialCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.1)),
+        border: Border.all(color: color.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -872,7 +783,7 @@ class _QuickActionsBar extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),

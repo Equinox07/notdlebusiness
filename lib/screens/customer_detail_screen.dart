@@ -149,88 +149,110 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
             fontWeight: FontWeight.w500,
           ),
         ),
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildHeaderAction(
+              Icons.call,
+              () => launchUrl(Uri(scheme: 'tel', path: widget.customer.phone)),
+            ),
+            const SizedBox(width: 12),
+            _buildHeaderAction(
+              Icons.chat_bubble,
+              () => launchUrl(Uri(scheme: 'sms', path: widget.customer.phone)),
+            ),
+            const SizedBox(width: 12),
+            _buildHeaderAction(
+              Icons.email,
+              () =>
+                  widget.customer.email != null
+                      ? launchUrl(
+                        Uri(scheme: 'mailto', path: widget.customer.email!),
+                      )
+                      : null,
+            ),
+          ],
+        ),
       ],
     );
   }
 
-  Widget _buildQuickActions() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildActionItem(
-            Icons.shopping_bag_outlined,
-            "New Order",
-            () => AppNavigator.toCreateOrder(customer: widget.customer),
-          ),
-          const SizedBox(width: 16),
-          _buildActionItem(
-            Icons.straighten,
-            "Measure",
-            () => AppNavigator.toNewMeasurement(widget.customer),
-          ),
-          const SizedBox(width: 16),
-          _buildActionItem(
-            Icons.call,
-            "Call",
-            () => launchUrl(Uri(scheme: 'tel', path: widget.customer.phone)),
-          ),
-          const SizedBox(width: 16),
-          _buildActionItem(
-            Icons.chat_bubble,
-            "Message",
-            () => launchUrl(Uri(scheme: 'sms', path: widget.customer.phone)),
-          ),
-          const SizedBox(width: 16),
-          _buildActionItem(
-            Icons.email,
-            "Email",
-            () =>
-                widget.customer.email != null
-                    ? launchUrl(
-                      Uri(scheme: 'mailto', path: widget.customer.email!),
-                    )
-                    : null,
-          ),
-        ],
+  Widget _buildHeaderAction(IconData icon, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Icon(icon, color: const Color(0xFF6200EE), size: 18),
       ),
     );
   }
 
-  Widget _buildActionItem(IconData icon, String label, VoidCallback onTap) {
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: onTap,
-          child: Container(
-            width: 70, // wider button
-            height: 60, // proportional height
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.02),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+  Widget _buildQuickActions() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton.icon(
+              onPressed:
+                  () => AppNavigator.toCreateOrder(customer: widget.customer),
+              icon: const Icon(Icons.shopping_bag_outlined, size: 18),
+              label: Text(
+                "New Order",
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
                 ),
-              ],
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6200EE),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 0,
+              ),
             ),
-            child: Icon(icon, color: const Color(0xFF6200EE), size: 26),
           ),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: Colors.black87,
+          const SizedBox(width: 12),
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: () => AppNavigator.toNewMeasurement(widget.customer),
+              icon: const Icon(Icons.straighten, size: 18),
+              label: Text(
+                "Measure",
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF6200EE),
+                side: const BorderSide(color: Color(0xFFE9D8F4), width: 1.5),
+                backgroundColor: const Color(0xFFFAF5FF),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 0,
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 

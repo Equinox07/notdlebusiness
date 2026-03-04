@@ -30,7 +30,7 @@ class _NotificationSettingsScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFFBFBFB),
       appBar: CustomAppBar(
         title: "Notifications",
         centerTitle: true,
@@ -45,79 +45,76 @@ class _NotificationSettingsScreenState
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
-            const SizedBox(height: 32),
+            const SizedBox(height: 16),
             _buildSection(
-              title: "Order Updates",
+              title: "ORDER UPDATES",
               items: [
                 _buildToggleItem(
                   "Fittings",
                   "Scheduled or rescheduled fitting alerts",
                   _fittings,
                   (val) => setState(() => _fittings = val),
-                  isLast: false,
                 ),
+                _buildSectionDivider(),
                 _buildToggleItem(
                   "Status Changes",
                   "Garment construction progress updates",
                   _statusChanges,
                   (val) => setState(() => _statusChanges = val),
-                  isLast: false,
                 ),
+                _buildSectionDivider(),
                 _buildToggleItem(
                   "Deadlines",
                   "Delivery and milestone reminders",
                   _deadlines,
                   (val) => setState(() => _deadlines = val),
-                  isLast: true,
                 ),
               ],
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             _buildSection(
-              title: "Client Communications",
+              title: "CLIENT COMMUNICATIONS",
               items: [
                 _buildToggleItem(
                   "New Messages",
                   "Direct messages from clients",
                   _newMessages,
                   (val) => setState(() => _newMessages = val),
-                  isLast: false,
                 ),
+                _buildSectionDivider(),
                 _buildToggleItem(
                   "Meeting Reminders",
                   "Alerts before scheduled appointments",
                   _meetingReminders,
                   (val) => setState(() => _meetingReminders = val),
-                  isLast: true,
                 ),
               ],
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             _buildSection(
-              title: "Marketing & Billing",
+              title: "MARKETING & BILLING",
               items: [
                 _buildToggleItem(
                   "Billing Reports",
                   "Weekly financial summaries",
                   _billingReports,
                   (val) => setState(() => _billingReports = val),
-                  isLast: false,
                 ),
+                _buildSectionDivider(),
                 _buildToggleItem(
                   "Promotion & Tips",
                   "New features and business growth tips",
                   _promotionTips,
                   (val) => setState(() => _promotionTips = val),
-                  isLast: true,
                 ),
               ],
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -139,9 +136,9 @@ class _NotificationSettingsScreenState
         ),
         const SizedBox(height: 4),
         Text(
-          "StitchFlow Alerts",
+          "StitchFlow Notifications",
           style: GoogleFonts.poppins(
-            fontSize: 32,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.black,
             height: 1.1,
@@ -167,13 +164,27 @@ class _NotificationSettingsScreenState
         Text(
           title,
           style: GoogleFonts.poppins(
-            fontSize: 18,
+            fontSize: 11,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: Colors.black45,
+            letterSpacing: 1.0,
           ),
         ),
-        const SizedBox(height: 16),
-        ...items,
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.01),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(children: items),
+        ),
       ],
     );
   }
@@ -182,49 +193,55 @@ class _NotificationSettingsScreenState
     String title,
     String subtitle,
     bool value,
-    Function(bool) onChanged, {
-    bool isLast = false,
-  }) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: Colors.black38,
-                      ),
-                    ),
-                  ],
+    Function(bool) onChanged,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
                 ),
-              ),
-              Switch.adaptive(
-                value: value,
-                onChanged: onChanged,
-                activeColor: const Color(0xFF6200EE),
-              ),
-            ],
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.black38,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        if (!isLast)
-          Divider(color: Colors.grey.shade100, thickness: 1, height: 24),
-      ],
+          Transform.scale(
+            scale: 0.8,
+            child: Switch.adaptive(
+              value: value,
+              onChanged: onChanged,
+              activeColor: const Color(0xFF6200EE),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionDivider() {
+    return Divider(
+      height: 1,
+      thickness: 1,
+      indent: 16,
+      endIndent: 16,
+      color: Colors.grey.shade50,
     );
   }
 }

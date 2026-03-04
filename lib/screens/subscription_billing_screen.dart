@@ -25,39 +25,40 @@ class SubscriptionBillingScreen extends StatelessWidget {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildActiveMembershipCard(),
-            const SizedBox(height: 32),
-            _buildSectionHeader("Plan Options"),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
+            _buildSectionTitle("Plan Options"),
+            const SizedBox(height: 8),
             _buildBoutiquePlanCard(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             _buildAtelierPlanCard(),
-            const SizedBox(height: 32),
-            _buildSectionHeader("Payment Method"),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
+            _buildSectionTitle("Payment Method"),
+            const SizedBox(height: 8),
             _buildPaymentMethodCard(),
-            const SizedBox(height: 32),
-            _buildSectionHeader("Billing History"),
-            const SizedBox(height: 16),
-            _buildBillingHistoryList(),
-            const SizedBox(height: 40),
+            const SizedBox(height: 24),
+            _buildSectionTitle("Billing History"),
+            const SizedBox(height: 8),
+            _buildBillingHistorySection(),
+            const SizedBox(height: 24),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionTitle(String title) {
     return Text(
-      title,
+      title.toUpperCase(),
       style: GoogleFonts.poppins(
-        fontSize: 20,
+        fontSize: 11,
         fontWeight: FontWeight.bold,
-        color: Colors.black,
+        color: Colors.black45,
+        letterSpacing: 1.0,
       ),
     );
   }
@@ -121,7 +122,7 @@ class SubscriptionBillingScreen extends StatelessWidget {
             "StitchFlow Pro",
             style: GoogleFonts.poppins(
               color: Colors.white,
-              fontSize: 26,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -143,7 +144,7 @@ class SubscriptionBillingScreen extends StatelessWidget {
                       "Oct 12, 2024",
                       style: GoogleFonts.poppins(
                         color: Colors.white,
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -204,7 +205,7 @@ class SubscriptionBillingScreen extends StatelessWidget {
               Text(
                 "\$49",
                 style: GoogleFonts.poppins(
-                  fontSize: 32,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -218,7 +219,7 @@ class SubscriptionBillingScreen extends StatelessWidget {
           _buildFeatureRow("5 Team Members", isChecked: true),
           _buildFeatureRow("100 Designs / mo", isChecked: true),
           _buildFeatureRow("Standard Analytics", isChecked: true),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
@@ -315,7 +316,7 @@ class SubscriptionBillingScreen extends StatelessWidget {
                   Text(
                     "\$99",
                     style: GoogleFonts.poppins(
-                      fontSize: 32,
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -349,7 +350,7 @@ class SubscriptionBillingScreen extends StatelessWidget {
                 isChecked: true,
                 premium: true,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -459,19 +460,39 @@ class SubscriptionBillingScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBillingHistoryList() {
-    return Column(
-      children: [
-        _buildHistoryItem("INV-0092", "Sep 12, 2023", "\$79.00"),
-        _buildHistoryItem("INV-0081", "Aug 12, 2023", "\$79.00"),
-        _buildHistoryItem("INV-0075", "Jul 12, 2023", "\$79.00"),
-      ],
+  Widget _buildBillingHistorySection() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.01),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _buildHistoryItem("INV-0092", "Sep 12, 2023", "\$79.00"),
+          _buildSectionDivider(),
+          _buildHistoryItem("INV-0081", "Aug 12, 2023", "\$79.00"),
+          _buildSectionDivider(),
+          _buildHistoryItem("INV-0075", "Jul 12, 2023", "\$79.00"),
+        ],
+      ),
     );
+  }
+
+  Widget _buildSectionDivider() {
+    return Divider(height: 1, thickness: 1, color: Colors.grey.shade50);
   }
 
   Widget _buildHistoryItem(String id, String date, String amount) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
           Expanded(
@@ -481,7 +502,7 @@ class SubscriptionBillingScreen extends StatelessWidget {
                 Text(
                   "Invoice #$id",
                   style: GoogleFonts.poppins(
-                    fontSize: 15,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -499,7 +520,7 @@ class SubscriptionBillingScreen extends StatelessWidget {
             icon: const Icon(
               Icons.file_download_outlined,
               color: Color(0xFF6200EE),
-              size: 24,
+              size: 22,
             ),
             onPressed: () {},
           ),

@@ -135,21 +135,21 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(),
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
               _buildSectionCard(
                 title: "GENERAL INFORMATION",
                 children: [
                   _buildLabelledField("Legal Business Name", _nameController),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   _buildLabelledField("Registration Number", _regController),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
@@ -162,7 +162,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                           },
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: _buildLabelledField(
                           "Years in Business",
@@ -174,7 +174,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               _buildSectionCard(
                 title: "SOCIAL LINKS",
                 children: [
@@ -197,7 +197,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               _buildSectionCard(
                 title: "BUSINESS LOCATION",
                 children: [
@@ -206,13 +206,13 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                     _addressController,
                     maxLines: 1,
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   _buildMapPreview(),
                 ],
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
               _buildSaveButton(),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
             ],
           ),
         ),
@@ -241,7 +241,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                   ],
                 ),
                 child: CircleAvatar(
-                  radius: 70,
+                  radius: 45,
                   backgroundColor: const Color(0xFFF5F5F5),
                   backgroundImage:
                       _company?.imagePath != null
@@ -309,13 +309,13 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             ),
             child: Text(
               "Edit Business Logo",
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.w600,
-                fontSize: 13,
+                fontSize: 12,
               ),
             ),
           ),

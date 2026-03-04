@@ -61,23 +61,23 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               children: [
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 _buildProfileHeader(company),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 _buildUpgradeBanner(),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
                 _buildSectionTitle("BUSINESS DETAILS"),
                 const SizedBox(height: 8),
                 _buildBusinessDetailsSection(company),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 _buildSectionTitle("CONTACT INFORMATION"),
                 const SizedBox(height: 8),
                 _buildContactInfoSection(company),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 _buildSectionTitle("ACCOUNT SETTINGS"),
                 const SizedBox(height: 8),
                 _buildAccountSettingsSection(context),
-                const SizedBox(height: 40),
+                const SizedBox(height: 24),
               ],
             ),
           );
@@ -92,24 +92,24 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
         Stack(
           children: [
             Container(
-              padding: const EdgeInsets.all(4),
+              padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white,
                 border: Border.all(
                   color: const Color(0xFFD4AF37), // Accurate Gold
-                  width: 3,
+                  width: 2,
                 ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.08),
-                    blurRadius: 12,
+                    blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
               child: CircleAvatar(
-                radius: 60,
+                radius: 40,
                 backgroundColor: Colors.grey.shade200,
                 backgroundImage:
                     company?.imagePath != null
@@ -117,26 +117,26 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                         : null,
                 child:
                     company?.imagePath == null
-                        ? const Icon(Icons.person, size: 50, color: Colors.grey)
+                        ? const Icon(Icons.person, size: 40, color: Colors.grey)
                         : null,
               ),
             ),
             Positioned(
-              bottom: 2,
-              right: 2,
+              bottom: 0,
+              right: 0,
               child: Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
                   color: const Color(0xFF6200EE), // Primary Purple
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 2),
                 ),
-                child: const Icon(Icons.edit, color: Colors.white, size: 16),
+                child: const Icon(Icons.edit, color: Colors.white, size: 14),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Text(
           company?.ownerName ?? "Elena Rossi",
           style: GoogleFonts.poppins(

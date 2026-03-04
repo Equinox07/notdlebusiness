@@ -31,22 +31,12 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final _addressController = TextEditingController();
   String _selectedGender = "Female"; // Default
 
-  // Style Preferences
-  final List<String> _selectedStyles = ["Minimalist"];
-  final List<String> _availableStyles = ["Minimalist", "Avant-Garde", "Bridal"];
-  final _fabricsController = TextEditingController();
-
-  // Client Notes
-  final _notesController = TextEditingController();
-
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     _addressController.dispose();
-    _fabricsController.dispose();
-    _notesController.dispose();
     super.dispose();
   }
 
@@ -71,9 +61,6 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       lastVisit: now,
       gender: _selectedGender,
       createdDate: now,
-      stylePreferences: _selectedStyles.join(", "),
-      favoriteFabrics: _fabricsController.text.trim(),
-      notes: _notesController.text.trim(),
     );
 
     // Save Customer
@@ -182,112 +169,6 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                 keyboardType: TextInputType.streetAddress,
                 validator:
                     (val) => val == null || val.isEmpty ? "Required" : null,
-              ),
-              const SizedBox(height: 24), // reduced from 32
-
-              _buildSectionHeader(Icons.auto_awesome, "STYLE PREFERENCES"),
-              const SizedBox(height: 12), // reduced
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16), // reduced from 20
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: const Color(0xFFF0F0F0),
-                  ), // added faint border
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Primary Styles",
-                      style: GoogleFonts.poppins(
-                        fontSize: 13, // slightly smaller
-                        color: Colors.black87, // slightly darker
-                        fontWeight: FontWeight.w500, // added weight
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        ..._availableStyles.map(
-                          (style) => _buildStyleTag(style),
-                        ),
-                        _buildAddTag(),
-                      ],
-                    ),
-                    const SizedBox(height: 16), // reduced
-                    Text(
-                      "Favorite Fabrics",
-                      style: GoogleFonts.poppins(
-                        fontSize: 13, // slightly smaller
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(12), // tighter padding
-                      decoration: BoxDecoration(
-                        color: const Color(
-                          0xFFF9FAFB,
-                        ), // light gray background from design
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: TextField(
-                        controller: _fabricsController,
-                        maxLines: 2,
-                        decoration: InputDecoration(
-                          hintText: "Silk, Linen, Sustainable Cotton...",
-                          hintStyle: GoogleFonts.poppins(
-                            color: Colors.black26,
-                            fontSize: 14,
-                          ),
-                          border: InputBorder.none,
-                          isDense: true,
-                        ),
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24), // reduced from 32
-
-              _buildSectionHeader(Icons.notes, "CLIENT NOTES"),
-              const SizedBox(height: 12), // reduced
-              Container(
-                padding: const EdgeInsets.all(16), // tighter padding
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: const Color(0xFFF0F0F0),
-                  ), // added faint border
-                ),
-                child: TextField(
-                  controller: _notesController,
-                  maxLines: 3, // slightly reduced
-                  decoration: InputDecoration(
-                    hintText:
-                        "Mention any specific fitting history, allergies to certain materials, or preferred seam finishes...",
-                    hintStyle: GoogleFonts.poppins(
-                      color: Colors.black26,
-                      fontSize: 14,
-                    ),
-                    border: InputBorder.none,
-                  ),
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: Colors.black87,
-                  ),
-                ),
               ),
               const SizedBox(height: 80), // Keep some spacing for bottom sheet
             ],
@@ -428,54 +309,6 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     );
   }
 
-  Widget _buildStyleTag(String style) {
-    bool isSelected = _selectedStyles.contains(style);
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          if (isSelected) {
-            _selectedStyles.remove(style);
-          } else {
-            _selectedStyles.add(style);
-          }
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF6200EE) : const Color(0xFFF3E8FF),
-          borderRadius: BorderRadius.circular(100),
-        ),
-        child: Text(
-          style,
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: isSelected ? Colors.white : const Color(0xFF6200EE),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAddTag() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF3E8FF), // updated to light purple
-        borderRadius: BorderRadius.circular(100),
-      ),
-      child: Text(
-        "+ Add",
-        style: GoogleFonts.poppins(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-          color: const Color(0xFF6200EE),
-        ),
-      ),
-    );
-  }
-
   Widget _buildBottomButtons() {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 32), // unified padding
@@ -501,25 +334,14 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
               ),
             ],
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.straighten,
-                color: Colors.white,
-                size: 20,
-              ), // slightly smaller
-              const SizedBox(height: 6),
-              Text(
-                "Save & Take Measurements",
-                style: GoogleFonts.poppins(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
+          child: Text(
+            "Save & Take Measurements",
+            style: GoogleFonts.poppins(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
           ),
         ),
       ),

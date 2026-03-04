@@ -135,7 +135,7 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
         Text(
           widget.customer.name,
           style: GoogleFonts.poppins(
-            fontSize: 26,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
@@ -154,32 +154,48 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
   }
 
   Widget _buildQuickActions() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildActionItem(
-          Icons.call,
-          "Call",
-          () => launchUrl(Uri(scheme: 'tel', path: widget.customer.phone)),
-        ),
-        const SizedBox(width: 20),
-        _buildActionItem(
-          Icons.chat_bubble,
-          "Message",
-          () => launchUrl(Uri(scheme: 'sms', path: widget.customer.phone)),
-        ),
-        const SizedBox(width: 20),
-        _buildActionItem(
-          Icons.email,
-          "Email",
-          () =>
-              widget.customer.email != null
-                  ? launchUrl(
-                    Uri(scheme: 'mailto', path: widget.customer.email!),
-                  )
-                  : null,
-        ),
-      ],
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildActionItem(
+            Icons.shopping_bag_outlined,
+            "New Order",
+            () => AppNavigator.toCreateOrder(customer: widget.customer),
+          ),
+          const SizedBox(width: 16),
+          _buildActionItem(
+            Icons.straighten,
+            "Measure",
+            () => AppNavigator.toNewMeasurement(widget.customer),
+          ),
+          const SizedBox(width: 16),
+          _buildActionItem(
+            Icons.call,
+            "Call",
+            () => launchUrl(Uri(scheme: 'tel', path: widget.customer.phone)),
+          ),
+          const SizedBox(width: 16),
+          _buildActionItem(
+            Icons.chat_bubble,
+            "Message",
+            () => launchUrl(Uri(scheme: 'sms', path: widget.customer.phone)),
+          ),
+          const SizedBox(width: 16),
+          _buildActionItem(
+            Icons.email,
+            "Email",
+            () =>
+                widget.customer.email != null
+                    ? launchUrl(
+                      Uri(scheme: 'mailto', path: widget.customer.email!),
+                    )
+                    : null,
+          ),
+        ],
+      ),
     );
   }
 
@@ -189,8 +205,8 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
         GestureDetector(
           onTap: onTap,
           child: Container(
-            width: 80, // wider button
-            height: 70, // proportional height
+            width: 70, // wider button
+            height: 60, // proportional height
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),

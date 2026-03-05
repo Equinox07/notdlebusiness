@@ -299,12 +299,12 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
   }
 
   Widget _buildDetailsTab() {
-    final styles =
-        widget.customer.stylePreferences
-            ?.split(", ")
-            .where((s) => s.isNotEmpty)
-            .toList() ??
-        [];
+    // final styles =
+    //     widget.customer.stylePreferences
+    //         ?.split(", ")
+    //         .where((s) => s.isNotEmpty)
+    //         .toList() ??
+    //     [];
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(
@@ -324,27 +324,27 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
             ],
           ),
           const SizedBox(height: 16), // reduced from 20/24
-          if (styles.isNotEmpty ||
-              widget.customer.stylePreferences == null) ...[
-            // show default if empty for design matching
-            _buildStylePreferences(
-              styles.isEmpty
-                  ? [
-                    "Minimalist",
-                    "Silk Fabrics",
-                    "Neutral Palette",
-                    "Tailored Fit",
-                    "Sustainable",
-                  ]
-                  : styles,
-            ),
-            const SizedBox(height: 16), // reduced from 24
-          ],
-          if (widget.customer.notes != null &&
-              widget.customer.notes!.isNotEmpty) ...[
-            _buildNotesSection(),
-            const SizedBox(height: 20), // reduced from 32
-          ],
+          // if (styles.isNotEmpty ||
+          //     widget.customer.stylePreferences == null) ...[
+          //   // show default if empty for design matching
+          //   _buildStylePreferences(
+          //     styles.isEmpty
+          //         ? [
+          //           "Minimalist",
+          //           "Silk Fabrics",
+          //           "Neutral Palette",
+          //           "Tailored Fit",
+          //           "Sustainable",
+          //         ]
+          //         : styles,
+          //   ),
+          //   const SizedBox(height: 16), // reduced from 24
+          // ],
+          // if (widget.customer.notes != null &&
+          //     widget.customer.notes!.isNotEmpty) ...[
+          //   _buildNotesSection(),
+          //   const SizedBox(height: 20), // reduced from 32
+          // ],
           _buildRecentOrders(),
         ],
       ),
@@ -456,28 +456,28 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
         color: Colors.white,
         borderRadius: BorderRadius.circular(20), // reduced from 24
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Client Notes",
-            style: GoogleFonts.poppins(
-              fontSize: 16, // reduced
-              fontWeight: FontWeight.w600,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 10), // reduced
-          Text(
-            widget.customer.notes!,
-            style: GoogleFonts.poppins(
-              fontSize: 13, // reduced
-              color: const Color(0xFF717171),
-              height: 1.4,
-            ),
-          ),
-        ],
-      ),
+      // child: Column(
+      //   crossAxisAlignment: CrossAxisAlignment.start,
+      //   children: [
+      //     Text(
+      //       "Client Notes",
+      //       style: GoogleFonts.poppins(
+      //         fontSize: 16, // reduced
+      //         fontWeight: FontWeight.w600,
+      //         color: Colors.black,
+      //       ),
+      //     ),
+      //     const SizedBox(height: 10), // reduced
+      //     Text(
+      //       widget.customer.notes!,
+      //       style: GoogleFonts.poppins(
+      //         fontSize: 13, // reduced
+      //         color: const Color(0xFF717171),
+      //         height: 1.4,
+      //       ),
+      //     ),
+      //   ],
+      // ),
     );
   }
 

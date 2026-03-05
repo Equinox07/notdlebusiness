@@ -120,6 +120,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       createdDate: now,
     );
 
+    debugPrint("New Customer: $newCustomer");
     // Save Customer
     await Provider.of<CustomerProvider>(
       context,

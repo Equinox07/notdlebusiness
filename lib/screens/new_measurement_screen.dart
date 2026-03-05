@@ -64,14 +64,14 @@ class _NewMeasurementScreenState extends State<NewMeasurementScreen> {
     // Group fields by category (upperBody, lowerBody, other)
     _grouped = _fields.groupByCategory();
 
-    if (widget.customer.stylePreferences != null &&
-        widget.customer.stylePreferences!.isNotEmpty) {
-      _selectedStyles.addAll(
-        widget.customer.stylePreferences!.split(", ").map((s) => s.trim()),
-      );
-    }
-    _fabricsController.text = widget.customer.favoriteFabrics ?? "";
-    _notesController.text = widget.customer.notes ?? "";
+    // if (widget.customer.stylePreferences != null &&
+    //     widget.customer.stylePreferences!.isNotEmpty) {
+    //   _selectedStyles.addAll(
+    //     widget.customer.stylePreferences!.split(", ").map((s) => s.trim()),
+    //   );
+    // }
+    // _fabricsController.text = widget.customer.favoriteFabrics ?? "";
+    // _notesController.text = widget.customer.notes ?? "";
   }
 
   @override

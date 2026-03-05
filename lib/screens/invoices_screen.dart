@@ -77,43 +77,76 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FD),
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
-        flexibleSpace: const _AbstractAppBarBackground(),
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            color: Colors.black87,
-            size: 20,
-          ),
-        ),
-        title: Text(
-          "Invoices",
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
+        scrolledUnderElevation: 0,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6200EE).withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.receipt_long_rounded,
+                color: Color(0xFF6200EE),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Invoices',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  'Manage payment records',
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black38,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
         actions: [
           IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.notifications_none_rounded,
+                color: Color(0xFF424242),
+                size: 18,
+              ),
+            ),
             onPressed: () {},
-            icon: const Icon(
-              Icons.notifications_none_outlined,
-              color: Colors.black87,
-            ),
           ),
-          const Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundImage: AssetImage('assets/profile.jpg'),
-            ),
-          ),
+          const SizedBox(width: 8),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: Colors.black.withValues(alpha: 0.02),
+          ),
+        ),
       ),
       body: SafeArea(
         child: Stack(
@@ -148,16 +181,16 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 16,
+                            horizontal: 16,
+                            vertical: 12,
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Invoices & Payments",
+                                "Invoices",
                                 style: GoogleFonts.poppins(
-                                  fontSize: 24,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: const Color(0xFF1A1C1E),
                                 ),
@@ -226,7 +259,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                         )
                       else
                         SliverPadding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
                           sliver: SliverList(
                             delegate: SliverChildBuilderDelegate((
                               context,
@@ -262,10 +295,9 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
             ),
             // --- Sticky Action Button ---
             Positioned(
-              bottom: 24,
-              left: 20,
+              bottom: 100,
               right: 20,
-              child: ElevatedButton.icon(
+              child: FloatingActionButton(
                 onPressed: () async {
                   await Navigator.push(
                     context,
@@ -275,28 +307,78 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   );
                   _refreshInvoices();
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6200EE),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 8,
-                  shadowColor: const Color(0xFF6200EE).withOpacity(0.4),
+                backgroundColor: const Color(0xFF6200EE),
+                elevation: 8,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                icon: const Icon(Icons.add_circle_outline),
-                label: Text(
-                  "Create Invoice",
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: const Icon(Icons.add, color: Colors.white, size: 28),
               ),
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: _buildBottomNav(),
+    );
+  }
+
+  Widget _buildBottomNav() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Colors.grey.shade100)),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildNavItem(Icons.people_rounded, "Clients", false, () {}),
+          _buildNavItem(Icons.assignment_rounded, "Orders", false, () {}),
+          _buildNavItem(Icons.receipt_long_rounded, "Invoices", true, () {}),
+          _buildNavItem(Icons.settings_rounded, "Settings", false, () {}),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(
+    IconData icon,
+    String label,
+    bool isActive,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color:
+                  isActive
+                      ? const Color(0xFF6200EE).withValues(alpha: 0.1)
+                      : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              icon,
+              color:
+                  isActive ? const Color(0xFF6200EE) : const Color(0xFF999999),
+              size: 22,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 9,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+              color:
+                  isActive ? const Color(0xFF6200EE) : const Color(0xFF999999),
+            ),
+          ),
+        ],
       ),
     );
   }

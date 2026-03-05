@@ -6,7 +6,6 @@ import 'package:notdle/models/company.dart';
 import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/providers/image_provider.dart';
 import 'package:notdle/services/session_manager.dart';
-import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 
 class CompanyProfileScreen extends StatefulWidget {
@@ -136,29 +135,94 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFB),
-      appBar: CustomAppBar(
-        title: "Company Profile",
-        centerTitle: true,
-        isLight: true,
+      backgroundColor: Colors.grey.shade50,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6200EE).withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.apartment_rounded,
+                color: Color(0xFF6200EE),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Company Profile',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  'Business details',
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black38,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.notifications_none_rounded,
+                color: Color(0xFF424242),
+                size: 18,
+              ),
+            ),
+            onPressed: () {},
+          ),
+          const SizedBox(width: 8),
+        ],
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios,
-            color: Colors.black87,
-            size: 20,
+            color: Color(0xFF424242),
+            size: 18,
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: Colors.black.withValues(alpha: 0.02),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildHeader(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               _buildSectionCard(
                 title: "GENERAL INFORMATION",
                 children: [
@@ -226,9 +290,9 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                   _buildMapPreview(),
                 ],
               ),
-              const SizedBox(height: 20),
-              _buildSaveButton(),
               const SizedBox(height: 16),
+              _buildSaveButton(),
+              const SizedBox(height: 12),
             ],
           ),
         ),
@@ -302,7 +366,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
           Text(
             _company?.businessName ?? "StitchFlow Studio",
             style: GoogleFonts.poppins(
-              fontSize: 22,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
@@ -310,7 +374,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
           Text(
             "Premium Fashion Management",
             style: GoogleFonts.poppins(
-              fontSize: 13,
+              fontSize: 11,
               color: const Color(0xFF6200EE),
               fontWeight: FontWeight.w500,
             ),
@@ -345,10 +409,10 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
     required List<Widget> children,
   }) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.01),
@@ -390,23 +454,23 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
         Text(
           label,
           style: GoogleFonts.poppins(
-            fontSize: 12,
+            fontSize: 11,
             color: const Color(0xFF2C3E50).withOpacity(0.7),
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
           maxLines: maxLines,
-          style: GoogleFonts.poppins(fontSize: 15, fontWeight: FontWeight.w500),
+          style: GoogleFonts.poppins(fontSize: 13, fontWeight: FontWeight.w500),
           decoration: InputDecoration(
             filled: true,
             fillColor: const Color(0xFFF8F9FA),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
-              vertical: 14,
+              vertical: 12,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -434,14 +498,14 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
         Text(
           label,
           style: GoogleFonts.poppins(
-            fontSize: 12,
+            fontSize: 11,
             color: const Color(0xFF2C3E50).withOpacity(0.7),
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
             color: const Color(0xFFF8F9FA),
             borderRadius: BorderRadius.circular(12),
@@ -461,7 +525,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                       child: Text(
                         item,
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -491,7 +555,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
           child: TextFormField(
             controller: controller,
             style: GoogleFonts.poppins(
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
             decoration: InputDecoration(
@@ -499,7 +563,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
               fillColor: const Color(0xFFF8F9FA),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
-                vertical: 12,
+                vertical: 10,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),

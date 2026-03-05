@@ -298,26 +298,41 @@ class _NotificationBell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined, color: Colors.black87),
-          onPressed: () => AppNavigator.toNotificationList(),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: IconButton(
+            icon: const Icon(
+              Icons.notifications_rounded,
+              color: Color(0xFF424242),
+              size: 20,
+            ),
+            onPressed: () => AppNavigator.toNotificationList(),
+            iconSize: 20,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+          ),
         ),
         if (notificationProvider.unreadCount > 0)
           Positioned(
-            right: 8,
-            top: 8,
+            right: 0,
+            top: 0,
             child: Container(
-              padding: const EdgeInsets.all(4),
+              padding: const EdgeInsets.all(3),
               decoration: const BoxDecoration(
-                color: Colors.redAccent,
+                color: Color(0xFFFF5252),
                 shape: BoxShape.circle,
               ),
-              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+              constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
               child: Text(
-                notificationProvider.unreadCount.toString(),
+                notificationProvider.unreadCount > 9
+                    ? '9+'
+                    : notificationProvider.unreadCount.toString(),
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 10,
+                  fontSize: 9,
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
@@ -337,18 +352,27 @@ class _ProfileIcon extends StatelessWidget {
     return GestureDetector(
       onTap: () => AppNavigator.toBusinessProfile(),
       child: Container(
-        padding: const EdgeInsets.all(2),
+        width: 40,
+        height: 40,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFF6200EE).withValues(alpha: 0.15),
+              const Color(0xFF6200EE).withValues(alpha: 0.05),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           border: Border.all(
-            color: const Color(0xFF6200EE).withValues(alpha: 0.1),
-            width: 1.5,
+            color: const Color(0xFF6200EE).withValues(alpha: 0.15),
+            width: 1,
           ),
         ),
-        child: CircleAvatar(
-          radius: 16,
-          backgroundColor: Colors.grey.shade100,
-          child: const Icon(Icons.person, color: Color(0xFF6200EE), size: 18),
+        child: const Icon(
+          Icons.person_rounded,
+          color: Color(0xFF6200EE),
+          size: 20,
         ),
       ),
     );

@@ -8,7 +8,6 @@ import 'package:notdle/providers/image_provider.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/providers/api_provider.dart';
 import 'package:notdle/services/session_manager.dart';
-import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 
 class BusinessProfileScreen extends StatefulWidget {
@@ -137,24 +136,83 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFB),
-      appBar: CustomAppBar(
-        title: "Business Profile",
-        centerTitle: true,
-        isLight: true,
+      backgroundColor: Colors.grey.shade50,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6200EE).withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.business_rounded,
+                color: Color(0xFF6200EE),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Business Profile',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  'Account overview',
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black38,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_horiz, color: Colors.black87),
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.more_horiz_rounded,
+                color: Color(0xFF424242),
+                size: 18,
+              ),
+            ),
             onPressed: () {},
           ),
+          const SizedBox(width: 8),
         ],
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios,
-            color: Colors.black87,
-            size: 20,
+            color: Color(0xFF424242),
+            size: 18,
           ),
           onPressed: () => Navigator.of(context).pop(),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: Colors.black.withValues(alpha: 0.02),
+          ),
         ),
       ),
       body: FutureBuilder<Company?>(
@@ -166,14 +224,14 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
           final company = snapshot.data;
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
               children: [
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 _buildProfileHeader(company),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 _buildUpgradeBanner(),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 _buildSectionTitle("BUSINESS DETAILS"),
                 const SizedBox(height: 8),
                 _buildBusinessDetailsSection(company),
@@ -185,7 +243,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                 _buildSectionTitle("ACCOUNT SETTINGS"),
                 const SizedBox(height: 8),
                 _buildAccountSettingsSection(context),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
               ],
             ),
           );
@@ -255,7 +313,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
         Text(
           company?.ownerName ?? "Elena Rossi",
           style: GoogleFonts.poppins(
-            fontSize: 24,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
@@ -264,7 +322,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
         Text(
           "STITCHFLOW ELITE MEMBER",
           style: GoogleFonts.poppins(
-            fontSize: 12,
+            fontSize: 10,
             fontWeight: FontWeight.w600,
             color: const Color(0xFF6200EE),
             letterSpacing: 1.2,
@@ -322,7 +380,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
               Text(
                 "Upgrade to Premium",
                 style: GoogleFonts.poppins(
-                  fontSize: 20,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
@@ -331,7 +389,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
               Text(
                 "Unlock advanced inventory tracking and priority support.",
                 style: GoogleFonts.poppins(
-                  fontSize: 13,
+                  fontSize: 11,
                   color: Colors.white.withOpacity(0.85),
                 ),
               ),

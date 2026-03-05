@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:notdle/widgets/custom_app_bar.dart';
 
 class SubscriptionBillingScreen extends StatelessWidget {
   const SubscriptionBillingScreen({super.key});
@@ -10,41 +9,88 @@ class SubscriptionBillingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFB),
-      appBar: CustomAppBar(
-        title: "Subscription & Billing",
-        centerTitle: true,
-        isLight: true,
+      backgroundColor: Colors.grey.shade50,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6200EE).withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.workspace_premium_rounded,
+                color: Color(0xFF6200EE),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Subscription & Billing',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  'Plans and payments',
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black38,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios,
-            color: Colors.black87,
-            size: 20,
+            color: Color(0xFF424242),
+            size: 18,
           ),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: Colors.black.withValues(alpha: 0.02),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildActiveMembershipCard(),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             _buildSectionTitle("Plan Options"),
             const SizedBox(height: 8),
             _buildBoutiquePlanCard(),
             const SizedBox(height: 12),
             _buildAtelierPlanCard(),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             _buildSectionTitle("Payment Method"),
             const SizedBox(height: 8),
             _buildPaymentMethodCard(),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             _buildSectionTitle("Billing History"),
             const SizedBox(height: 8),
             _buildBillingHistorySection(),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
           ],
         ),
       ),
@@ -66,14 +112,14 @@ class SubscriptionBillingScreen extends StatelessWidget {
   Widget _buildActiveMembershipCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFF4A148C), Color(0xFF1A237E)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF1A237E).withOpacity(0.3),
@@ -122,11 +168,11 @@ class SubscriptionBillingScreen extends StatelessWidget {
             "StitchFlow Pro",
             style: GoogleFonts.poppins(
               color: Colors.white,
-              fontSize: 22,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
@@ -182,10 +228,10 @@ class SubscriptionBillingScreen extends StatelessWidget {
 
   Widget _buildBoutiquePlanCard() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.shade100),
       ),
       child: Column(
@@ -205,7 +251,7 @@ class SubscriptionBillingScreen extends StatelessWidget {
               Text(
                 "\$49",
                 style: GoogleFonts.poppins(
-                  fontSize: 28,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -215,7 +261,7 @@ class SubscriptionBillingScreen extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           _buildFeatureRow("5 Team Members", isChecked: true),
           _buildFeatureRow("100 Designs / mo", isChecked: true),
           _buildFeatureRow("Standard Analytics", isChecked: true),
@@ -248,10 +294,10 @@ class SubscriptionBillingScreen extends StatelessWidget {
 
   Widget _buildAtelierPlanCard() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: const Color(0xFF6200EE).withOpacity(0.5),
           width: 1.5,
@@ -316,7 +362,7 @@ class SubscriptionBillingScreen extends StatelessWidget {
                   Text(
                     "\$99",
                     style: GoogleFonts.poppins(
-                      fontSize: 28,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -329,7 +375,7 @@ class SubscriptionBillingScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               _buildFeatureRow(
                 "Unlimited Users",
                 isChecked: true,
@@ -407,10 +453,10 @@ class SubscriptionBillingScreen extends StatelessWidget {
 
   Widget _buildPaymentMethodCard() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.shade100),
       ),
       child: Row(

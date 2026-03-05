@@ -68,106 +68,93 @@ class _AllMeasurementScreenState extends State<AllMeasurementScreen> {
         }).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9F9F9),
+      backgroundColor: Colors.grey.shade50,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6200EE).withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.straighten,
+                color: Color(0xFF6200EE),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Measurements',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  "Manage client profiles",
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black38,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.notifications_none_rounded,
+                color: Color(0xFF424242),
+                size: 18,
+              ),
+            ),
+            onPressed: () {},
+          ),
+          const SizedBox(width: 8),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: Colors.black.withValues(alpha: 0.02),
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header: Logo & Notifications
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF3E8FF),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.dashboard_customize_rounded,
-                          color: Color(0xFF6200EE),
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        "StitchFlow",
-                        style: GoogleFonts.poppins(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1A1C1E),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.notifications_none_rounded,
-                      color: Color(0xFF424242),
-                      size: 24,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Title section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Measurement Directory",
-                    style: GoogleFonts.poppins(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1A1C1E),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    "Manage your client size profiles",
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: const Color(0xFF757575),
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
             // Search Bar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(18),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -178,43 +165,45 @@ class _AllMeasurementScreenState extends State<AllMeasurementScreen> {
                     hintText: "Search client name...",
                     hintStyle: GoogleFonts.poppins(
                       color: const Color(0xFFADADAD),
+                      fontSize: 13,
                     ),
                     prefixIcon: const Icon(
                       Icons.search,
                       color: Color(0xFFADADAD),
+                      size: 18,
                     ),
                     suffixIcon: Container(
-                      margin: const EdgeInsets.all(8),
-                      padding: const EdgeInsets.all(8),
+                      margin: const EdgeInsets.all(6),
+                      padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF5F5F5),
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(
                         Icons.tune_rounded,
                         color: Color(0xFF6200EE),
-                        size: 20,
+                        size: 16,
                       ),
                     ),
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                 ),
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
 
             // Category Chips
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children:
                     _categories.map((category) {
                       final bool isSelected = _selectedCategory == category;
                       return Padding(
-                        padding: const EdgeInsets.only(right: 12),
+                        padding: const EdgeInsets.only(right: 8),
                         child: GestureDetector(
                           onTap: () {
                             setState(() {
@@ -223,15 +212,15 @@ class _AllMeasurementScreenState extends State<AllMeasurementScreen> {
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
+                              horizontal: 16,
+                              vertical: 6,
                             ),
                             decoration: BoxDecoration(
                               color:
                                   isSelected
                                       ? const Color(0xFF6200EE)
                                       : Colors.white,
-                              borderRadius: BorderRadius.circular(30),
+                              borderRadius: BorderRadius.circular(20),
                               border: Border.all(
                                 color:
                                     isSelected
@@ -244,9 +233,9 @@ class _AllMeasurementScreenState extends State<AllMeasurementScreen> {
                                         BoxShadow(
                                           color: const Color(
                                             0xFF6200EE,
-                                          ).withValues(alpha: 0.3),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 4),
+                                          ).withValues(alpha: 0.2),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
                                         ),
                                       ]
                                       : null,
@@ -254,12 +243,12 @@ class _AllMeasurementScreenState extends State<AllMeasurementScreen> {
                             child: Text(
                               category,
                               style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.w600,
+                                fontWeight: FontWeight.w500,
                                 color:
                                     isSelected
                                         ? Colors.white
                                         : const Color(0xFF757575),
-                                fontSize: 14,
+                                fontSize: 12,
                               ),
                             ),
                           ),
@@ -269,7 +258,7 @@ class _AllMeasurementScreenState extends State<AllMeasurementScreen> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
             // Measurement List
             Expanded(
@@ -281,22 +270,23 @@ class _AllMeasurementScreenState extends State<AllMeasurementScreen> {
                           children: [
                             Icon(
                               Icons.person_off_rounded,
-                              size: 64,
+                              size: 56,
                               color: Colors.grey.shade300,
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 12),
                             Text(
                               "No clients found",
                               style: GoogleFonts.poppins(
                                 color: Colors.grey.shade500,
-                                fontSize: 16,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
                         ),
                       )
                       : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
                         itemCount: filteredMeasurements.length,
                         itemBuilder: (context, index) {
                           return _MeasurementListTile(
@@ -314,8 +304,8 @@ class _AllMeasurementScreenState extends State<AllMeasurementScreen> {
         },
         backgroundColor: const Color(0xFF6200EE),
         elevation: 8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: const Icon(Icons.add_rounded, color: Colors.white, size: 30),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
       ),
       bottomNavigationBar: _buildBottomNav(),
     );
@@ -327,38 +317,58 @@ class _AllMeasurementScreenState extends State<AllMeasurementScreen> {
         color: Colors.white,
         border: Border(top: BorderSide(color: Colors.grey.shade100)),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildNavItem(Icons.people_rounded, "Clients", true),
-          _buildNavItem(Icons.architecture_rounded, "Projects", false),
-          _buildNavItem(Icons.calendar_today_rounded, "Calendar", false),
-          _buildNavItem(Icons.settings_rounded, "Settings", false),
+          _buildNavItem(Icons.people_rounded, "Clients", true, () {}),
+          _buildNavItem(Icons.assignment_rounded, "Projects", false, () {}),
+          _buildNavItem(Icons.calendar_month_rounded, "Orders", false, () {}),
+          _buildNavItem(Icons.settings_rounded, "Settings", false, () {}),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, bool isActive) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          color: isActive ? const Color(0xFF6200EE) : const Color(0xFFABABAB),
-          size: 26,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: GoogleFonts.poppins(
-            fontSize: 11,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-            color: isActive ? const Color(0xFF6200EE) : const Color(0xFFABABAB),
+  Widget _buildNavItem(
+    IconData icon,
+    String label,
+    bool isActive,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color:
+                  isActive
+                      ? const Color(0xFF6200EE).withValues(alpha: 0.1)
+                      : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              icon,
+              color:
+                  isActive ? const Color(0xFF6200EE) : const Color(0xFF999999),
+              size: 22,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(height: 3),
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 9,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+              color:
+                  isActive ? const Color(0xFF6200EE) : const Color(0xFF999999),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -395,16 +405,16 @@ class _MeasurementListTile extends StatelessWidget {
     final bool isNeedsUpdate = DateTime.now().difference(date).inDays > 180;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFF5F5F5)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -413,17 +423,17 @@ class _MeasurementListTile extends StatelessWidget {
         child: InkWell(
           onTap:
               () => AppNavigator.toMeasurementDetails(measurement: measurement),
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(14),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Row(
               children: [
                 // Avatar
                 Container(
-                  width: 64,
-                  height: 64,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(12),
                     image:
                         customer.imagePath != null
                             ? DecorationImage(
@@ -439,21 +449,22 @@ class _MeasurementListTile extends StatelessWidget {
                             child: Text(
                               customer.name.substring(0, 1).toUpperCase(),
                               style: GoogleFonts.poppins(
-                                fontSize: 24,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: const Color(
                                   0xFF6200EE,
-                                ).withValues(alpha: 0.3),
+                                ).withValues(alpha: 0.4),
                               ),
                             ),
                           )
                           : null,
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 // Info
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -462,8 +473,8 @@ class _MeasurementListTile extends StatelessWidget {
                             child: Text(
                               customer.name,
                               style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
                                 color: const Color(0xFF1A1C1E),
                               ),
                               maxLines: 1,
@@ -473,13 +484,13 @@ class _MeasurementListTile extends StatelessWidget {
                           _StatusBadge(isNeedsUpdate: isNeedsUpdate),
                         ],
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 1),
                       Text(
                         measurement.name.isNotEmpty
                             ? measurement.name
                             : "General Selection",
                         style: GoogleFonts.poppins(
-                          fontSize: 13,
+                          fontSize: 11,
                           color: const Color(0xFF6200EE),
                           fontWeight: FontWeight.w500,
                         ),
@@ -488,7 +499,7 @@ class _MeasurementListTile extends StatelessWidget {
                       Text(
                         formattedDate,
                         style: GoogleFonts.poppins(
-                          fontSize: 11,
+                          fontSize: 9,
                           color: const Color(0xFFADADAD),
                           fontWeight: FontWeight.w500,
                         ),
@@ -496,11 +507,11 @@ class _MeasurementListTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                const Icon(
+                const SizedBox(width: 6),
+                Icon(
                   Icons.arrow_forward_ios_rounded,
-                  size: 16,
-                  color: Color(0xFFADADAD),
+                  size: 14,
+                  color: Colors.grey.shade300,
                 ),
               ],
             ),
@@ -519,16 +530,16 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color:
             isNeedsUpdate ? const Color(0xFFFFF7E6) : const Color(0xFFE6FFF1),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
-        isNeedsUpdate ? "NEEDS UPDATE" : "COMPLETE",
+        isNeedsUpdate ? "UPDATE" : "OK",
         style: GoogleFonts.poppins(
-          fontSize: 10,
+          fontSize: 8,
           fontWeight: FontWeight.bold,
           color:
               isNeedsUpdate ? const Color(0xFFD48806) : const Color(0xFF23B175),

@@ -74,59 +74,81 @@ class ServicesScreen extends StatelessWidget {
     final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FD),
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
-        flexibleSpace: const _AbstractAppBarBackground(),
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            color: Colors.black87,
-            size: 20,
-          ),
+        scrolledUnderElevation: 0,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6200EE).withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.miscellaneous_services_rounded,
+                color: Color(0xFF6200EE),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Services',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  'Manage your operations',
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black38,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
-        title: Text(
-          "Services",
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
+        actions: [
+          IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.notifications_none_rounded,
+                color: Color(0xFF424242),
+                size: 18,
+              ),
+            ),
+            onPressed: () {},
+          ),
+          const SizedBox(width: 8),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: Colors.black.withValues(alpha: 0.02),
           ),
         ),
       ),
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Business Services",
-                    style: GoogleFonts.poppins(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1A1C1E),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Manage your shop operations efficiently",
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                ],
-              ),
-            ),
-          ),
           SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             sliver: SliverGrid(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: isTablet ? 3 : 2,
@@ -173,7 +195,7 @@ class ServicesScreen extends StatelessWidget {
               }, childCount: _services.length),
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          const SliverToBoxAdapter(child: SizedBox(height: 16)),
         ],
       ),
     );
@@ -191,57 +213,58 @@ class _ServiceCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: service.iconColor.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: service.iconColor.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
           ),
         ],
-        border: Border.all(color: Colors.grey.shade100, width: 1.5),
+        border: Border.all(color: Colors.grey.shade100, width: 1),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: service.isComingSoon ? null : onTap,
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(20),
           child: Opacity(
             opacity: service.isComingSoon ? 0.6 : 1.0,
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: service.iconColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(14),
+                          color: service.iconColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
                           service.icon,
-                          size: 22,
+                          size: 18,
                           color: service.iconColor,
                         ),
                       ),
                       if (service.isComingSoon)
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
+                            horizontal: 5,
+                            vertical: 1,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(6),
+                            borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             "Soon",
                             style: GoogleFonts.poppins(
-                              fontSize: 8,
+                              fontSize: 7,
                               fontWeight: FontWeight.bold,
                               color: Colors.grey.shade600,
                             ),
@@ -250,27 +273,27 @@ class _ServiceCard extends StatelessWidget {
                       else
                         Icon(
                           Icons.arrow_forward_ios,
-                          size: 12,
+                          size: 10,
                           color: Colors.grey.shade300,
                         ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   Text(
                     service.title,
                     style: GoogleFonts.poppins(
-                      fontSize: 15,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
                       color: const Color(0xFF1A1C1E),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   Text(
                     service.description,
                     style: GoogleFonts.poppins(
-                      fontSize: 11,
+                      fontSize: 9,
                       color: Colors.grey.shade500,
                       height: 1.3,
                     ),

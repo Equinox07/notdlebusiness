@@ -1,22 +1,20 @@
 // lib/screens/create_order_screen.dart
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:notdle/models/customer.dart';
-import 'package:notdle/models/image_owner_types.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
-import 'package:notdle/providers/image_provider.dart';
 import 'package:notdle/providers/invoice_provider.dart';
 import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/screens/invoice_details_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
-import 'dart:io';
 
 const _kPurple = Color(0xFF6200EE);
 const _kBg = Color(0xFFF5F4F8);
@@ -46,23 +44,16 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   String _outfitType = "Evening Gown";
   String _fabric = "";
   int _quantity = 1;
-  final List<File> _designImages = [];
-
-  Future<void> _pickDesignImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _designImages.add(File(pickedFile.path));
-      });
-    }
-  }
 
   // ── Pricing state ────────────────────────────────────────────────────────
   double _materialCost = 0;
   double _laborCost = 0;
   bool _depositReceived = false;
   double _depositAmount = 0;
+
+  // ── Design Inspiration state ──────────────────────────────────────────────
+  final List<File> _designInspirationImages = [];
+  final ImagePicker _picker = ImagePicker();
 
   late Future<List<Customer>> _customersFuture;
 
@@ -202,23 +193,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     final orderProvider = Provider.of<OrderProvider>(context, listen: false);
     final dashProvider = Provider.of<DashBoardProvider>(context, listen: false);
     await orderProvider.addOrder(newOrder);
-
-    // Save design images
-    if (_designImages.isNotEmpty) {
-      if (!mounted) return;
-      final imageProvider = Provider.of<AppImageProvider>(
-        context,
-        listen: false,
-      );
-      for (final imageFile in _designImages) {
-        await imageProvider.saveMultipleImage(
-          ownerId: newOrder.id,
-          ownerType: ImageOwnerTypes.order,
-          file: imageFile,
-        );
-      }
-    }
-
     dashProvider.fetchCounts();
 
     if (!mounted) return;
@@ -394,17 +368,16 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                   ),
                   const SizedBox(height: 16),
                   _DesignInspirationCard(
-                    images: _designImages,
-                    onPickImage: _pickDesignImage,
-                    onRemoveImage: (index) {
+                    images: _designInspirationImages,
+                    picker: _picker,
+                    onImagesChanged: (images) {
                       setState(() {
-                        _designImages.removeAt(index);
+                        _designInspirationImages.clear();
+                        _designInspirationImages.addAll(images);
                       });
                     },
                   ),
-                  const SizedBox(height: 16),
-                  // _FabricSamplesCard(),
-                  // const SizedBox(height: 24),
+                  const SizedBox(height: 24),
                   // ── Step 3: Pricing & Payments ─────────────────────────────
                   _SectionStepLabel(
                     step: 3,
@@ -493,12 +466,11 @@ class _TopBar extends StatelessWidget {
   }
 }
 
-// ── STEP PROGRESS HEADER ─────────────────────────────────────────────────────
-
 class _StepHeader extends StatelessWidget {
   final int step;
   final int totalSteps;
   final String label;
+
   const _StepHeader({
     required this.step,
     required this.totalSteps,
@@ -508,55 +480,50 @@ class _StepHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Row(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "STEP $step OF $totalSteps",
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: _kPurple,
-                  letterSpacing: 0.8,
-                ),
-              ),
-              Text(
-                label,
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: Colors.grey.shade500,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: Colors.black87,
+            ),
           ),
-          const SizedBox(height: 6),
-          Row(
-            children: List.generate(totalSteps, (i) {
-              final active = i < step;
-              return Expanded(
-                child: Container(
-                  margin: EdgeInsets.only(right: i < totalSteps - 1 ? 6 : 0),
-                  height: 4,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(2),
-                    color: active ? _kPurple : Colors.grey.shade200,
+          const Spacer(),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: _kPurple.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: _kPurple.withValues(alpha: 0.16)),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.person_add_alt_1_rounded,
+                  size: 13,
+                  color: _kPurple,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  'Quick Add',
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: _kPurple,
                   ),
                 ),
-              );
-            }),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 }
-
-// ── SELECT CLIENT CARD ───────────────────────────────────────────────────────
 
 class _SelectClientCard extends StatelessWidget {
   final List<Customer> customers;
@@ -575,84 +542,61 @@ class _SelectClientCard extends StatelessWidget {
     required this.onClientSelected,
   });
 
-  List<Customer> get _filtered =>
-      clientSearch.isEmpty
-          ? customers.take(5).toList()
-          : customers
-              .where(
-                (c) =>
-                    c.name.toLowerCase().contains(clientSearch.toLowerCase()),
-              )
-              .take(5)
-              .toList();
-
   @override
   Widget build(BuildContext context) {
+    final filtered =
+        clientSearch.trim().isEmpty
+            ? customers
+            : customers
+                .where(
+                  (c) =>
+                      c.name.toLowerCase().contains(clientSearch.toLowerCase()),
+                )
+                .toList();
+
     return _SectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Select Client",
-                style: GoogleFonts.poppins(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              if (canChange)
-                _PillButton(
-                  label: "Quick Add",
-                  icon: Icons.person_add_alt_1,
-                  onTap: () {},
-                ),
-            ],
-          ),
-          const SizedBox(height: 4),
           Text(
-            "Who is this order for?",
+            "Select Client",
             style: GoogleFonts.poppins(
-              fontSize: 13,
-              color: Colors.grey.shade500,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: Colors.black87,
             ),
           ),
-          const SizedBox(height: 12),
-          // Search field
-          if (canChange) ...[
-            Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFF0EFF4),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: TextField(
-                onChanged: onSearchChanged,
-                style: GoogleFonts.poppins(fontSize: 14),
-                decoration: InputDecoration(
-                  hintText: "Search existing clients...",
-                  hintStyle: GoogleFonts.poppins(
-                    color: Colors.grey.shade400,
-                    fontSize: 14,
-                  ),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: Colors.grey.shade400,
-                    size: 20,
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          const SizedBox(height: 10),
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0EFF4),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: TextField(
+              onChanged: onSearchChanged,
+              style: GoogleFonts.poppins(fontSize: 14),
+              decoration: InputDecoration(
+                hintText: "Search existing clients...",
+                hintStyle: GoogleFonts.poppins(
+                  color: Colors.grey.shade400,
+                  fontSize: 14,
                 ),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: Colors.grey.shade400,
+                  size: 20,
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 12),
               ),
             ),
-            const SizedBox(height: 16),
-          ],
-          // Client avatars
+          ),
+          const SizedBox(height: 16),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
               children:
-                  _filtered.map((c) {
+                  filtered.map((c) {
                     final isSelected = selectedCustomer?.id == c.id;
                     final initials =
                         c.name
@@ -750,42 +694,62 @@ class _OutfitDetailsCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Outfit Details",
-            style: GoogleFonts.poppins(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: _kPurple.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.checkroom_rounded,
+                  size: 18,
+                  color: _kPurple,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Outfit Details",
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    "Select style, fabric and quantity",
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            "Outfit Type",
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: Colors.grey.shade500,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 6),
-          DropdownButtonFormField<String>(
-            value: outfitType,
-            style: GoogleFonts.poppins(color: Colors.black87, fontSize: 14),
-            decoration: _inputDeco(null),
-            items:
+          const SizedBox(height: 14),
+          _FieldLabel("Outfit Type"),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children:
                 outfitTypes
                     .map(
-                      (t) => DropdownMenuItem(
-                        value: t,
-                        child: Text(
-                          t,
-                          style: GoogleFonts.poppins(fontSize: 14),
-                        ),
+                      (type) => _OutfitTypeChip(
+                        label: type,
+                        isSelected: outfitType == type,
+                        onTap: () => onOutfitTypeChanged(type),
                       ),
                     )
                     .toList(),
-            onChanged: onOutfitTypeChanged,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -793,45 +757,87 @@ class _OutfitDetailsCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Fabric",
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: Colors.grey.shade500,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                    _FieldLabel("Fabric"),
                     const SizedBox(height: 6),
                     TextFormField(
-                      style: GoogleFonts.poppins(fontSize: 14),
-                      decoration: _inputDeco("e.g. Silk Charmeuse"),
+                      initialValue: fabric,
+                      style: GoogleFonts.poppins(fontSize: 13),
+                      decoration: _inputDeco("e.g. Silk Charmeuse").copyWith(
+                        prefixIcon: const Icon(
+                          Icons.texture_rounded,
+                          size: 18,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      onChanged: (v) => onFabricChanged(v),
                       onSaved: onFabricChanged,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Quantity",
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Colors.grey.shade500,
-                      fontWeight: FontWeight.w500,
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF6F4FB),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _FieldLabel("Quantity"),
+                    const SizedBox(height: 6),
+                    _QuantityStepper(
+                      value: quantity,
+                      onChanged: onQuantityChanged,
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  _QuantityStepper(
-                    value: quantity,
-                    onChanged: onQuantityChanged,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _OutfitTypeChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _OutfitTypeChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color:
+              isSelected
+                  ? _kPurple.withValues(alpha: 0.12)
+                  : const Color(0xFFF0EFF4),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected ? _kPurple : Colors.transparent,
+            width: 1.2,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            color: isSelected ? _kPurple : Colors.black87,
+          ),
+        ),
       ),
     );
   }
@@ -1324,144 +1330,122 @@ class _DashedLinePainter extends CustomPainter {
   bool shouldRepaint(_DashedLinePainter old) => false;
 }
 
-// ── FABRIC SAMPLES CARD ─────────────────────────────────────────────────────
-
-// class _FabricSamplesCard extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return _SectionCard(
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Row(
-//             children: [
-//               Container(
-//                 padding: const EdgeInsets.all(8),
-//                 decoration: BoxDecoration(
-//                   color: Colors.amber.shade50,
-//                   borderRadius: BorderRadius.circular(10),
-//                 ),
-//                 child: Icon(
-//                   Icons.colorize_outlined,
-//                   color: Colors.amber.shade700,
-//                   size: 18,
-//                 ),
-//               ),
-//               const SizedBox(width: 10),
-//               Text(
-//                 "Fabric Samples",
-//                 style: GoogleFonts.poppins(
-//                   fontSize: 17,
-//                   fontWeight: FontWeight.bold,
-//                 ),
-//               ),
-//             ],
-//           ),
-//           const SizedBox(height: 4),
-//           Text(
-//             "Attach physical fabric swatches or colour references",
-//             style: GoogleFonts.poppins(
-//               fontSize: 12,
-//               color: Colors.grey.shade500,
-//             ),
-//           ),
-//           const SizedBox(height: 14),
-//           // Upload zone
-//           GestureDetector(
-//             onTap: () {},
-//             child: Container(
-//               width: double.infinity,
-//               height: 140,
-//               decoration: BoxDecoration(
-//                 borderRadius: BorderRadius.circular(16),
-//                 border: Border.all(color: Colors.amber.shade300, width: 1.5),
-//                 color: Colors.amber.shade50.withValues(alpha: 0.5),
-//               ),
-//               child: Column(
-//                 mainAxisAlignment: MainAxisAlignment.center,
-//                 children: [
-//                   Container(
-//                     width: 48,
-//                     height: 48,
-//                     decoration: BoxDecoration(
-//                       color: Colors.amber.shade600,
-//                       shape: BoxShape.circle,
-//                     ),
-//                     child: const Icon(
-//                       Icons.upload_file_outlined,
-//                       color: Colors.white,
-//                       size: 24,
-//                     ),
-//                   ),
-//                   const SizedBox(height: 10),
-//                   Text(
-//                     "Upload Fabric Sample",
-//                     style: GoogleFonts.poppins(
-//                       fontSize: 14,
-//                       fontWeight: FontWeight.bold,
-//                     ),
-//                   ),
-//                   const SizedBox(height: 4),
-//                   Text(
-//                     "JPG, PNG or PDF · Max 10 MB",
-//                     style: GoogleFonts.poppins(
-//                       fontSize: 12,
-//                       color: Colors.grey.shade500,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ),
-//           const SizedBox(height: 14),
-//           // Thumbnail strip
-//           Row(
-//             children: [
-//               Container(
-//                 width: 70,
-//                 height: 70,
-//                 decoration: BoxDecoration(
-//                   borderRadius: BorderRadius.circular(12),
-//                   color: Colors.amber.shade100,
-//                 ),
-//                 child: Icon(
-//                   Icons.texture,
-//                   color: Colors.amber.shade700,
-//                   size: 30,
-//                 ),
-//               ),
-//               const SizedBox(width: 10),
-//               GestureDetector(
-//                 onTap: () {},
-//                 child: Container(
-//                   width: 70,
-//                   height: 70,
-//                   decoration: BoxDecoration(
-//                     borderRadius: BorderRadius.circular(12),
-//                     color: Colors.grey.shade100,
-//                     border: Border.all(color: Colors.grey.shade300, width: 1.5),
-//                   ),
-//                   child: const Icon(Icons.add, color: Colors.grey, size: 28),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-
 class _DesignInspirationCard extends StatelessWidget {
   final List<File> images;
-  final VoidCallback onPickImage;
-  final Function(int) onRemoveImage;
+  final ImagePicker picker;
+  final ValueChanged<List<File>> onImagesChanged;
 
   const _DesignInspirationCard({
     required this.images,
-    required this.onPickImage,
-    required this.onRemoveImage,
+    required this.picker,
+    required this.onImagesChanged,
   });
+
+  Future<void> _showImageSourceOptions(BuildContext context) async {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Add Design Inspiration",
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: _kPurple.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt_rounded,
+                      color: _kPurple,
+                    ),
+                  ),
+                  title: Text(
+                    "Camera",
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  subtitle: Text(
+                    "Take a photo",
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImage(context, ImageSource.camera);
+                  },
+                ),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: _kPurple.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.photo_library_rounded,
+                      color: _kPurple,
+                    ),
+                  ),
+                  title: Text(
+                    "Gallery",
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  subtitle: Text(
+                    "Choose from gallery",
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _pickImage(context, ImageSource.gallery);
+                  },
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _pickImage(BuildContext context, ImageSource source) async {
+    final pickedFile = await picker.pickImage(source: source, imageQuality: 85);
+    if (pickedFile != null) {
+      final newImages = List<File>.from(images)..add(File(pickedFile.path));
+      onImagesChanged(newImages);
+    }
+  }
+
+  void _removeImage(int index) {
+    final newImages = List<File>.from(images)..removeAt(index);
+    onImagesChanged(newImages);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1478,149 +1462,200 @@ class _DesignInspirationCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
-                  Icons.lightbulb_outline,
-                  color: _kPurple,
+                  Icons.collections_rounded,
                   size: 18,
+                  color: _kPurple,
                 ),
               ),
               const SizedBox(width: 10),
-              Text(
-                "Design Inspiration",
-                style: GoogleFonts.poppins(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // Upload Area
-          GestureDetector(
-            onTap: onPickImage,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: _kPurple.withValues(alpha: 0.3),
-                  width: 1.5,
-                ),
-                color: _kPurple.withValues(alpha: 0.03),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: const BoxDecoration(
-                      color: _kPurple,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.cloud_upload_outlined,
-                      color: Colors.white,
-                      size: 24,
+                  Text(
+                    "Design Inspiration",
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black87,
                     ),
                   ),
-                  const SizedBox(height: 10),
                   Text(
-                    "Upload Reference",
+                    "Add reference images",
                     style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Add fabric swatches, design sketches,\nor mood board photos",
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
                       color: Colors.grey.shade500,
                     ),
                   ),
                 ],
               ),
-            ),
+            ],
           ),
-          if (images.isNotEmpty) ...[
-            const SizedBox(height: 14),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  ...images.asMap().entries.map((entry) {
-                    int idx = entry.key;
-                    File file = entry.value;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: Stack(
-                        children: [
-                          Container(
-                            width: 70,
-                            height: 70,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              image: DecorationImage(
-                                image: FileImage(file),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            right: 0,
-                            top: 0,
-                            child: GestureDetector(
-                              onTap: () => onRemoveImage(idx),
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.close,
-                                  size: 10,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-                  GestureDetector(
-                    onTap: onPickImage,
-                    child: Container(
-                      width: 70,
-                      height: 70,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: Colors.grey.shade100,
-                        border: Border.all(
-                          color: Colors.grey.shade300,
-                          width: 1.5,
-                        ),
+          const SizedBox(height: 14),
+          // Upload zone
+          if (images.isEmpty)
+            GestureDetector(
+              onTap: () => _showImageSourceOptions(context),
+              child: Container(
+                width: double.infinity,
+                height: 140,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: _kPurple.withValues(alpha: 0.3),
+                    width: 1.5,
+                  ),
+                  color: _kPurple.withValues(alpha: 0.03),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: const BoxDecoration(
+                        color: _kPurple,
+                        shape: BoxShape.circle,
                       ),
                       child: const Icon(
-                        Icons.add,
-                        color: Colors.grey,
-                        size: 28,
+                        Icons.add_photo_alternate_outlined,
+                        color: Colors.white,
+                        size: 24,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 10),
+                    Text(
+                      "Add Reference Images",
+                      style: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "Fabric swatches, sketches, or photos",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontSize: 11,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
+          // Image thumbnails
+          if (images.isNotEmpty)
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                ...images.asMap().entries.map(
+                  (entry) => _ImageThumbnail(
+                    image: entry.value,
+                    onRemove: () => _removeImage(entry.key),
+                  ),
+                ),
+                // Add more button
+                GestureDetector(
+                  onTap: () => _showImageSourceOptions(context),
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: _kPurple.withValues(alpha: 0.05),
+                      border: Border.all(
+                        color: _kPurple.withValues(alpha: 0.3),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.add_rounded,
+                          color: _kPurple,
+                          size: 28,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Add",
+                          style: GoogleFonts.poppins(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: _kPurple,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );
   }
 }
+
+class _ImageThumbnail extends StatelessWidget {
+  final File image;
+  final VoidCallback onRemove;
+
+  const _ImageThumbnail({required this.image, required this.onRemove});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            image: DecorationImage(image: FileImage(image), fit: BoxFit.cover),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 4,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+        ),
+        Positioned(
+          top: 4,
+          right: 4,
+          child: GestureDetector(
+            onTap: onRemove,
+            child: Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: Colors.red.shade500,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.close_rounded,
+                color: Colors.white,
+                size: 16,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+void _imageErrorHandler(Object exception, StackTrace? stackTrace) {}
 
 // ── BOTTOM CTA ────────────────────────────────────────────────────────────────
 

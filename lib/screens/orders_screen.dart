@@ -93,43 +93,76 @@ class _OrdersScreenState extends State<OrdersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FD),
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         elevation: 0,
-        flexibleSpace: const _AbstractAppBarBackground(),
-        leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            color: Colors.black87,
-            size: 20,
-          ),
-        ),
-        title: Text(
-          "Garment Orders",
-          style: GoogleFonts.poppins(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
+        scrolledUnderElevation: 0,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF6200EE).withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.assignment_rounded,
+                color: Color(0xFF6200EE),
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Orders',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  'Manage garment orders',
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black38,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
         actions: [
           IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.notifications_none_rounded,
+                color: Color(0xFF424242),
+                size: 18,
+              ),
+            ),
             onPressed: () {},
-            icon: const Icon(
-              Icons.notifications_none_outlined,
-              color: Colors.black87,
-            ),
           ),
-          const Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundImage: AssetImage('assets/profile.jpg'),
-            ),
-          ),
+          const SizedBox(width: 8),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: Colors.black.withValues(alpha: 0.02),
+          ),
+        ),
       ),
       body: SafeArea(
         child: Stack(
@@ -141,11 +174,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   // Search Bar
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(18),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.04),
@@ -160,13 +193,13 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           decoration: InputDecoration(
                             hintText: "Search client, fabric or style...",
                             hintStyle: GoogleFonts.poppins(
-                              color: Colors.grey.shade400,
+                              color: const Color(0xFFADADAD),
                               fontSize: 13,
                             ),
                             prefixIcon: const Icon(
                               Icons.search,
-                              color: Color(0xFF6200EE),
-                              size: 20,
+                              color: Color(0xFFADADAD),
+                              size: 18,
                             ),
                             border: InputBorder.none,
                             contentPadding: const EdgeInsets.symmetric(
@@ -182,7 +215,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   SliverToBoxAdapter(
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                       child: Row(
                         children:
                             _filters.map((filter) {
@@ -287,7 +320,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           );
                         }
                         return SliverPadding(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
                           sliver: SliverList(
                             delegate: SliverChildBuilderDelegate((
                               context,
@@ -320,7 +353,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             ),
             // Sticky FAB-style button
             Positioned(
-              bottom: 24,
+              bottom: 100,
               right: 20,
               child: FloatingActionButton(
                 onPressed: () async {
@@ -332,12 +365,77 @@ class _OrdersScreenState extends State<OrdersScreen> {
                   _refreshOrders();
                 },
                 backgroundColor: const Color(0xFF6200EE),
-                elevation: 6,
+                elevation: 8,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: const Icon(Icons.add, color: Colors.white, size: 28),
               ),
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: _buildBottomNav(),
+    );
+  }
+
+  Widget _buildBottomNav() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Colors.grey.shade100)),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildNavItem(Icons.people_rounded, "Clients", false, () {}),
+          _buildNavItem(Icons.assignment_rounded, "Orders", true, () {}),
+          _buildNavItem(Icons.receipt_long_rounded, "Invoices", false, () {}),
+          _buildNavItem(Icons.settings_rounded, "Settings", false, () {}),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(
+    IconData icon,
+    String label,
+    bool isActive,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color:
+                  isActive
+                      ? const Color(0xFF6200EE).withValues(alpha: 0.1)
+                      : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              icon,
+              color:
+                  isActive ? const Color(0xFF6200EE) : const Color(0xFF999999),
+              size: 22,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 9,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+              color:
+                  isActive ? const Color(0xFF6200EE) : const Color(0xFF999999),
+            ),
+          ),
+        ],
       ),
     );
   }

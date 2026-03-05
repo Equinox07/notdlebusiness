@@ -89,93 +89,123 @@ class _CustomersScreenState extends State<CustomersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: Colors.grey.shade50,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: _kPurple.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.people_rounded,
+                color: _kPurple,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Clients',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  'Manage customer profiles',
+                  style: GoogleFonts.poppins(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black38,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.notifications_none_rounded,
+                color: Color(0xFF424242),
+                size: 18,
+              ),
+            ),
+            onPressed: () {},
+          ),
+          const SizedBox(width: 8),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: Colors.black.withValues(alpha: 0.02),
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header ─────────────────────────────────────────────────────
+            // Search Bar
             Padding(
-              padding: const EdgeInsets.fromLTRB(22, 22, 18, 0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Clients",
-                    style: GoogleFonts.poppins(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF0D0D0D),
-                    ),
-                  ),
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.07),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.more_horiz,
-                      color: Colors.black87,
-                      size: 20,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 18),
-
-            // ── Search ─────────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(18),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
+                      color: Colors.black.withValues(alpha: 0.03),
                       blurRadius: 10,
-                      offset: const Offset(0, 3),
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: TextField(
                   controller: _searchController,
-                  style: GoogleFonts.poppins(fontSize: 14),
+                  style: GoogleFonts.poppins(fontSize: 13),
                   decoration: InputDecoration(
                     hintText: "Search by name or phone...",
                     hintStyle: GoogleFonts.poppins(
-                      color: Colors.grey.shade400,
-                      fontSize: 14,
+                      color: const Color(0xFFADADAD),
+                      fontSize: 13,
                     ),
-                    prefixIcon: Icon(
+                    prefixIcon: const Icon(
                       Icons.search,
-                      color: Colors.grey.shade400,
-                      size: 20,
+                      color: Color(0xFFADADAD),
+                      size: 18,
                     ),
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                 ),
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
 
-            // ── Filter Pills ───────────────────────────────────────────────
+            // Filter Pills
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 18),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
                   _TagPill(
@@ -202,9 +232,9 @@ class _CustomersScreenState extends State<CustomersScreen> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
 
-            // ── List ───────────────────────────────────────────────────────
+            // List
             Expanded(
               child:
                   _isLoading
@@ -212,12 +242,12 @@ class _CustomersScreenState extends State<CustomersScreen> {
                       : _filtered.isEmpty
                       ? _buildEmptyState()
                       : ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(18, 0, 18, 100),
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
                         itemCount: _filtered.length,
                         itemBuilder: (context, index) {
                           final customer = _filtered[index];
                           return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.only(bottom: 10),
                             child: _ClientCard(
                               customer: customer,
                               tag: _inferTag(customer),
@@ -253,9 +283,11 @@ class _CustomersScreenState extends State<CustomersScreen> {
           }
         },
         backgroundColor: _kPurple,
-        elevation: 6,
+        elevation: 8,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
+      bottomNavigationBar: _buildBottomNav(),
     );
   }
 
@@ -264,22 +296,81 @@ class _CustomersScreenState extends State<CustomersScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.people_outline, size: 72, color: Colors.grey.shade300),
-          const SizedBox(height: 16),
+          Icon(Icons.people_outline, size: 56, color: Colors.grey.shade300),
+          const SizedBox(height: 12),
           Text(
             "No clients found",
             style: GoogleFonts.poppins(
-              fontSize: 17,
-              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
               color: Colors.grey.shade500,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Text(
             "Tap + to add your first client",
             style: GoogleFonts.poppins(
-              fontSize: 13,
+              fontSize: 12,
               color: Colors.grey.shade400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomNav() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Colors.grey.shade100)),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildNavItem(Icons.people_rounded, "Clients", true, () {}),
+          _buildNavItem(Icons.assignment_rounded, "Projects", false, () {}),
+          _buildNavItem(Icons.calendar_month_rounded, "Orders", false, () {}),
+          _buildNavItem(Icons.settings_rounded, "Settings", false, () {}),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(
+    IconData icon,
+    String label,
+    bool isActive,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color:
+                  isActive
+                      ? _kPurple.withValues(alpha: 0.1)
+                      : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              icon,
+              color: isActive ? _kPurple : const Color(0xFF999999),
+              size: 22,
+            ),
+          ),
+          const SizedBox(height: 3),
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 9,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+              color: isActive ? _kPurple : const Color(0xFF999999),
             ),
           ),
         ],
@@ -306,23 +397,23 @@ class _TagPill extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        margin: const EdgeInsets.only(right: 10),
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
           color: active ? _kPurple : Colors.white,
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(20),
           boxShadow:
               active
                   ? [
                     BoxShadow(
-                      color: _kPurple.withValues(alpha: 0.28),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+                      color: _kPurple.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
                   ]
                   : [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
+                      color: Colors.black.withValues(alpha: 0.03),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
@@ -331,8 +422,8 @@ class _TagPill extends StatelessWidget {
         child: Text(
           label,
           style: GoogleFonts.poppins(
-            fontSize: 14,
-            fontWeight: active ? FontWeight.bold : FontWeight.w500,
+            fontSize: 12,
+            fontWeight: active ? FontWeight.w600 : FontWeight.w500,
             color: active ? Colors.white : Colors.grey.shade700,
           ),
         ),
@@ -371,28 +462,30 @@ class _ClientCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFF5F5F5)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // ── Photo ──────────────────────────────────────────────────
               _buildAvatar(),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
 
               // ── Info ───────────────────────────────────────────────────
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     // Name row + badge
                     Row(
@@ -401,8 +494,8 @@ class _ClientCard extends StatelessWidget {
                           child: Text(
                             customer.name,
                             style: GoogleFonts.poppins(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
                               color: const Color(0xFF0D0D0D),
                             ),
                             maxLines: 1,
@@ -410,20 +503,20 @@ class _ClientCard extends StatelessWidget {
                           ),
                         ),
                         if (badgeData != null) ...[
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           _Badge(label: badgeData.$1, color: badgeData.$2),
                         ],
                       ],
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 1),
                     Text(
                       customer.phone,
                       style: GoogleFonts.poppins(
-                        fontSize: 13,
+                        fontSize: 11,
                         color: Colors.grey.shade500,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 4),
                     // Last visit + balance row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -431,7 +524,7 @@ class _ClientCard extends StatelessWidget {
                         Text(
                           "Last: $lastVisitStr",
                           style: GoogleFonts.poppins(
-                            fontSize: 12,
+                            fontSize: 10,
                             color: Colors.grey.shade400,
                           ),
                         ),
@@ -448,7 +541,7 @@ class _ClientCard extends StatelessWidget {
                                   ? "Bal: \$${(count * 85).toStringAsFixed(2)}"
                                   : "No Balance",
                               style: GoogleFonts.poppins(
-                                fontSize: 13,
+                                fontSize: 10,
                                 fontWeight:
                                     hasBalance
                                         ? FontWeight.w600
@@ -474,10 +567,10 @@ class _ClientCard extends StatelessWidget {
   }
 
   Widget _buildAvatar() {
-    const double size = 62;
+    const double size = 48;
     if (customer.imagePath != null) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         child: Image.file(
           File(customer.imagePath!),
           width: size,
@@ -490,7 +583,7 @@ class _ClientCard extends StatelessWidget {
     if (customer.profileImageUrl != null &&
         customer.profileImageUrl!.isNotEmpty) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         child: Image.network(
           customer.profileImageUrl!,
           width: size,
@@ -517,13 +610,13 @@ class _ClientCard extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         color: _kPurple.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Center(
         child: Text(
           initials,
           style: GoogleFonts.poppins(
-            fontSize: 18,
+            fontSize: 14,
             fontWeight: FontWeight.bold,
             color: _kPurple,
           ),

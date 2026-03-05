@@ -156,6 +156,30 @@ void main() async {
     );
   });
 
+  final migration7to8 = Migration(7, 8, (database) async {
+    await database.execute(
+      'ALTER TABLE `orders` ADD COLUMN `currentStage` TEXT NOT NULL DEFAULT "measure"',
+    );
+    await database.execute(
+      'ALTER TABLE `orders` ADD COLUMN `designReferences` TEXT NOT NULL DEFAULT "[]"',
+    );
+    await database.execute(
+      'ALTER TABLE `orders` ADD COLUMN `totalQuotation` REAL NOT NULL DEFAULT 0.0',
+    );
+    await database.execute(
+      'ALTER TABLE `orders` ADD COLUMN `paidAmount` REAL NOT NULL DEFAULT 0.0',
+    );
+    await database.execute(
+      'ALTER TABLE `orders` ADD COLUMN `garmentType` TEXT NOT NULL DEFAULT ""',
+    );
+    await database.execute(
+      'ALTER TABLE `orders` ADD COLUMN `fabric` TEXT NOT NULL DEFAULT ""',
+    );
+    await database.execute(
+      'ALTER TABLE `orders` ADD COLUMN `lining` TEXT NOT NULL DEFAULT ""',
+    );
+  });
+
   final db =
       await $FloorAppDatabase
           .databaseBuilder('app_database')
@@ -166,6 +190,7 @@ void main() async {
             migration4to5,
             migration5to6,
             migration6to7,
+            migration7to8,
           ])
           .addCallback(
             Callback(

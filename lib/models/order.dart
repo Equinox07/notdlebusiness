@@ -1,8 +1,11 @@
 // lib/models/order.dart
 import 'package:floor/floor.dart';
+import 'package:intl/intl.dart';
 import 'package:notdle/models/order_item.dart'; // Import the OrderItem model
 import 'package:uuid/uuid.dart';
 import 'customer.dart';
+
+enum ProductionStage { measure, cutting, sewing, fitting, ready }
 
 @Entity(
   tableName: 'orders',
@@ -34,6 +37,13 @@ class Order {
   final bool isSynced; // New field
   final String? companyId;
   final String? userId;
+  final ProductionStage currentStage; // New field for production stage
+  final List<String> designReferences;
+  final double totalQuotation;
+  final double paidAmount;
+  final String garmentType;
+  final String fabric;
+  final String lining;
 
   @ignore
   final List<OrderItem> items; // Add items list
@@ -58,6 +68,13 @@ class Order {
     this.isSynced = false, // Add to constructor with default value
     this.companyId,
     this.userId,
+    this.currentStage = ProductionStage.measure, // Initialize production stage
+    this.designReferences = const [], // Initialize design references
+    this.totalQuotation = 0, // Initialize total quotation
+    this.paidAmount = 0, // Initialize paid amount
+    this.garmentType = '', // Add garment type
+    this.fabric = '', // Add fabric
+    this.lining = '', // Add lining
   }) : id = id ?? const Uuid().v4();
 
   Order copyWith({
@@ -79,6 +96,13 @@ class Order {
     bool? isSynced, // Add to copyWith
     String? companyId,
     String? userId,
+    ProductionStage? currentStage, // Add currentStage to copyWith
+    List<String>? designReferences, // Add designReferences to copyWith
+    double? totalQuotation, // Add totalQuotation to copyWith
+    double? paidAmount, // Add paidAmount to copyWith
+    String? garmentType, // Add garmentType to copyWith
+    String? fabric, // Add fabric to copyWith
+    String? lining, // Add lining to copyWith
   }) {
     return Order(
       id: id,
@@ -100,8 +124,29 @@ class Order {
       isSynced: isSynced ?? this.isSynced, // Update in copyWith
       companyId: companyId ?? this.companyId,
       userId: userId ?? this.userId,
+      currentStage:
+          currentStage ?? this.currentStage, // Update currentStage in copyWith
+      designReferences:
+          designReferences ??
+          this.designReferences, // Update designReferences in copyWith
+      totalQuotation:
+          totalQuotation ??
+          this.totalQuotation, // Update totalQuotation in copyWith
+      paidAmount:
+          paidAmount ?? this.paidAmount, // Update paidAmount in copyWith
+      garmentType:
+          garmentType ?? this.garmentType, // Update garmentType in copyWith
+      fabric: fabric ?? this.fabric, // Update fabric in copyWith
+      lining: lining ?? this.lining, // Update lining in copyWith
     );
   }
+
+  // Calculate days remaining
+  int get daysLeft =>
+      DateTime.parse(dueDate!).difference(DateTime.now()).inDays;
+
+  // Calculate balance
+  double get balance => totalQuotation - paidAmount;
 
   //
   // // Convert an Order object into a Map.
@@ -137,7 +182,8 @@ class Order {
   // }
 }
 
-extension OrderDateExtension on Order {
+extension OrderExtension on Order {
+  // ---------- Dates ----------
   DateTime? get createdAt {
     try {
       return DateTime.parse(createdDate);
@@ -148,11 +194,37 @@ extension OrderDateExtension on Order {
 
   DateTime? get dueAt {
     if (dueDate == null) return null;
-
     try {
       return DateTime.parse(dueDate!);
     } catch (_) {
       return null;
     }
+  }
+
+  // ---------- Payment ----------
+  bool get isPaid => paymentStatus.toLowerCase() == "paid";
+
+  bool get isPartiallyPaid => paymentStatus.toLowerCase() == "partial";
+
+  double get balanceAmount {
+    final totalAmount = total ?? 0;
+    final paid = paymentAmount ?? 0;
+    return totalAmount - paid;
+  }
+
+  // ---------- Currency ----------
+  String totalFormatted({String symbol = "₵"}) {
+    final formatter = NumberFormat.currency(symbol: symbol);
+    return formatter.format(total ?? 0);
+  }
+
+  String balanceFormatted({String symbol = "₵"}) {
+    final formatter = NumberFormat.currency(symbol: symbol);
+    return formatter.format(balanceAmount);
+  }
+
+  String subtotalFormatted({String symbol = "₵"}) {
+    final formatter = NumberFormat.currency(symbol: symbol);
+    return formatter.format(subtotal ?? 0);
   }
 }

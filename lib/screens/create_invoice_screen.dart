@@ -172,7 +172,18 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
   }
 
   void _saveInvoice() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Please fix the validation errors",
+            style: GoogleFonts.poppins(),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     if (_selectedCustomer == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

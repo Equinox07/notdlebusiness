@@ -7,7 +7,7 @@ import 'package:notdle/models/order.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/screens/create_order_screen.dart';
-import 'package:notdle/screens/order_details_screen.dart';
+import 'package:notdle/screens/orderdetails_screen.dart';
 import 'package:provider/provider.dart';
 
 class _OrderWithCustomer {
@@ -334,10 +334,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                   await Navigator.of(context).push(
                                     MaterialPageRoute(
                                       builder:
-                                          (context) => OrderDetailsScreen(
-                                            order: item.order,
-                                            orderId: item.order.id,
-                                          ),
+                                          (context) => OrderDetailsScreen(),
                                     ),
                                   );
                                   _refreshOrders();

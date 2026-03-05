@@ -16,6 +16,8 @@ import 'package:notdle/models/invoice_item.dart';
 import 'package:notdle/models/measurement_map_convertor.dart';
 import 'package:notdle/models/order_item.dart';
 import 'package:notdle/models/payment.dart';
+import 'package:notdle/models/string_list_converter.dart';
+import 'package:notdle/models/production_stage_converter.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
 import 'package:notdle/models/company.dart';
@@ -32,9 +34,11 @@ part 'app_database.g.dart'; // The file that will be generated
   DateTimeConvertor,
   MeasurementMapConverter,
   DateTimeNullConvertor,
+  StringListConverter,
+  ProductionStageConverter,
 ])
 @Database(
-  version: 7, // Increment version for schema changes
+  version: 8, // Increment version for schema changes
   entities: [
     Company,
     Customer,

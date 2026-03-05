@@ -94,7 +94,7 @@ class _$AppDatabase extends AppDatabase {
     Callback? callback,
   ]) async {
     final databaseOptions = sqflite.OpenDatabaseOptions(
-      version: 7,
+      version: 8,
       onConfigure: (database) async {
         await database.execute('PRAGMA foreign_keys = ON');
         await callback?.onConfigure?.call(database);
@@ -114,13 +114,13 @@ class _$AppDatabase extends AppDatabase {
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `customers` (`id` TEXT, `name` TEXT NOT NULL, `phone` TEXT NOT NULL, `email` TEXT, `lastVisit` INTEGER NOT NULL, `gender` TEXT NOT NULL, `address` TEXT, `imagePath` TEXT, `profileImageUrl` TEXT, `createdDate` INTEGER NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `orders` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `customerId` TEXT NOT NULL, `status` TEXT NOT NULL, `paymentStatus` TEXT NOT NULL, `paymentAmount` REAL, `dueDate` TEXT, `notes` TEXT, `createdDate` TEXT NOT NULL, `orderNumber` TEXT, `subtotal` REAL, `total` REAL, `tax` REAL, `expectedDeliveryDate` INTEGER, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `orders` (`id` TEXT NOT NULL, `title` TEXT NOT NULL, `customerId` TEXT NOT NULL, `status` TEXT NOT NULL, `paymentStatus` TEXT NOT NULL, `paymentAmount` REAL, `dueDate` TEXT, `notes` TEXT, `createdDate` TEXT NOT NULL, `orderNumber` TEXT, `subtotal` REAL, `total` REAL, `tax` REAL, `expectedDeliveryDate` INTEGER, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, `currentStage` TEXT NOT NULL, `designReferences` TEXT NOT NULL, `totalQuotation` REAL NOT NULL, `paidAmount` REAL NOT NULL, `garmentType` TEXT NOT NULL, `fabric` TEXT NOT NULL, `lining` TEXT NOT NULL, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, PRIMARY KEY (`id`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `measurements` (`id` TEXT NOT NULL, `customerId` TEXT NOT NULL, `name` TEXT NOT NULL, `measurementValues` TEXT NOT NULL, `createdDate` INTEGER NOT NULL, `updatedDate` INTEGER, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE NO ACTION, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `invoices` (`id` TEXT NOT NULL, `customerId` TEXT NOT NULL, `companyId` TEXT, `userId` TEXT, `status` TEXT NOT NULL, `createdDate` TEXT, `updatedDate` TEXT, `invoiceNumber` TEXT, `issueDate` INTEGER, `dueDate` INTEGER, `notes` TEXT, `terms` TEXT, `subtotal` REAL, `tax` REAL, `total` REAL, `projectId` TEXT, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `title` TEXT, `date` INTEGER, `orderId` TEXT, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, FOREIGN KEY (`orderId`) REFERENCES `orders` (`id`) ON UPDATE NO ACTION ON DELETE SET NULL, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `invoices` (`id` TEXT NOT NULL, `customerId` TEXT NOT NULL, `companyId` TEXT, `userId` TEXT, `status` TEXT NOT NULL, `createdDate` TEXT, `updatedDate` TEXT, `invoiceNumber` TEXT, `issueDate` INTEGER, `dueDate` INTEGER, `notes` TEXT, `terms` TEXT, `subtotal` REAL, `tax` REAL, `total` REAL, `projectId` TEXT, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `title` TEXT, `date` INTEGER, `orderId` TEXT, `isPaid` INTEGER NOT NULL, FOREIGN KEY (`customerId`) REFERENCES `customers` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, FOREIGN KEY (`orderId`) REFERENCES `orders` (`id`) ON UPDATE NO ACTION ON DELETE SET NULL, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `payments` (`id` TEXT NOT NULL, `invoiceId` TEXT NOT NULL, `companyId` TEXT, `amount` REAL NOT NULL, `paymentDate` INTEGER NOT NULL, `referenceNumber` TEXT, `notes` TEXT, `status` TEXT NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `userId` TEXT, FOREIGN KEY (`invoiceId`) REFERENCES `invoices` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `payments` (`id` TEXT NOT NULL, `invoiceId` TEXT NOT NULL, `companyId` TEXT, `amount` REAL NOT NULL, `paymentDate` INTEGER NOT NULL, `referenceNumber` TEXT, `notes` TEXT, `status` TEXT NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `userId` TEXT, `method` TEXT NOT NULL, FOREIGN KEY (`invoiceId`) REFERENCES `invoices` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`id`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `order_items` (`id` TEXT NOT NULL, `orderId` TEXT NOT NULL, `productName` TEXT NOT NULL, `productDescription` TEXT, `quantity` INTEGER NOT NULL, `unitPrice` REAL NOT NULL, `taxRate` REAL, `amount` REAL NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, FOREIGN KEY (`orderId`) REFERENCES `orders` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`id`))');
         await database.execute(
@@ -666,7 +666,16 @@ class _$OrderDao extends OrderDao {
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
                   'isSynced': item.isSynced ? 1 : 0,
                   'companyId': item.companyId,
-                  'userId': item.userId
+                  'userId': item.userId,
+                  'currentStage':
+                      _productionStageConverter.encode(item.currentStage),
+                  'designReferences':
+                      _stringListConverter.encode(item.designReferences),
+                  'totalQuotation': item.totalQuotation,
+                  'paidAmount': item.paidAmount,
+                  'garmentType': item.garmentType,
+                  'fabric': item.fabric,
+                  'lining': item.lining
                 }),
         _orderItemInsertionAdapter = InsertionAdapter(
             database,
@@ -708,7 +717,16 @@ class _$OrderDao extends OrderDao {
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
                   'isSynced': item.isSynced ? 1 : 0,
                   'companyId': item.companyId,
-                  'userId': item.userId
+                  'userId': item.userId,
+                  'currentStage':
+                      _productionStageConverter.encode(item.currentStage),
+                  'designReferences':
+                      _stringListConverter.encode(item.designReferences),
+                  'totalQuotation': item.totalQuotation,
+                  'paidAmount': item.paidAmount,
+                  'garmentType': item.garmentType,
+                  'fabric': item.fabric,
+                  'lining': item.lining
                 }),
         _orderItemUpdateAdapter = UpdateAdapter(
             database,
@@ -751,7 +769,16 @@ class _$OrderDao extends OrderDao {
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
                   'isSynced': item.isSynced ? 1 : 0,
                   'companyId': item.companyId,
-                  'userId': item.userId
+                  'userId': item.userId,
+                  'currentStage':
+                      _productionStageConverter.encode(item.currentStage),
+                  'designReferences':
+                      _stringListConverter.encode(item.designReferences),
+                  'totalQuotation': item.totalQuotation,
+                  'paidAmount': item.paidAmount,
+                  'garmentType': item.garmentType,
+                  'fabric': item.fabric,
+                  'lining': item.lining
                 });
 
   final sqflite.DatabaseExecutor database;
@@ -792,7 +819,16 @@ class _$OrderDao extends OrderDao {
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
             isSynced: (row['isSynced'] as int) != 0,
             companyId: row['companyId'] as String?,
-            userId: row['userId'] as String?));
+            userId: row['userId'] as String?,
+            currentStage:
+                _productionStageConverter.decode(row['currentStage'] as String),
+            designReferences:
+                _stringListConverter.decode(row['designReferences'] as String),
+            totalQuotation: row['totalQuotation'] as double,
+            paidAmount: row['paidAmount'] as double,
+            garmentType: row['garmentType'] as String,
+            fabric: row['fabric'] as String,
+            lining: row['lining'] as String));
   }
 
   @override
@@ -817,7 +853,16 @@ class _$OrderDao extends OrderDao {
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
             isSynced: (row['isSynced'] as int) != 0,
             companyId: row['companyId'] as String?,
-            userId: row['userId'] as String?),
+            userId: row['userId'] as String?,
+            currentStage:
+                _productionStageConverter.decode(row['currentStage'] as String),
+            designReferences:
+                _stringListConverter.decode(row['designReferences'] as String),
+            totalQuotation: row['totalQuotation'] as double,
+            paidAmount: row['paidAmount'] as double,
+            garmentType: row['garmentType'] as String,
+            fabric: row['fabric'] as String,
+            lining: row['lining'] as String),
         arguments: [id]);
   }
 
@@ -852,7 +897,16 @@ class _$OrderDao extends OrderDao {
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
             isSynced: (row['isSynced'] as int) != 0,
             companyId: row['companyId'] as String?,
-            userId: row['userId'] as String?),
+            userId: row['userId'] as String?,
+            currentStage:
+                _productionStageConverter.decode(row['currentStage'] as String),
+            designReferences:
+                _stringListConverter.decode(row['designReferences'] as String),
+            totalQuotation: row['totalQuotation'] as double,
+            paidAmount: row['paidAmount'] as double,
+            garmentType: row['garmentType'] as String,
+            fabric: row['fabric'] as String,
+            lining: row['lining'] as String),
         arguments: [customerId]);
   }
 
@@ -886,7 +940,16 @@ class _$OrderDao extends OrderDao {
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
             isSynced: (row['isSynced'] as int) != 0,
             companyId: row['companyId'] as String?,
-            userId: row['userId'] as String?));
+            userId: row['userId'] as String?,
+            currentStage:
+                _productionStageConverter.decode(row['currentStage'] as String),
+            designReferences:
+                _stringListConverter.decode(row['designReferences'] as String),
+            totalQuotation: row['totalQuotation'] as double,
+            paidAmount: row['paidAmount'] as double,
+            garmentType: row['garmentType'] as String,
+            fabric: row['fabric'] as String,
+            lining: row['lining'] as String));
   }
 
   @override
@@ -962,7 +1025,8 @@ class _$OrderDao extends OrderDao {
             isSynced: (row['isSynced'] as int) != 0,
             title: row['title'] as String?,
             date: _dateTimeNullConvertor.decode(row['date'] as int?),
-            orderId: row['orderId'] as String?),
+            orderId: row['orderId'] as String?,
+            isPaid: (row['isPaid'] as int) != 0),
         arguments: [orderId]);
   }
 
@@ -990,7 +1054,8 @@ class _$OrderDao extends OrderDao {
             isSynced: (row['isSynced'] as int) != 0,
             title: row['title'] as String?,
             date: _dateTimeNullConvertor.decode(row['date'] as int?),
-            orderId: row['orderId'] as String?),
+            orderId: row['orderId'] as String?,
+            isPaid: (row['isPaid'] as int) != 0),
         arguments: [orderId]);
   }
 
@@ -1018,7 +1083,8 @@ class _$OrderDao extends OrderDao {
             isSynced: (row['isSynced'] as int) != 0,
             title: row['title'] as String?,
             date: _dateTimeNullConvertor.decode(row['date'] as int?),
-            orderId: row['orderId'] as String?),
+            orderId: row['orderId'] as String?,
+            isPaid: (row['isPaid'] as int) != 0),
         arguments: [customerId]);
   }
 
@@ -1261,7 +1327,8 @@ class _$InvoiceDao extends InvoiceDao {
                   'isSynced': item.isSynced ? 1 : 0,
                   'title': item.title,
                   'date': _dateTimeNullConvertor.encode(item.date),
-                  'orderId': item.orderId
+                  'orderId': item.orderId,
+                  'isPaid': item.isPaid ? 1 : 0
                 }),
         _invoiceItemInsertionAdapter = InsertionAdapter(
             database,
@@ -1293,7 +1360,8 @@ class _$InvoiceDao extends InvoiceDao {
                   'status': item.status,
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
                   'isSynced': item.isSynced ? 1 : 0,
-                  'userId': item.userId
+                  'userId': item.userId,
+                  'method': item.method
                 }),
         _invoiceUpdateAdapter = UpdateAdapter(
             database,
@@ -1320,7 +1388,8 @@ class _$InvoiceDao extends InvoiceDao {
                   'isSynced': item.isSynced ? 1 : 0,
                   'title': item.title,
                   'date': _dateTimeNullConvertor.encode(item.date),
-                  'orderId': item.orderId
+                  'orderId': item.orderId,
+                  'isPaid': item.isPaid ? 1 : 0
                 }),
         _invoiceItemUpdateAdapter = UpdateAdapter(
             database,
@@ -1354,7 +1423,8 @@ class _$InvoiceDao extends InvoiceDao {
                   'status': item.status,
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
                   'isSynced': item.isSynced ? 1 : 0,
-                  'userId': item.userId
+                  'userId': item.userId,
+                  'method': item.method
                 }),
         _invoiceDeletionAdapter = DeletionAdapter(
             database,
@@ -1381,7 +1451,8 @@ class _$InvoiceDao extends InvoiceDao {
                   'isSynced': item.isSynced ? 1 : 0,
                   'title': item.title,
                   'date': _dateTimeNullConvertor.encode(item.date),
-                  'orderId': item.orderId
+                  'orderId': item.orderId,
+                  'isPaid': item.isPaid ? 1 : 0
                 });
 
   final sqflite.DatabaseExecutor database;
@@ -1428,7 +1499,8 @@ class _$InvoiceDao extends InvoiceDao {
             isSynced: (row['isSynced'] as int) != 0,
             title: row['title'] as String?,
             date: _dateTimeNullConvertor.decode(row['date'] as int?),
-            orderId: row['orderId'] as String?));
+            orderId: row['orderId'] as String?,
+            isPaid: (row['isPaid'] as int) != 0));
   }
 
   @override
@@ -1455,7 +1527,8 @@ class _$InvoiceDao extends InvoiceDao {
             isSynced: (row['isSynced'] as int) != 0,
             title: row['title'] as String?,
             date: _dateTimeNullConvertor.decode(row['date'] as int?),
-            orderId: row['orderId'] as String?),
+            orderId: row['orderId'] as String?,
+            isPaid: (row['isPaid'] as int) != 0),
         arguments: [id]);
   }
 
@@ -1500,7 +1573,8 @@ class _$InvoiceDao extends InvoiceDao {
             status: row['status'] as String,
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
             isSynced: (row['isSynced'] as int) != 0,
-            userId: row['userId'] as String?),
+            userId: row['userId'] as String?,
+            method: row['method'] as String),
         arguments: [invoiceId]);
   }
 
@@ -1831,7 +1905,8 @@ class _$PaymentDao extends PaymentDao {
                   'status': item.status,
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
                   'isSynced': item.isSynced ? 1 : 0,
-                  'userId': item.userId
+                  'userId': item.userId,
+                  'method': item.method
                 }),
         _paymentUpdateAdapter = UpdateAdapter(
             database,
@@ -1848,7 +1923,8 @@ class _$PaymentDao extends PaymentDao {
                   'status': item.status,
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
                   'isSynced': item.isSynced ? 1 : 0,
-                  'userId': item.userId
+                  'userId': item.userId,
+                  'method': item.method
                 }),
         _paymentDeletionAdapter = DeletionAdapter(
             database,
@@ -1865,7 +1941,8 @@ class _$PaymentDao extends PaymentDao {
                   'status': item.status,
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
                   'isSynced': item.isSynced ? 1 : 0,
-                  'userId': item.userId
+                  'userId': item.userId,
+                  'method': item.method
                 });
 
   final sqflite.DatabaseExecutor database;
@@ -1894,7 +1971,8 @@ class _$PaymentDao extends PaymentDao {
             status: row['status'] as String,
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
             isSynced: (row['isSynced'] as int) != 0,
-            userId: row['userId'] as String?));
+            userId: row['userId'] as String?,
+            method: row['method'] as String));
   }
 
   @override
@@ -1911,7 +1989,8 @@ class _$PaymentDao extends PaymentDao {
             status: row['status'] as String,
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
             isSynced: (row['isSynced'] as int) != 0,
-            userId: row['userId'] as String?),
+            userId: row['userId'] as String?,
+            method: row['method'] as String),
         arguments: [id]);
   }
 
@@ -1930,7 +2009,8 @@ class _$PaymentDao extends PaymentDao {
             status: row['status'] as String,
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
             isSynced: (row['isSynced'] as int) != 0,
-            userId: row['userId'] as String?),
+            userId: row['userId'] as String?,
+            method: row['method'] as String),
         arguments: [invoiceId]);
   }
 
@@ -2058,3 +2138,5 @@ class _$AppImageDao extends AppImageDao {
 final _dateTimeConvertor = DateTimeConvertor();
 final _measurementMapConverter = MeasurementMapConverter();
 final _dateTimeNullConvertor = DateTimeNullConvertor();
+final _stringListConverter = StringListConverter();
+final _productionStageConverter = ProductionStageConverter();

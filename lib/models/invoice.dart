@@ -47,6 +47,7 @@ class Invoice {
   final String? title; // New field
   final DateTime? date; // New field
   final String? orderId; // New field
+  bool isPaid;
 
   @ignore
   final List<InvoiceItem> items;
@@ -77,6 +78,7 @@ class Invoice {
     this.title, // Add to constructor
     this.date, // Add to constructor
     this.orderId, // Add to constructor
+    this.isPaid = false, // Initialize isPaid
   }) : id = id ?? const Uuid().v4();
 
   Invoice copyWith({
@@ -102,6 +104,7 @@ class Invoice {
     String? title, // Add to copyWith
     DateTime? date, // Add to copyWith
     String? orderId, // Add to copyWith
+    bool? isPaid, // Add isPaid to copyWith
   }) {
     return Invoice(
       id: id,
@@ -127,6 +130,7 @@ class Invoice {
       title: title ?? this.title, // Update in copyWith
       date: date ?? this.date, // Update in copyWith
       orderId: orderId ?? this.orderId, // Update in copyWith
+      isPaid: isPaid ?? this.isPaid, // Update isPaid in copyWith
     );
   }
 }

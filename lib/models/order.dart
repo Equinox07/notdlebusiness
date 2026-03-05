@@ -136,3 +136,23 @@ class Order {
   //   );
   // }
 }
+
+extension OrderDateExtension on Order {
+  DateTime? get createdAt {
+    try {
+      return DateTime.parse(createdDate);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  DateTime? get dueAt {
+    if (dueDate == null) return null;
+
+    try {
+      return DateTime.parse(dueDate!);
+    } catch (_) {
+      return null;
+    }
+  }
+}

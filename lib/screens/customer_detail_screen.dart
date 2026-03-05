@@ -4,11 +4,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/customer.dart';
+import 'package:notdle/models/order.dart';
 import 'package:notdle/navigation/app_navigation.dart';
 import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:notdle/models/measurement.dart';
 import 'package:notdle/providers/measurement_provider.dart';
+import 'package:notdle/providers/order_provider.dart';
+import 'package:notdle/screens/client_order_details_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -37,6 +40,11 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
           context,
           listen: false,
         ).fetchMeasurementsWithCustomer(widget.customer.id!);
+
+        Provider.of<OrderProvider>(
+          context,
+          listen: false,
+        ).fetchOrdersForCustomer(widget.customer.id!);
       }
     });
   }
@@ -646,7 +654,192 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
   }
 
   Widget _buildOrdersTab() {
-    return const Center(child: Text("Orders Tab Content"));
+    return Consumer<OrderProvider>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final orders = provider.customerOrders;
+
+        if (orders.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.receipt_long, size: 48, color: Colors.grey.shade300),
+                const SizedBox(height: 16),
+                Text(
+                  "No orders yet",
+                  style: GoogleFonts.poppins(color: Colors.grey.shade500),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.all(20),
+          itemCount: orders.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final order = orders[index];
+            return _buildOrderCard(order);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildOrderCard(Order order) {
+    final dateStr =
+        order.dueDate != null && order.dueDate!.isNotEmpty
+            ? "Due: ${_formatDueDate(order.dueDate!)}"
+            : "No due date";
+
+    return GestureDetector(
+      onTap: () async {
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ClientOrderDetailsScreen(order: order),
+          ),
+        );
+        // Refresh orders after returning from details screen
+        if (!mounted) return;
+        if (widget.customer.id != null) {
+          Provider.of<OrderProvider>(
+            context,
+            listen: false,
+          ).fetchOrdersForCustomer(widget.customer.id!);
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.015),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    order.title,
+                    style: GoogleFonts.poppins(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Text(
+                  dateStr,
+                  style: GoogleFonts.poppins(
+                    fontSize: 11,
+                    color: const Color(0xFFBCC1CC),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _buildStatusChip(order.status),
+                const SizedBox(width: 8),
+                _buildPaymentStatusChip(order.paymentStatus),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDueDate(String dueDate) {
+    try {
+      final date = DateFormat("yyyy-M-d").parse(dueDate);
+      return DateFormat('MMM d, y').format(date);
+    } catch (e) {
+      return dueDate;
+    }
+  }
+
+  Widget _buildStatusChip(String status) {
+    final Color statusColor = _getStatusColor(status);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        status,
+        style: GoogleFonts.poppins(
+          color: statusColor,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentStatusChip(String status) {
+    final Color statusColor = _getPaymentStatusColor(status);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: statusColor.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        status,
+        style: GoogleFonts.poppins(
+          color: statusColor,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case "Completed":
+        return Colors.green.shade600;
+      case "In Progress":
+        return Colors.blue.shade600;
+      case "Pending":
+        return Colors.orange.shade600;
+      case "Cancelled":
+        return Colors.red.shade600;
+      default:
+        return Colors.grey.shade700;
+    }
+  }
+
+  Color _getPaymentStatusColor(String status) {
+    switch (status) {
+      case "Paid":
+        return Colors.green.shade600;
+      case "Partially Paid":
+        return Colors.orange.shade600;
+      case "Unpaid":
+        return Colors.red.shade600;
+      default:
+        return Colors.grey.shade700;
+    }
   }
 
   Widget _buildMeasurementsTab() {

@@ -97,7 +97,11 @@ class _CustomerOrdersScreenState extends State<CustomerOrdersScreen> {
                     // Await navigation to refresh the list if changes were made
                     await Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => OrderDetailsScreen(order: order),
+                        builder:
+                            (context) => OrderDetailsScreen(
+                              order: order,
+                              orderId: order.id,
+                            ),
                       ),
                     );
                     _refreshOrders();

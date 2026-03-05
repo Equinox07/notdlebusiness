@@ -11,6 +11,10 @@ import 'package:notdle/screens/create_invoice_screen.dart';
 import 'package:notdle/screens/update_order_modal.dart';
 import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
+import 'dart:developer' as _logger;
+import 'dart:math' as _math;
+import 'dart:typed_data' as _typed_data;
+import 'package:url_launcher/url_launcher.dart';
 
 // Private data model to hold all fetched details
 class _OrderDetailsData {
@@ -22,9 +26,13 @@ class _OrderDetailsData {
 
 class OrderDetailsScreen extends StatefulWidget {
   static const String tag = "order_details";
-  final Order order;
+  final String orderId;
 
-  const OrderDetailsScreen({super.key, required this.order});
+  const OrderDetailsScreen({
+    super.key,
+    required Order order,
+    required this.orderId,
+  });
 
   @override
   State<OrderDetailsScreen> createState() => _OrderDetailsScreenState();
@@ -32,25 +40,18 @@ class OrderDetailsScreen extends StatefulWidget {
 
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   late Future<_OrderDetailsData?> _orderDetailsFuture;
-  // Store the order ID in the state to ensure it's constant for all fetches.
-  late final String _orderId;
 
   @override
   void initState() {
     super.initState();
-    // 1. Set the order ID from the initial widget.
-    _orderId = widget.order.id;
-    // 2. Fetch the initial data using the stored ID.
     _orderDetailsFuture = _fetchOrderDetails();
   }
 
   Future<_OrderDetailsData?> _fetchOrderDetails() async {
-    // It's good practice to check if the widget is still mounted before using context.
     if (!mounted) return null;
     final orderProvider = Provider.of<OrderProvider>(context, listen: false);
 
-    // 3. Use the state's _orderId for all fetches, not widget.order.id.
-    final data = await orderProvider.getOrderWithDetails(_orderId);
+    final data = await orderProvider.getOrderWithDetails(widget.orderId);
 
     if (data != null) {
       return _OrderDetailsData(
@@ -59,15 +60,12 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         invoice: data.invoice,
       );
     }
-    // If you see "Order not found", it's likely this line is being reached.
-    // Add a debug print to confirm if the fetch is failing.
     debugPrint(
-      "Could not fetch details for order ID: $_orderId. 'getOrderWithDetails' returned null.",
+      "Could not fetch details for order ID: ${widget.orderId}. 'getOrderWithDetails' returned null.",
     );
     return null;
   }
 
-  // Central method to refresh the screen's data.
   void _refreshOrderData() {
     if (mounted) {
       setState(() {
@@ -81,31 +79,19 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     return FutureBuilder<_OrderDetailsData?>(
       future: _orderDetailsFuture,
       builder: (context, snapshot) {
-        // Determine the current order data. Use the initial widget.order as a fallback.
-        final currentOrder = snapshot.data?.order ?? widget.order;
+        final orderDetails = snapshot.data;
+        final order = orderDetails?.order;
 
         return Scaffold(
-          backgroundColor: Colors.grey.shade100,
+          backgroundColor: Colors.grey.shade50,
           appBar: CustomAppBar(
-            title: "Order Details",
+            title: 'Order Details',
             actions: [
-              // Only show the edit button if we have data to edit.
               if (snapshot.connectionState == ConnectionState.done &&
-                  snapshot.hasData)
+                  order != null)
                 IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return UpdateOrderModal(
-                          // Pass the most up-to-date order from the snapshot.
-                          order: currentOrder,
-                          onOrderUpdated: _refreshOrderData,
-                        );
-                      },
-                    );
-                  },
+                  icon: const Icon(Icons.edit_note),
+                  onPressed: () => _showUpdateOrderModal(context, order),
                 ),
             ],
           ),
@@ -149,22 +135,14 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _OrderSummaryCard(
-              order: order,
-              // Use the paymentStatus from the fetched order object
-              paymentStatus: order.paymentStatus,
-            ),
+            _OrderSummaryCard(order: order, paymentStatus: order.paymentStatus),
             const SizedBox(height: 16),
-            if (order.dueDate != null) ...[
-              _TimeInfoCard(dueDate: order.dueDate!),
-              const SizedBox(height: 16),
-            ],
+            _OrderStatusCard(status: order.status),
+            const SizedBox(height: 16),
+            _TimeInfoCard(orderDate: order.createdAt!, dueDate: order.dueAt),
+            const SizedBox(height: 16),
             if (customer != null) ...[
-              _CustomerInfoCard(
-                customerName: customer.name,
-                phone: customer.phone,
-                email: customer.email ?? 'N/A',
-              ),
+              _CustomerInfoCard(customer: customer),
               const SizedBox(height: 16),
             ],
             if (order.notes != null && order.notes!.isNotEmpty) ...[
@@ -172,7 +150,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               const SizedBox(height: 16),
             ],
             if (invoice != null) ...[
-              _InvoiceCard(invoice: invoice),
+              _InvoiceCard(invoice: invoice, order: order),
               const SizedBox(height: 16),
             ],
           ],
@@ -206,7 +184,6 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 (context) => CreateInvoiceScreen(order: orderDetails.order),
           ),
         );
-        // If the create invoice screen returns true, refresh the data.
         if (result == true && mounted) {
           _refreshOrderData();
         }
@@ -222,53 +199,65 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       icon: const Icon(Icons.receipt, color: Colors.white),
     );
   }
-}
 
-// Helper widget to build section titles
-Widget _buildSectionTitle(String title) {
-  return Text(
-    title,
-    style: GoogleFonts.poppins(
-      fontSize: 18,
-      fontWeight: FontWeight.w600,
-      color: Colors.black87,
-    ),
-  );
-}
+  void _showUpdateOrderModal(BuildContext context, Order order) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return UpdateOrderModal(
+          order: order,
+          onOrderUpdated: _refreshOrderData,
+        );
+      },
+    );
+  }
 
-// Helper widget to build the dropdowns
-Widget _buildDropdown(
-  String label,
-  String value,
-  List<String> items,
-  void Function(String?) onChanged,
-) {
-  return DropdownButtonFormField<String>(
-    decoration: InputDecoration(
-      labelText: label,
-      labelStyle: GoogleFonts.poppins(color: Colors.grey.shade600),
-      filled: true,
-      fillColor: Colors.grey.shade200,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
+  // Helper widget to build section titles
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.poppins(
+        fontSize: 18,
+        fontWeight: FontWeight.w600,
+        color: Colors.black87,
       ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide.none,
+    );
+  }
+
+  // Helper widget to build the dropdowns
+  Widget _buildDropdown(
+    String label,
+    String value,
+    List<String> items,
+    void Function(String?) onChanged,
+  ) {
+    return DropdownButtonFormField<String>(
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.poppins(color: Colors.grey.shade600),
+        filled: true,
+        fillColor: Colors.grey.shade200,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.indigo.shade600, width: 2),
+        ),
       ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.indigo.shade600, width: 2),
-      ),
-    ),
-    value: value,
-    items:
-        items.map((item) {
-          return DropdownMenuItem<String>(value: item, child: Text(item));
-        }).toList(),
-    onChanged: onChanged,
-  );
+      value: value,
+      items:
+          items.map((item) {
+            return DropdownMenuItem<String>(value: item, child: Text(item));
+          }).toList(),
+      onChanged: onChanged,
+    );
+  }
 }
 
 // 📦 Flat Order Summary Card
@@ -284,6 +273,13 @@ class _OrderSummaryCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.indigo.shade600,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.indigo.shade200.withOpacity(0.4),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -335,47 +331,79 @@ class _OrderSummaryCard extends StatelessWidget {
   }
 }
 
-// ⌚ Flat Time Info Card
-class _TimeInfoCard extends StatelessWidget {
-  final String dueDate;
-  const _TimeInfoCard({required this.dueDate});
+// 📊 Order Status Tracking Card
+class _OrderStatusCard extends StatelessWidget {
+  final String status;
+
+  const _OrderStatusCard({required this.status});
+
+  int _getOrderStep(String status) {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return 0;
+      case "in progress":
+        return 1;
+      case "ready":
+        return 2;
+      case "completed":
+        return 3;
+      default:
+        return 0;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
+    int currentStep = _getOrderStep(status);
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade300, width: 1),
+        side: BorderSide(color: Colors.grey.shade200, width: 1),
       ),
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(24.0),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              Icons.access_time_filled,
-              color: Colors.orange.shade600,
-              size: 24,
+            Text(
+              'Order Status',
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade800,
+              ),
             ),
-            const SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(height: 24),
+            Row(
               children: [
-                Text(
-                  "Due Date",
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade800,
-                  ),
+                _Step(
+                  title: 'Ordered',
+                  isCompleted: currentStep >= 0,
+                  isFirst: true,
+                  isLast: false,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  dueDate,
-                  style: GoogleFonts.poppins(
-                    fontSize: 14,
-                    color: Colors.grey.shade600,
-                  ),
+                _Connector(isCompleted: currentStep >= 1),
+                _Step(
+                  title: 'In Progress',
+                  isCompleted: currentStep >= 1,
+                  isFirst: false,
+                  isLast: false,
+                ),
+                _Connector(isCompleted: currentStep >= 2),
+                _Step(
+                  title: 'Ready',
+                  isCompleted: currentStep >= 2,
+                  isFirst: false,
+                  isLast: false,
+                ),
+                _Connector(isCompleted: currentStep >= 3),
+                _Step(
+                  title: 'Completed',
+                  isCompleted: currentStep >= 3,
+                  isFirst: false,
+                  isLast: true,
                 ),
               ],
             ),
@@ -386,26 +414,183 @@ class _TimeInfoCard extends StatelessWidget {
   }
 }
 
-// 👤 Flat Customer Info Card
-class _CustomerInfoCard extends StatelessWidget {
-  final String customerName;
-  final String phone;
-  final String email;
+class _Step extends StatelessWidget {
+  final String title;
+  final bool isCompleted;
+  final bool isFirst;
+  final bool isLast;
 
-  const _CustomerInfoCard({
-    required this.customerName,
-    required this.phone,
-    required this.email,
+  const _Step({
+    required this.title,
+    required this.isCompleted,
+    required this.isFirst,
+    required this.isLast,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade300, width: 1),
+    return Column(
+      children: [
+        Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isCompleted ? Colors.indigo.shade600 : Colors.grey.shade300,
+            border: Border.all(
+              color:
+                  isCompleted ? Colors.indigo.shade600 : Colors.grey.shade300,
+              width: 2,
+            ),
+          ),
+          child:
+              isCompleted
+                  ? const Icon(Icons.check, color: Colors.white, size: 16)
+                  : null,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          title,
+          style: GoogleFonts.poppins(
+            fontSize: 12,
+            fontWeight: isCompleted ? FontWeight.w600 : FontWeight.w500,
+            color: isCompleted ? Colors.indigo.shade600 : Colors.grey.shade500,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _Connector extends StatelessWidget {
+  final bool isCompleted;
+
+  const _Connector({required this.isCompleted});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Container(
+            height: 2,
+            color: isCompleted ? Colors.indigo.shade600 : Colors.grey.shade300,
+          ),
+          const SizedBox(height: 32), // To align with text
+        ],
       ),
+    );
+  }
+}
+
+// ⌚ Flat Time Info Card
+class _TimeInfoCard extends StatelessWidget {
+  final DateTime orderDate;
+  final DateTime? dueDate;
+  const _TimeInfoCard({required this.orderDate, this.dueDate});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.shade200, width: 1),
+      ),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Timeline",
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade800,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                _buildTimeDetail(
+                  context,
+                  icon: Icons.calendar_today_outlined,
+                  label: 'Order Date',
+                  value: DateFormat('d MMM yyyy').format(orderDate),
+                ),
+                if (dueDate != null) ...[
+                  const SizedBox(width: 16),
+                  _buildTimeDetail(
+                    context,
+                    icon: Icons.event_available_outlined,
+                    label: 'Due Date',
+                    value: DateFormat('d MMM yyyy').format(dueDate!),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimeDetail(
+    BuildContext context, {
+    required String label,
+    required String value,
+    required IconData icon,
+  }) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18, color: Colors.indigo.shade600),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// 👤 Flat Customer Info Card
+class _CustomerInfoCard extends StatelessWidget {
+  final Customer customer;
+
+  const _CustomerInfoCard({required this.customer});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.grey.shade200, width: 1),
+      ),
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -424,45 +609,61 @@ class _CustomerInfoCard extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.call_outlined,
-                        color: Colors.green.shade600,
+                    if (customer.phone != null && customer.phone!.isNotEmpty)
+                      IconButton(
+                        icon: Icon(
+                          Icons.call_outlined,
+                          color: Colors.green.shade600,
+                        ),
+                        onPressed:
+                            () => launchUrl(Uri.parse('tel:${customer.phone}')),
                       ),
-                      onPressed: () {
-                        // TODO: Implement call functionality
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.email_outlined,
-                        color: Colors.blue.shade600,
+                    if (customer.email != null && customer.email!.isNotEmpty)
+                      IconButton(
+                        icon: Icon(
+                          Icons.email_outlined,
+                          color: Colors.blue.shade600,
+                        ),
+                        onPressed:
+                            () => launchUrl(
+                              Uri.parse('mailto:${customer.email}'),
+                            ),
                       ),
-                      onPressed: () {
-                        // TODO: Implement email functionality
-                      },
-                    ),
                   ],
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            _InfoRow(
-              icon: Icons.person_outline,
-              label: customerName,
-              iconColor: Colors.blue,
-            ),
-            const SizedBox(height: 12),
-            _InfoRow(
-              icon: Icons.phone_outlined,
-              label: phone,
-              iconColor: Colors.green,
-            ),
-            const SizedBox(height: 12),
-            _InfoRow(
-              icon: Icons.email_outlined,
-              label: email,
-              iconColor: Colors.red,
+            Row(
+              children: [
+                const CircleAvatar(
+                  radius: 24,
+                  backgroundColor: Colors.indigo,
+                  child: Icon(Icons.person, color: Colors.white),
+                ),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      customer.name,
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                    if (customer.phone != null && customer.phone!.isNotEmpty)
+                      Text(
+                        customer.phone!,
+                        style: GoogleFonts.poppins(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),
@@ -479,12 +680,13 @@ class _NotesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade300, width: 1),
+        side: BorderSide(color: Colors.grey.shade200, width: 1),
       ),
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -517,16 +719,18 @@ class _NotesCard extends StatelessWidget {
 // 🧾 Invoice Card Widget
 class _InvoiceCard extends StatelessWidget {
   final Invoice invoice;
-  const _InvoiceCard({required this.invoice});
+  final Order order;
+  const _InvoiceCard({required this.invoice, required this.order});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade300, width: 1),
+        side: BorderSide(color: Colors.grey.shade200, width: 1),
       ),
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -553,25 +757,85 @@ class _InvoiceCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _InfoRow(
-              icon: Icons.monetization_on_outlined,
-              label: "Amount: \$${invoice.total?.toStringAsFixed(2)}",
-              iconColor: Colors.green,
+            Row(
+              children: [
+                _buildTimeDetail(
+                  context,
+                  icon: Icons.monetization_on_outlined,
+                  label: 'Amount',
+                  value: NumberFormat.currency(
+                    symbol: '₦',
+                  ).format(invoice.total),
+                ),
+                const SizedBox(width: 16),
+                _buildTimeDetail(
+                  context,
+                  icon: Icons.receipt_long,
+                  label: 'Status',
+                  value: invoice.status,
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            _InfoRow(
-              icon: Icons.receipt_long,
-              label: "Status: ${invoice.status}",
-              iconColor: Colors.orange,
-            ),
-            const SizedBox(height: 12),
-            _InfoRow(
-              icon: Icons.calendar_today,
-              label: "Date: ${DateFormat('MMM d, y').format(invoice.date!)}",
-              iconColor: Colors.blue,
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                _buildTimeDetail(
+                  context,
+                  icon: Icons.calendar_today_outlined,
+                  label: 'Order Date',
+                  value: DateFormat('d MMM yyyy').format(order.createdAt!),
+                ),
+                if (order.dueAt != null) ...[
+                  const SizedBox(width: 16),
+                  _buildTimeDetail(
+                    context,
+                    icon: Icons.event_available_outlined,
+                    label: 'Due Date',
+                    value: DateFormat('d MMM yyyy').format(order.dueAt!),
+                  ),
+                ],
+              ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTimeDetail(
+    BuildContext context, {
+    required String label,
+    required String value,
+    required IconData icon,
+  }) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18, color: Colors.indigo.shade600),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade800,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -585,19 +849,18 @@ class _StatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color statusColor = _getStatusColor(status);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.15),
+        color: _getStatusColor(status).withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         status,
         style: GoogleFonts.poppins(
-          color: statusColor,
-          fontSize: 14,
+          color: _getStatusColor(status),
           fontWeight: FontWeight.w600,
+          fontSize: 12,
         ),
       ),
     );
@@ -627,36 +890,28 @@ class _PaymentStatusChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color statusColor = _getPaymentColor(status);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.15),
+        color: _getPaymentStatusColor(status).withOpacity(0.1),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.payment, size: 16, color: statusColor),
-          const SizedBox(width: 4),
-          Text(
-            status,
-            style: GoogleFonts.poppins(
-              color: statusColor,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
+      child: Text(
+        status,
+        style: GoogleFonts.poppins(
+          color: _getPaymentStatusColor(status),
+          fontWeight: FontWeight.w600,
+          fontSize: 12,
+        ),
       ),
     );
   }
 
-  Color _getPaymentColor(String status) {
+  Color _getPaymentStatusColor(String status) {
     switch (status) {
       case "Paid":
         return Colors.green.shade600;
-      case "Partial":
+      case "Partially Paid":
         return Colors.blue.shade600;
       case "Unpaid":
         return Colors.orange.shade600;

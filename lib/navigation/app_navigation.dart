@@ -21,6 +21,7 @@ import 'package:notdle/screens/login_page_screen.dart';
 import 'package:notdle/screens/main.dart';
 import 'package:notdle/screens/notification_screen.dart';
 import 'package:notdle/screens/order_details_screen.dart';
+import 'package:notdle/screens/client_order_details_screen.dart';
 import 'package:notdle/screens/orders_screen.dart';
 import 'package:notdle/pages/signup_page.dart';
 import 'package:notdle/pages/signup_success_screen.dart';
@@ -52,8 +53,20 @@ class AppNavigator {
         if (settings.arguments is Order) {
           return MaterialPageRoute(
             builder:
-                (context) =>
-                    OrderDetailsScreen(order: settings.arguments as Order),
+                (context) => OrderDetailsScreen(
+                  order: settings.arguments as Order,
+                  orderId: (settings.arguments as Order).id,
+                ),
+          );
+        }
+        return null;
+      case ClientOrderDetailsScreen.tag:
+        if (settings.arguments is Order) {
+          return MaterialPageRoute(
+            builder:
+                (context) => ClientOrderDetailsScreen(
+                  order: settings.arguments as Order,
+                ),
           );
         }
         return null;

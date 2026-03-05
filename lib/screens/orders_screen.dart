@@ -336,6 +336,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
                                       builder:
                                           (context) => OrderDetailsScreen(
                                             order: item.order,
+                                            orderId: item.order.id,
                                           ),
                                     ),
                                   );

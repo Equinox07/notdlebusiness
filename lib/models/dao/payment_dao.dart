@@ -20,4 +20,14 @@ abstract class PaymentDao {
 
   @Query('SELECT * FROM payments WHERE invoiceId = :invoiceId')
   Future<List<Payment>> getPaymentsForInvoice(String invoiceId);
+
+  @Query(
+    'SELECT SUM(amount) FROM payments WHERE date >= :start AND date <= :end',
+  )
+  Future<double?> getIncomeBetween(String start, String end);
+
+  @Query(
+    'SELECT (SELECT SUM(totalQuotation) FROM orders) - (SELECT SUM(amount) FROM payments)',
+  )
+  Future<double?> getPendingPayments();
 }

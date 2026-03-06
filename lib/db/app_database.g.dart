@@ -1146,6 +1146,17 @@ class _$OrderDao extends OrderDao {
   }
 
   @override
+  Future<List<Order>> getOrdersDueWithin(
+    String startDate,
+    String endDate,
+  ) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM orders WHERE dueDate IS NOT NULL AND dueDate BETWEEN ?1 AND ?2',
+        mapper: (Map<String, Object?> row) => Order(title: row['title'] as String, customerId: row['customerId'] as String, status: row['status'] as String, paymentStatus: row['paymentStatus'] as String, paymentAmount: row['paymentAmount'] as double?, dueDate: row['dueDate'] as String?, notes: row['notes'] as String?, createdDate: row['createdDate'] as String, id: row['id'] as String?, orderNumber: row['orderNumber'] as String?, subtotal: row['subtotal'] as double?, total: row['total'] as double?, tax: row['tax'] as double?, expectedDeliveryDate: _dateTimeNullConvertor.decode(row['expectedDeliveryDate'] as int?), syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?), isSynced: (row['isSynced'] as int) != 0, companyId: row['companyId'] as String?, userId: row['userId'] as String?, currentStage: _productionStageConverter.decode(row['currentStage'] as String), designReferences: _stringListConverter.decode(row['designReferences'] as String), totalQuotation: row['totalQuotation'] as double, totalQuotationCents: row['totalQuotationCents'] as int, paidAmount: row['paidAmount'] as double, paidAmountCents: row['paidAmountCents'] as int, garmentType: row['garmentType'] as String, fabric: row['fabric'] as String, lining: row['lining'] as String, subtotalCents: row['subtotalCents'] as int?, totalCents: row['totalCents'] as int?),
+        arguments: [startDate, endDate]);
+  }
+
+  @override
   Future<void> insertOrder(Order order) async {
     await _orderInsertionAdapter.insert(order, OnConflictStrategy.replace);
   }
@@ -2123,6 +2134,24 @@ class _$PaymentDao extends PaymentDao {
             method: row['method'] as String,
             isPaid: (row['isPaid'] as int) != 0),
         arguments: [invoiceId]);
+  }
+
+  @override
+  Future<double?> getIncomeBetween(
+    String start,
+    String end,
+  ) async {
+    return _queryAdapter.query(
+        'SELECT SUM(amount) FROM payments WHERE date >= ?1 AND date <= ?2',
+        mapper: (Map<String, Object?> row) => row.values.first as double,
+        arguments: [start, end]);
+  }
+
+  @override
+  Future<double?> getPendingPayments() async {
+    return _queryAdapter.query(
+        'SELECT (SELECT SUM(totalQuotation) FROM orders) - (SELECT SUM(amount) FROM payments)',
+        mapper: (Map<String, Object?> row) => row.values.first as double);
   }
 
   @override

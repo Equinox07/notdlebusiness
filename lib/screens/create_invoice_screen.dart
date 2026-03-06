@@ -788,7 +788,7 @@ class _InvoiceItemRowState extends State<_InvoiceItemRow> {
     );
     _detailsController = TextEditingController();
     _quantityController = TextEditingController(
-      text: widget.item.quantity.toString(),
+      text: (widget.item.quantity ?? 0).toString(),
     );
     _unitPriceController = TextEditingController(
       text: widget.item.unitPrice.toStringAsFixed(2),

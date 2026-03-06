@@ -50,7 +50,7 @@ class InvoiceItemDto {
   final String? id;
   final String? externalId;
   final String description;
-  final int quantity;
+  final int? quantity;
   final double unitPrice;
   final double? taxRate;
   final double amount;
@@ -62,7 +62,7 @@ class InvoiceItemDto {
     this.id,
     this.externalId,
     required this.description,
-    required this.quantity,
+    this.quantity,
     required this.unitPrice,
     this.taxRate,
     required this.amount,

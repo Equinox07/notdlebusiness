@@ -19,7 +19,7 @@ class InvoiceItem {
   final String id;
   final String invoiceId;
   final String description;
-  final int quantity;
+  final int? quantity;
   final double unitPrice;
   final double? taxRate;
   final double amount;
@@ -32,7 +32,7 @@ class InvoiceItem {
     String? id,
     required this.invoiceId,
     required this.description,
-    required this.quantity,
+    this.quantity,
     required this.unitPrice,
     this.taxRate,
     required this.amount,

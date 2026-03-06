@@ -54,7 +54,7 @@ InvoiceItemDto _$InvoiceItemDtoFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String?,
       externalId: json['externalId'] as String?,
       description: json['description'] as String,
-      quantity: (json['quantity'] as num).toInt(),
+      quantity: (json['quantity'] as num?)?.toInt(),
       unitPrice: (json['unitPrice'] as num).toDouble(),
       taxRate: (json['taxRate'] as num?)?.toDouble(),
       amount: (json['amount'] as num).toDouble(),

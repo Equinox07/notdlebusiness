@@ -37,33 +37,39 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
   }
 
   Future<List<_InvoiceWithCustomer>> _fetchInvoicesWithCustomers() async {
-    if (!mounted) return [];
-    final invoiceProvider = Provider.of<InvoiceProvider>(
-      context,
-      listen: false,
-    );
-    final customerProvider = Provider.of<CustomerProvider>(
-      context,
-      listen: false,
-    );
-
-    await invoiceProvider.fetchInvoices();
-    final invoices = invoiceProvider.invoices;
-
-    final List<_InvoiceWithCustomer> detailedInvoices = [];
-
-    for (final invoice in invoices) {
-      final customer = await customerProvider.getCustomerById(
-        invoice.customerId,
+    try {
+      if (!mounted) return [];
+      final invoiceProvider = Provider.of<InvoiceProvider>(
+        context,
+        listen: false,
       );
-      detailedInvoices.add(
-        _InvoiceWithCustomer(
-          invoice: invoice,
-          customerName: customer?.name ?? "Unknown Customer",
-        ),
+      final customerProvider = Provider.of<CustomerProvider>(
+        context,
+        listen: false,
       );
+
+      await invoiceProvider.fetchInvoices();
+      final invoices = invoiceProvider.invoices;
+
+      final List<_InvoiceWithCustomer> detailedInvoices = [];
+
+      for (final invoice in invoices) {
+        final customer = await customerProvider.getCustomerById(
+          invoice.customerId,
+        );
+        detailedInvoices.add(
+          _InvoiceWithCustomer(
+            invoice: invoice,
+            customerName: customer?.name ?? "Unknown Customer",
+          ),
+        );
+      }
+      return detailedInvoices;
+    } catch (e, stacktrace) {
+      print("Error fetching invoices: $e");
+      print(stacktrace);
+      rethrow;
     }
-    return detailedInvoices;
   }
 
   void _refreshInvoices() {
@@ -161,7 +167,7 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                   } else if (snapshot.hasError) {
                     return Center(
                       child: Text(
-                        "An error occurred.",
+                        "An error occurred: ${snapshot.error}",
                         style: GoogleFonts.poppins(),
                       ),
                     );

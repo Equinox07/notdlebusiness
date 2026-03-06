@@ -16,12 +16,13 @@ class InvoiceProvider extends ChangeNotifier {
   List<Invoice> get invoices => _invoices;
 
   Future<void> fetchInvoices() async {
-    final invoices = await invoiceDao.getAllInvoices();
-    for (var i = 0; i < invoices.length; i++) {
-      final items = await invoiceDao.getInvoiceItems(invoices[i].id);
-      invoices[i] = invoices[i].copyWith(items: items);
+    final rawInvoices = await invoiceDao.getAllInvoices();
+    final List<Invoice> loadedInvoices = [];
+    for (final invoice in rawInvoices) {
+      final items = await invoiceDao.getInvoiceItems(invoice.id);
+      loadedInvoices.add(invoice.copyWith(items: items));
     }
-    _invoices = invoices;
+    _invoices = loadedInvoices;
     notifyListeners();
   }
 

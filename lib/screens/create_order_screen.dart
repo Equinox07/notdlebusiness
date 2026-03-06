@@ -8,12 +8,14 @@ import 'package:intl/intl.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
+import 'package:notdle/models/payment.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
 import 'package:notdle/providers/invoice_provider.dart';
 import 'package:notdle/providers/image_provider.dart';
 import 'package:notdle/models/image_owner_types.dart';
 import 'package:notdle/providers/order_provider.dart';
+import 'package:notdle/providers/payment_provider.dart';
 import 'package:notdle/screens/invoice_details_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -280,6 +282,24 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       context,
       listen: false,
     ).addInvoice(newInvoice);
+
+    // Create payment record if paidAmount exists
+    if (newOrder.paidAmount > 0) {
+      final payment = Payment(
+        id: const Uuid().v4(),
+        invoiceId: newInvoice.id,
+        amount: newOrder.paidAmount!,
+        method: 'Cash',
+        referenceNumber: newInvoice.invoiceNumber,
+        paymentDate: DateTime.now(),
+        status: 'Completed',
+      );
+
+      await Provider.of<PaymentProvider>(
+        context,
+        listen: false,
+      ).addPayment(payment);
+    }
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(

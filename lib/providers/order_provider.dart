@@ -5,6 +5,7 @@ import 'package:notdle/utils/helpers.dart';
 import '../models/order.dart';
 import 'package:notdle/services/api_service.dart';
 import 'package:notdle/services/session_manager.dart';
+import 'package:notdle/models/production_status.dart';
 
 class OrderProvider extends ChangeNotifier {
   final OrderDao orderDao;
@@ -107,5 +108,36 @@ class OrderProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<ProductionStatus> getProductionStatusCounts() async {
+    final measureCount =
+        await orderDao.getCountForStage(ProductionStage.measure.name) ?? 0;
+    final cuttingCount =
+        await orderDao.getCountForStage(ProductionStage.cutting.name) ?? 0;
+    final sewingCount =
+        await orderDao.getCountForStage(ProductionStage.sewing.name) ?? 0;
+    final fittingCount =
+        await orderDao.getCountForStage(ProductionStage.fitting.name) ?? 0;
+    final readyCount =
+        await orderDao.getCountForStage(ProductionStage.ready.name) ?? 0;
+
+    return ProductionStatus(
+      measureCount: measureCount,
+      cuttingCount: cuttingCount,
+      sewingCount: sewingCount,
+      fittingCount: fittingCount,
+      readyCount: readyCount,
+    );
+  }
+
+  Future<List<Order>> fetchOrdersDueInNext7Days() async {
+    final now = DateTime.now();
+    final nextWeek = now.add(const Duration(days: 7));
+
+    final startDate = now.toIso8601String();
+    final endDate = nextWeek.toIso8601String();
+
+    return await orderDao.getOrdersDueWithin(startDate, endDate);
   }
 }

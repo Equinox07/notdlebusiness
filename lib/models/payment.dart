@@ -1,5 +1,6 @@
 // lib/models/payment.dart
 import 'package:floor/floor.dart';
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'invoice.dart'; // Assuming Invoice model is in invoice.dart
 
@@ -80,5 +81,62 @@ class Payment {
       method: method ?? this.method, // Update in copyWith
       isPaid: isPaid ?? this.isPaid, // Update in copyWith
     );
+  }
+}
+
+extension PaymentExtension on Payment {
+  /// Safe cents getter (fallback if cents not set)
+  int get safeCents {
+    if (amountCents > 0) return amountCents;
+    return (amount * 100).round();
+  }
+
+  /// Convert cents to double amount
+  double get amountFromCents {
+    return safeCents / 100.0;
+  }
+
+  /// Format payment amount with currency
+  String formatAmount({String locale = 'en_US', String currencyCode = 'USD'}) {
+    final formatter = NumberFormat.simpleCurrency(
+      locale: locale,
+      name: currencyCode,
+    );
+
+    return formatter.format(amountFromCents);
+  }
+
+  /// Check if payment is completed
+  bool get isCompleted {
+    return status.toLowerCase() == 'completed' || isPaid;
+  }
+
+  /// Check if payment is pending
+  bool get isPending {
+    return status.toLowerCase() == 'pending';
+  }
+
+  /// Check if payment failed
+  bool get isFailed {
+    return status.toLowerCase() == 'failed';
+  }
+
+  /// Human readable method
+  String get methodLabel {
+    switch (method.toLowerCase()) {
+      case 'cash':
+        return 'Cash';
+      case 'credit_card':
+        return 'Credit Card';
+      case 'bank_transfer':
+        return 'Bank Transfer';
+      default:
+        return method;
+    }
+  }
+
+  /// Short display summary
+  String summary({String locale = 'en_US', String currencyCode = 'USD'}) {
+    return "${formatAmount(locale: locale, currencyCode: currencyCode)} • $methodLabel";
   }
 }

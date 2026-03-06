@@ -138,18 +138,50 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     }
   }
 
+  ProductionStage _indexToStage(int index) {
+    if (index >= 0 && index < ProductionStage.values.length) {
+      return ProductionStage.values[index];
+    }
+    return ProductionStage.measure; // Default case
+  }
+
   // 2. Logic: Move to the next stage
-  void _updateStatus() {
-    setState(() {
-      if (_currentStepIndex < _steps.length - 1) {
-        _currentStepIndex++;
-      } else {
-        // Reset or show completion message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Order is Ready for Pickup!")),
-        );
-      }
-    });
+  void _updateStatus() async {
+    if (_currentStepIndex < _steps.length - 1) {
+      final newIndex = _currentStepIndex + 1;
+      final newStage = _indexToStage(newIndex);
+      final isNowReady = newStage == ProductionStage.ready;
+
+      // Create an updated order object
+      final updatedOrder = widget.order.copyWith(
+        currentStage: newStage,
+        status: isNowReady ? "Completed" : widget.order.status,
+      );
+
+      // Call the provider to update the order
+      final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+      await orderProvider.updateOrder(updatedOrder);
+
+      // Update the UI
+      setState(() {
+        _currentStepIndex = newIndex;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isNowReady
+                ? "Order is Ready and marked as Completed!"
+                : "Status updated to: ${_steps[newIndex]['label']}",
+          ),
+          backgroundColor: OrderDetailsScreen.successGreen,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Order is already marked as Ready!")),
+      );
+    }
   }
 
   void _addPayment(double amount) {

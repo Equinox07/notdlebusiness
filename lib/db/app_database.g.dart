@@ -94,7 +94,7 @@ class _$AppDatabase extends AppDatabase {
     Callback? callback,
   ]) async {
     final databaseOptions = sqflite.OpenDatabaseOptions(
-      version: 11,
+      version: 12,
       onConfigure: (database) async {
         await database.execute('PRAGMA foreign_keys = ON');
         await callback?.onConfigure?.call(database);
@@ -122,7 +122,7 @@ class _$AppDatabase extends AppDatabase {
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `payments` (`id` TEXT NOT NULL, `invoiceId` TEXT NOT NULL, `companyId` TEXT, `amount` REAL NOT NULL, `amountCents` INTEGER NOT NULL, `paymentDate` INTEGER NOT NULL, `referenceNumber` TEXT, `notes` TEXT, `status` TEXT NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `userId` TEXT, `method` TEXT NOT NULL, `isPaid` INTEGER NOT NULL, FOREIGN KEY (`invoiceId`) REFERENCES `invoices` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `order_items` (`id` TEXT NOT NULL, `orderId` TEXT NOT NULL, `productName` TEXT NOT NULL, `productDescription` TEXT, `quantity` INTEGER NOT NULL, `unitPrice` REAL NOT NULL, `taxRate` REAL, `amount` REAL NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, FOREIGN KEY (`orderId`) REFERENCES `orders` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `order_items` (`id` TEXT NOT NULL, `orderId` TEXT NOT NULL, `productName` TEXT NOT NULL, `productDescription` TEXT, `quantity` INTEGER NOT NULL, `unitPrice` REAL NOT NULL, `unitPriceCents` INTEGER, `taxRate` REAL, `amount` REAL NOT NULL, `amountCents` INTEGER, `taxAmountCents` INTEGER, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, FOREIGN KEY (`orderId`) REFERENCES `orders` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`id`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `invoice_items` (`id` TEXT NOT NULL, `invoiceId` TEXT NOT NULL, `description` TEXT NOT NULL, `quantity` INTEGER, `unitPrice` REAL NOT NULL, `taxRate` REAL, `amount` REAL NOT NULL, `amountCents` INTEGER, `taxAmountCents` INTEGER, `unitPriceCents` INTEGER NOT NULL, `syncDate` INTEGER, `isSynced` INTEGER NOT NULL, `companyId` TEXT, `userId` TEXT, FOREIGN KEY (`invoiceId`) REFERENCES `invoices` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`id`))');
         await database.execute(
@@ -691,8 +691,11 @@ class _$OrderDao extends OrderDao {
                   'productDescription': item.productDescription,
                   'quantity': item.quantity,
                   'unitPrice': item.unitPrice,
+                  'unitPriceCents': item.unitPriceCents,
                   'taxRate': item.taxRate,
                   'amount': item.amount,
+                  'amountCents': item.amountCents,
+                  'taxAmountCents': item.taxAmountCents,
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
                   'isSynced': item.isSynced ? 1 : 0,
                   'companyId': item.companyId,
@@ -747,8 +750,11 @@ class _$OrderDao extends OrderDao {
                   'productDescription': item.productDescription,
                   'quantity': item.quantity,
                   'unitPrice': item.unitPrice,
+                  'unitPriceCents': item.unitPriceCents,
                   'taxRate': item.taxRate,
                   'amount': item.amount,
+                  'amountCents': item.amountCents,
+                  'taxAmountCents': item.taxAmountCents,
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
                   'isSynced': item.isSynced ? 1 : 0,
                   'companyId': item.companyId,
@@ -993,6 +999,9 @@ class _$OrderDao extends OrderDao {
             unitPrice: row['unitPrice'] as double,
             taxRate: row['taxRate'] as double?,
             amount: row['amount'] as double,
+            amountCents: row['amountCents'] as int?,
+            unitPriceCents: row['unitPriceCents'] as int?,
+            taxAmountCents: row['taxAmountCents'] as int?,
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
             isSynced: (row['isSynced'] as int) != 0,
             companyId: row['companyId'] as String?,
@@ -1126,6 +1135,14 @@ class _$OrderDao extends OrderDao {
             taxRate: row['taxRate'] as int?,
             totalCents: row['totalCents'] as int),
         arguments: [customerId]);
+  }
+
+  @override
+  Future<int?> getCountForStage(String stage) async {
+    return _queryAdapter.query(
+        'SELECT COUNT(*) FROM orders WHERE currentStage = ?1',
+        mapper: (Map<String, Object?> row) => row.values.first as int,
+        arguments: [stage]);
   }
 
   @override

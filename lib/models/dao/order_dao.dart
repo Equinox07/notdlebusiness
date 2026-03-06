@@ -61,4 +61,14 @@ abstract class OrderDao {
 
   @Query('SELECT * FROM invoices WHERE customerId = :customerId')
   Future<Invoice?> getInvoiceByCustomerId(String customerId);
+
+  // Production Stage Counts
+  @Query('SELECT COUNT(*) FROM orders WHERE currentStage = :stage')
+  Future<int?> getCountForStage(String stage);
+
+  // Orders due within a specific date range
+  @Query(
+    'SELECT * FROM orders WHERE dueDate IS NOT NULL AND dueDate BETWEEN :startDate AND :endDate',
+  )
+  Future<List<Order>> getOrdersDueWithin(String startDate, String endDate);
 }

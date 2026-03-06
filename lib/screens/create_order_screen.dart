@@ -17,6 +17,7 @@ import 'package:notdle/models/image_owner_types.dart';
 import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/providers/payment_provider.dart';
 import 'package:notdle/screens/invoice_details_screen.dart';
+import 'package:notdle/utils/invoice_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -271,12 +272,16 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   void _generateInvoice(Order newOrder) async {
     final newInvoice = Invoice(
       id: const Uuid().v4(),
+      invoiceNumber: InvoiceHelper.generateInvoiceNumber(),
       title: 'Invoice for ${newOrder.title}',
       customerId: newOrder.customerId,
       status: 'Pending',
       total: newOrder.totalQuotation ?? 0.0,
       date: DateTime.now(),
       orderId: newOrder.id,
+      subtotal: newOrder.totalQuotation ?? 0.0,
+      tax: 0.0,
+      issueDate: DateTime.now(),
     );
     await Provider.of<InvoiceProvider>(
       context,

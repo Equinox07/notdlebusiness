@@ -144,8 +144,8 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     final picked = await showDatePicker(
       context: context,
       initialDate: _issueDate ?? DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2101),
+      firstDate: DateTime(DateTime.now().year),
+      lastDate: DateTime(DateTime.now().year + 1),
       builder:
           (context, child) => Theme(
             data: ThemeData.light().copyWith(
@@ -164,8 +164,8 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     final picked = await showDatePicker(
       context: context,
       initialDate: _dueDate ?? DateTime.now().add(const Duration(days: 30)),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2101),
+      firstDate: DateTime(DateTime.now().year),
+      lastDate: DateTime(DateTime.now().year + 1),
       builder:
           (context, child) => Theme(
             data: ThemeData.light().copyWith(

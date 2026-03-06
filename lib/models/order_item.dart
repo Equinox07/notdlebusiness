@@ -22,8 +22,11 @@ class OrderItem {
   final String? productDescription;
   final int quantity;
   final double unitPrice;
+  final int? unitPriceCents; // New field: unit price in cents
   final double? taxRate;
   final double amount;
+  final int? amountCents; // New field: amount in cents
+  final int? taxAmountCents; // New field: tax amount in cents
   final DateTime? syncDate; // New field
   final bool isSynced; // New field
   final String? companyId;
@@ -38,6 +41,9 @@ class OrderItem {
     required this.unitPrice,
     this.taxRate,
     required this.amount,
+    this.amountCents,
+    this.unitPriceCents,
+    this.taxAmountCents,
     this.syncDate, // Add to constructor
     this.isSynced = false, // Add to constructor with default value
     this.companyId,
@@ -53,6 +59,9 @@ class OrderItem {
     double? unitPrice,
     double? taxRate,
     double? amount,
+    int? amountCents,
+    int? unitPriceCents,
+    int? taxAmountCents,
     DateTime? syncDate, // Add to copyWith
     bool? isSynced, // Add to copyWith
     String? companyId,
@@ -71,6 +80,9 @@ class OrderItem {
       isSynced: isSynced ?? this.isSynced, // Update in copyWith
       companyId: companyId ?? this.companyId,
       userId: userId ?? this.userId,
+      amountCents: amountCents ?? this.amountCents,
+      unitPriceCents: unitPriceCents ?? this.unitPriceCents,
+      taxAmountCents: taxAmountCents ?? this.taxAmountCents,
     );
   }
 }

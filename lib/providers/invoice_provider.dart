@@ -40,6 +40,8 @@ class InvoiceProvider extends ChangeNotifier {
     await invoiceDao.insertInvoice(updatedInvoice);
     for (final item in updatedInvoice.items) {
       final updatedItem = item.copyWith(
+        amountCents: Money.fromDouble(item.amount).cents,
+        unitPriceCents: Money.fromDouble(item.unitPrice).cents,
         invoiceId: updatedInvoice.id,
         companyId: company?.id,
         userId: user?.id,

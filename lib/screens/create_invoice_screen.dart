@@ -112,6 +112,9 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
           quantity: 1,
           unitPrice: 0.0,
           amount: 0.0,
+          amountCents: 0,
+          taxAmountCents: 0,
+          unitPriceCents: 0,
           isSynced: false,
         ),
       );
@@ -273,7 +276,8 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
       tax: _calculateTax(),
       total: _calculateTotal(),
       items: _items,
-      totalCents: Money.fromDouble(_calculateTotal()).cents, // Store total in cents
+      totalCents:
+          Money.fromDouble(_calculateTotal()).cents, // Store total in cents
       createdDate: DateTime.now().toIso8601String(),
     );
 

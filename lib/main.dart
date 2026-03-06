@@ -190,6 +190,63 @@ void main() async {
       'ALTER TABLE `payments` ADD COLUMN `method` TEXT NOT NULL DEFAULT ""',
     );
   });
+  final migration10to11 = Migration(10, 11, (database) async {
+    await database.execute(
+      'ALTER TABLE `measurements` ADD COLUMN `unit` TEXT NOT NULL DEFAULT "cm"',
+    );
+    await database.execute(
+      'ALTER TABLE `payments` ADD COLUMN `isPaid` INTEGER NOT NULL DEFAULT 0',
+    );
+    await database.execute(
+      'ALTER TABLE `payments` ADD COLUMN `amountCents` INTEGER NOT NULL DEFAULT 0',
+    );
+    await database.execute(
+      'ALTER TABLE `invoices` ADD COLUMN `subtotalCents` INTEGER NOT NULL DEFAULT 0',
+    );
+    await database.execute(
+      'ALTER TABLE `invoices` ADD COLUMN `taxCents` INTEGER NOT NULL DEFAULT 0',
+    );
+    await database.execute(
+      'ALTER TABLE `invoices` ADD COLUMN `taxRate` INTEGER NOT NULL DEFAULT 0',
+    );
+    await database.execute(
+      'ALTER TABLE `invoices` ADD COLUMN `totalCents` INTEGER NOT NULL DEFAULT 0',
+    );
+    await database.execute(
+      'ALTER TABLE `invoice_items` ADD COLUMN `amountCents` INTEGER NOT NULL DEFAULT 0',
+    );
+    await database.execute(
+      'ALTER TABLE `invoice_items` ADD COLUMN `taxAmountCents` INTEGER NOT NULL DEFAULT 0',
+    );
+    await database.execute(
+      'ALTER TABLE `invoice_items` ADD COLUMN `unitPriceCents` INTEGER NOT NULL DEFAULT 0',
+    );
+  });
+
+  final migration11to12 = Migration(11, 12, (database) async {
+    await database.execute(
+      'ALTER TABLE `orders` ADD COLUMN `subtotalCents` INTEGER NOT NULL DEFAULT 0',
+    );
+    await database.execute(
+      'ALTER TABLE `orders` ADD COLUMN `totalCents` INTEGER NOT NULL DEFAULT 0',
+    );
+    await database.execute(
+      'ALTER TABLE `orders` ADD COLUMN `totalQuotationCents` INTEGER NOT NULL DEFAULT 0',
+    );
+    await database.execute(
+      'ALTER TABLE `orders` ADD COLUMN `paidAmountCents` INTEGER NOT NULL DEFAULT 0',
+    );
+
+    await database.execute(
+      'ALTER TABLE `order_items` ADD COLUMN `amountCents` INTEGER NOT NULL DEFAULT 0',
+    );
+    await database.execute(
+      'ALTER TABLE `order_items` ADD COLUMN `taxAmountCents` INTEGER NOT NULL DEFAULT 0',
+    );
+    await database.execute(
+      'ALTER TABLE `order_items` ADD COLUMN `unitPriceCents` INTEGER NOT NULL DEFAULT 0',
+    );
+  });
 
   final db =
       await $FloorAppDatabase
@@ -204,6 +261,8 @@ void main() async {
             migration7to8,
             migration8to9,
             migration9to10,
+            migration10to11,
+            migration11to12,
           ])
           .addCallback(
             Callback(

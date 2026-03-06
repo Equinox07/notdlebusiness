@@ -30,6 +30,7 @@ class Measurement {
   final bool isSynced; // New field
   final String? companyId;
   final String? userId;
+  final String unit; // New field for measurement unit (e.g., "cm", "inches")
 
   @ignore
   Customer? customer;
@@ -46,6 +47,7 @@ class Measurement {
     this.isSynced = false, // Add to constructor with default value
     this.companyId,
     this.userId,
+    this.unit = 'cm', // Default unit to centimeters
   }) : id = id ?? const Uuid().v4();
 
   void linkCustomer(Customer c) {
@@ -63,6 +65,7 @@ class Measurement {
     bool? isSynced, // Add to copyWith
     String? companyId,
     String? userId,
+    String? unit, // Add unit to copyWith
   }) {
     return Measurement(
       id: id ?? this.id,
@@ -76,6 +79,7 @@ class Measurement {
       isSynced: isSynced ?? this.isSynced, // Update in copyWith
       companyId: companyId ?? this.companyId,
       userId: userId ?? this.userId,
+      unit: unit ?? this.unit, // Update unit in copyWith
     );
   }
 }

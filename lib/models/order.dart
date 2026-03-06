@@ -30,7 +30,9 @@ class Order {
   final String createdDate; // New field
   final String? orderNumber;
   final double? subtotal;
+  final int? subtotalCents; // New field: subtotal in cents
   final double? total;
+  final int? totalCents; // New field: total in cents
   final double? tax;
   final DateTime? expectedDeliveryDate;
   final DateTime? syncDate; // New field
@@ -40,7 +42,9 @@ class Order {
   final ProductionStage currentStage; // New field for production stage
   final List<String> designReferences;
   final double totalQuotation;
+  final int totalQuotationCents; // New field: total quotation in cents
   final double paidAmount;
+  final int paidAmountCents; // New field: paid amount in cents
   final String garmentType;
   final String fabric;
   final String lining;
@@ -71,10 +75,14 @@ class Order {
     this.currentStage = ProductionStage.measure, // Initialize production stage
     this.designReferences = const [], // Initialize design references
     this.totalQuotation = 0, // Initialize total quotation
+    this.totalQuotationCents = 0, // Initialize total quotation in cents
     this.paidAmount = 0, // Initialize paid amount
+    this.paidAmountCents = 0, // Initialize paid amount in cents
     this.garmentType = '', // Add garment type
     this.fabric = '', // Add fabric
     this.lining = '', // Add lining
+    this.subtotalCents = 0, // Initialize subtotal in cents
+    this.totalCents = 0, // Initialize total in cents
   }) : id = id ?? const Uuid().v4();
 
   Order copyWith({
@@ -103,6 +111,10 @@ class Order {
     String? garmentType, // Add garmentType to copyWith
     String? fabric, // Add fabric to copyWith
     String? lining, // Add lining to copyWith
+    int? subtotalCents, // Add subtotalCents to copyWith
+    int? totalCents, // Add totalCents to copyWith
+    int? totalQuotationCents, // Add totalQuotationCents to copyWith
+    int? paidAmountCents, // Add paidAmountCents to copyWith
   }) {
     return Order(
       id: id,
@@ -170,6 +182,11 @@ class Order {
       'garmentType': garmentType, // Store garment type
       'fabric': fabric, // Store fabric
       'lining': lining, // Store lining
+      'subtotalCents': subtotalCents, // Store subtotal in cents
+      'totalCents': totalCents, // Store total in cents
+      'totalQuotationCents':
+          totalQuotationCents, // Store total quotation in cents
+      'paidAmountCents': paidAmountCents, // Store paid amount in cents
     };
   }
 

@@ -38,7 +38,7 @@ part 'app_database.g.dart'; // The file that will be generated
   ProductionStageConverter,
 ])
 @Database(
-  version: 10, // Increment version for schema changes
+  version: 12, // Increment version for schema changes
   entities: [
     Company,
     Customer,

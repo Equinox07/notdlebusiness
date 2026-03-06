@@ -29,6 +29,7 @@ class Payment {
   final bool isSynced; // New field
   final String? userId;
   final String method; // e.g., "Credit Card", "Cash", "Bank Transfer"
+  bool isPaid;
 
   Payment({
     String? id,
@@ -44,6 +45,7 @@ class Payment {
     this.isSynced = false, // Add to constructor with default value
     this.userId,
     required this.method, // Add to constructor
+    this.isPaid = false, // Add to constructor with default value
   }) : id = id ?? const Uuid().v4();
 
   Payment copyWith({
@@ -60,6 +62,7 @@ class Payment {
     bool? isSynced, // Add to copyWith
     String? userId,
     String? method, // Add to copyWith
+    bool? isPaid, // Add to copyWith
   }) {
     return Payment(
       id: id ?? this.id,
@@ -75,6 +78,7 @@ class Payment {
       isSynced: isSynced ?? this.isSynced, // Update in copyWith
       userId: userId ?? this.userId,
       method: method ?? this.method, // Update in copyWith
+      isPaid: isPaid ?? this.isPaid, // Update in copyWith
     );
   }
 }

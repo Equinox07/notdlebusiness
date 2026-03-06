@@ -23,6 +23,9 @@ class InvoiceItem {
   final double unitPrice;
   final double? taxRate;
   final double amount;
+  final int? amountCents; // New field: amount in cents
+  final int? taxAmountCents; // New field: tax amount in cents
+  final int unitPriceCents; // New field: unit price in cents
   final DateTime? syncDate; // New field
   final bool isSynced; // New field
   final String? companyId;
@@ -36,6 +39,9 @@ class InvoiceItem {
     required this.unitPrice,
     this.taxRate,
     required this.amount,
+    this.amountCents,
+    this.taxAmountCents,
+    required this.unitPriceCents,
     this.syncDate, // Add to constructor
     this.isSynced = false, // Add to constructor with default value
     this.companyId,
@@ -50,6 +56,9 @@ class InvoiceItem {
     double? unitPrice,
     double? taxRate,
     double? amount,
+    int? amountCents,
+    int? taxAmountCents,
+    int? unitPriceCents,
     DateTime? syncDate, // Add to copyWith
     bool? isSynced, // Add to copyWith
     String? companyId,
@@ -63,6 +72,9 @@ class InvoiceItem {
       unitPrice: unitPrice ?? this.unitPrice,
       taxRate: taxRate ?? this.taxRate,
       amount: amount ?? this.amount,
+      amountCents: amountCents ?? this.amountCents,
+      taxAmountCents: taxAmountCents ?? this.taxAmountCents,
+      unitPriceCents: unitPriceCents ?? this.unitPriceCents,
       syncDate: syncDate ?? this.syncDate, // Update in copyWith
       isSynced: isSynced ?? this.isSynced, // Update in copyWith
       companyId: companyId ?? this.companyId,

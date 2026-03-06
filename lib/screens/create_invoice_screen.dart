@@ -9,6 +9,8 @@ import 'package:notdle/models/invoice_item.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/invoice_provider.dart';
 import 'package:notdle/screens/orders_screen.dart';
+import 'package:notdle/utils/invoice_helper.dart';
+import 'package:notdle/utils/money.dart';
 import 'package:provider/provider.dart';
 
 const _kPurple = Color(0xFF6200EE);
@@ -262,7 +264,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     final invoice = Invoice(
       customerId: _selectedCustomer!.id!,
       status: 'Pending',
-      invoiceNumber: _invoiceNumber,
+      invoiceNumber: InvoiceHelper.generateInvoiceNumber(),
       issueDate: _issueDate,
       dueDate: _dueDate,
       notes: _notes,
@@ -271,6 +273,7 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
       tax: _calculateTax(),
       total: _calculateTotal(),
       items: _items,
+      totalCents: Money.fromDouble(_calculateTotal()).cents, // Store total in cents
       createdDate: DateTime.now().toIso8601String(),
     );
 

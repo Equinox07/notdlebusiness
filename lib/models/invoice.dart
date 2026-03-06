@@ -39,8 +39,13 @@ class Invoice {
   final String? notes;
   final String? terms;
   final double? subtotal;
+  final int? subtotalCents; // New field: subtotal in cents
   final double? tax;
-  final double? total;
+  final double total;
+  final int? taxCents; // New field: tax in cents
+  final int?
+  taxRate; // New field: tax rate in basis points (e.g., 750 for 7.5%)
+  final int totalCents; // New field: total in cents
   final String? projectId;
   final DateTime? syncDate; // New field
   final bool isSynced; // New field
@@ -69,7 +74,7 @@ class Invoice {
     this.terms,
     this.subtotal,
     this.tax,
-    this.total,
+    required this.total,
     this.projectId,
     this.items = const [],
     this.payments = const [], // Initialize payments list
@@ -79,6 +84,10 @@ class Invoice {
     this.date, // Add to constructor
     this.orderId, // Add to constructor
     this.isPaid = false, // Initialize isPaid
+    this.subtotalCents, // Add to constructor
+    this.taxCents, // Add to constructor
+    this.taxRate, // Add to constructor
+    required this.totalCents, // Add to constructor
   }) : id = id ?? const Uuid().v4();
 
   Invoice copyWith({
@@ -105,6 +114,10 @@ class Invoice {
     DateTime? date, // Add to copyWith
     String? orderId, // Add to copyWith
     bool? isPaid, // Add isPaid to copyWith
+    int? subtotalCent, // Add to copyWith
+    int? taxCent, // Add to copyWith
+    int? taxRate, // Add to copyWith
+    int? totalCents, // Add to copyWith
   }) {
     return Invoice(
       id: id,
@@ -131,6 +144,57 @@ class Invoice {
       date: date ?? this.date, // Update in copyWith
       orderId: orderId ?? this.orderId, // Update in copyWith
       isPaid: isPaid ?? this.isPaid, // Update isPaid in copyWith
+      subtotalCents: subtotalCents ?? this.subtotalCents, // Update in copyWith
+      taxCents: taxCents ?? this.taxCents, // Update in copyWith
+      taxRate: taxRate ?? this.taxRate, // Update in copyWith
+      totalCents: totalCents ?? this.totalCents, // Update in copyWith
     );
+  }
+}
+
+extension InvoicePaymentExtension on Invoice {
+  /// Sum of all payments linked to this invoice
+  double get paymentSum {
+    if (payments.isEmpty) return 0.0;
+    return payments.fold(0.0, (sum, payment) => sum + (payment.amount ?? 0));
+  }
+
+  /// Remaining balance on the invoice
+  double get remainBalance {
+    final invoiceTotal = total ?? 0.0;
+    return invoiceTotal - paymentSum;
+  }
+
+  /// Check if invoice is fully paid
+  bool get isFullyPaid {
+    return remainBalance <= 0;
+  }
+
+  /// Check if partially paid
+  // bool get isPartiallyPaid {
+  //   return paymentSum > 0 && remainBalance > 0;
+  // }
+
+  int get paymentTotalCents {
+    if (payments.isEmpty) return 0;
+
+    return payments.fold(0, (sum, p) => sum + p.amountCents);
+  }
+
+  int get invoiceTotalCents {
+    return totalCents ?? 0;
+  }
+
+  int get remainingBalanceCents {
+    final remain = invoiceTotalCents - paymentTotalCents;
+    return remain < 0 ? 0 : remain;
+  }
+
+  bool get isPaid {
+    return remainingBalanceCents == 0 && paymentTotalCents > 0;
+  }
+
+  bool get isPartiallyPaid {
+    return paymentTotalCents > 0 && remainingBalanceCents > 0;
   }
 }

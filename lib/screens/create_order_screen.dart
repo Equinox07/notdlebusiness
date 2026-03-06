@@ -18,6 +18,7 @@ import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/providers/payment_provider.dart';
 import 'package:notdle/screens/invoice_details_screen.dart';
 import 'package:notdle/utils/invoice_helper.dart';
+import 'package:notdle/utils/money.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -280,6 +281,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       date: DateTime.now(),
       orderId: newOrder.id,
       subtotal: newOrder.totalQuotation ?? 0.0,
+      totalCents:
+          Money.fromDouble(
+            newOrder.totalQuotation ?? 0.0,
+          ).cents, // Store total in cents
+      subtotalCents: Money.fromDouble(newOrder.totalQuotation ?? 0.0).cents,
       tax: 0.0,
       issueDate: DateTime.now(),
     );
@@ -296,6 +302,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         amount: newOrder.paidAmount!,
         method: 'Cash',
         referenceNumber: newInvoice.invoiceNumber,
+        amountCents:
+            Money.fromDouble(
+              newOrder.paidAmount!,
+            ).cents, // Store amount in cents),
         paymentDate: DateTime.now(),
         status: 'Completed',
       );

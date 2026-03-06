@@ -20,6 +20,7 @@ class Payment {
   final String invoiceId;
   final String? companyId; // companyId is now optional
   final double amount;
+  final int amountCents; // New field: amount in cents
   final DateTime paymentDate;
   final String? referenceNumber;
   final String? notes;
@@ -34,6 +35,7 @@ class Payment {
     required this.invoiceId,
     this.companyId, // Make optional in constructor
     required this.amount,
+    required this.amountCents, // Add to constructor
     required this.paymentDate,
     this.referenceNumber,
     this.notes,
@@ -49,6 +51,7 @@ class Payment {
     String? invoiceId,
     String? companyId, // Make optional in copyWith
     double? amount,
+    int? amountCents, // Add to copyWith
     DateTime? paymentDate,
     String? referenceNumber,
     String? notes,
@@ -63,6 +66,7 @@ class Payment {
       invoiceId: invoiceId ?? this.invoiceId,
       companyId: companyId ?? this.companyId, // Update in copyWith
       amount: amount ?? this.amount,
+      amountCents: amountCents ?? this.amountCents, // Update in copyWith
       paymentDate: paymentDate ?? this.paymentDate,
       referenceNumber: referenceNumber ?? this.referenceNumber,
       notes: notes ?? this.notes,

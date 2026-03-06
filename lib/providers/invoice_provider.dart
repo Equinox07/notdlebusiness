@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:notdle/models/dao/invoice_dao.dart';
 import 'package:notdle/utils/helpers.dart';
+import 'package:notdle/utils/invoice_helper.dart';
+import 'package:notdle/utils/money.dart';
 import 'package:uuid/uuid.dart';
 import '../models/invoice.dart';
 import '../models/order.dart';
@@ -64,11 +66,15 @@ class InvoiceProvider extends ChangeNotifier {
 
     final invoice = Invoice(
       id: const Uuid().v4(),
-      invoiceNumber: generateInvoiceNumber(),
+      invoiceNumber: InvoiceHelper.generateInvoiceNumber(),
       customerId: order.customerId,
       companyId: company?.id,
       userId: user?.id,
       status: 'unpaid',
+      total: order.totalQuotation ?? 0.0,
+      totalCents: Money.fromDouble(order.totalQuotation ?? 0.0).cents,
+      subtotal: order.totalQuotation ?? 0.0,
+      subtotalCents: Money.fromDouble(order.totalQuotation ?? 0.0).cents,
       issueDate: DateTime.now(),
       dueDate: DateTime.now().add(const Duration(days: 30)),
       createdDate: DateTime.now().toIso8601String(),

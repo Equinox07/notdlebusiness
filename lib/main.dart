@@ -180,6 +180,12 @@ void main() async {
     );
   });
 
+  final migration8to9 = Migration(8, 9, (database) async {
+    await database.execute(
+      'ALTER TABLE `invoices` ADD COLUMN `isPaid` INTEGER NOT NULL DEFAULT 0',
+    );
+  });
+
   final db =
       await $FloorAppDatabase
           .databaseBuilder('app_database')
@@ -191,6 +197,7 @@ void main() async {
             migration5to6,
             migration6to7,
             migration7to8,
+            migration8to9,
           ])
           .addCallback(
             Callback(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
@@ -51,6 +52,32 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     {'label': 'Fitting', 'icon': Icons.person_outline},
     {'label': 'Ready', 'icon': Icons.inventory_2_outlined},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _currentStepIndex = _stageToIndex(widget.order.currentStage);
+    totalQuotation =
+        widget.order.totalQuotation > 0
+            ? widget.order.totalQuotation
+            : (widget.order.total ?? 0);
+    paidAmount = widget.order.paidAmount;
+  }
+
+  int _stageToIndex(ProductionStage stage) {
+    switch (stage) {
+      case ProductionStage.measure:
+        return 0;
+      case ProductionStage.cutting:
+        return 1;
+      case ProductionStage.sewing:
+        return 2;
+      case ProductionStage.fitting:
+        return 3;
+      case ProductionStage.ready:
+        return 4;
+    }
+  }
 
   // 2. Logic: Move to the next stage
   void _updateStatus() {
@@ -110,7 +137,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               ),
             ),
             Text(
-              "Order #SF-8802",
+              "Order #${widget.order.orderNumber ?? widget.order.id.substring(0, 6).toUpperCase()}",
               style: TextStyle(color: Colors.blueGrey[500], fontSize: 12),
             ),
           ],
@@ -182,12 +209,12 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Eleanor Vance",
+            Text(
+              "Customer ${widget.order.customerId.substring(0, widget.order.customerId.length > 8 ? 8 : widget.order.customerId.length)}",
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            const Text(
-              "Custom Evening Gown",
+            Text(
+              widget.order.title,
               style: TextStyle(
                 color: OrderDetailsScreen.primaryPurple,
                 fontSize: 16,
@@ -201,9 +228,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 color: const Color(0xFFF3E5F5),
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: const Text(
-                "Priority Client",
-                style: TextStyle(
+              child: Text(
+                widget.order.paymentStatus,
+                style: const TextStyle(
                   color: OrderDetailsScreen.primaryPurple,
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -258,19 +285,19 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               color: const Color(0xFFFBF4FF),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Row(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  "Estimated completion for Sewing:",
+                const Text(
+                  "Current stage:",
                   style: TextStyle(
                     color: OrderDetailsScreen.primaryPurple,
                     fontSize: 13,
                   ),
                 ),
                 Text(
-                  "Oct 18",
-                  style: TextStyle(
+                  _steps[_currentStepIndex]['label'] as String,
+                  style: const TextStyle(
                     color: OrderDetailsScreen.primaryPurple,
                     fontWeight: FontWeight.bold,
                     decoration: TextDecoration.underline,
@@ -303,12 +330,30 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             ],
           ),
           const Divider(height: 30),
-          _detailRow("Garment Type", "Floor-length Evening Gown"),
-          _detailRow("Fabric", "Silk Chiffon with\nEmbroidered Lace"),
-          _detailRow("Lining", "Stretch Satin (Nude)"),
+          _detailRow(
+            "Garment Type",
+            widget.order.garmentType.isNotEmpty
+                ? widget.order.garmentType
+                : "Not specified",
+          ),
+          _detailRow(
+            "Fabric",
+            widget.order.fabric.isNotEmpty
+                ? widget.order.fabric
+                : "Not specified",
+          ),
+          _detailRow(
+            "Lining",
+            widget.order.lining.isNotEmpty
+                ? widget.order.lining
+                : "Not specified",
+          ),
           _detailRow(
             "Style Notes",
-            "Open back, sweetheart\nneckline with boning.",
+            (widget.order.notes != null &&
+                    widget.order.notes!.trim().isNotEmpty)
+                ? widget.order.notes!
+                : "No style notes provided.",
             isItalic: true,
           ),
         ],
@@ -317,6 +362,11 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
   Widget _buildDeliveryDeadline() {
+    final due = widget.order.dueAt;
+    final dueDateText =
+        due != null ? DateFormat('MMMM d, y').format(due) : "No due date set";
+    final daysLeft = due != null ? due.difference(DateTime.now()).inDays : null;
+
     return _buildCard(
       child: Row(
         children: [
@@ -332,10 +382,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             ),
           ),
           const SizedBox(width: 15),
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 "DELIVERY DEADLINE",
                 style: TextStyle(
                   color: Colors.grey,
@@ -344,25 +394,28 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 ),
               ),
               Text(
-                "October 24, 2023",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                dueDateText,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
           const Spacer(),
-          const Column(
+          Column(
             children: [
               Text(
-                "5",
-                style: TextStyle(
+                daysLeft?.toString() ?? '--',
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: OrderDetailsScreen.primaryPurple,
                 ),
               ),
               Text(
-                "DAYS LEFT",
-                style: TextStyle(
+                daysLeft == null ? "NO DATE" : "DAYS LEFT",
+                style: const TextStyle(
                   color: Colors.grey,
                   fontSize: 8,
                   fontWeight: FontWeight.bold,
@@ -376,6 +429,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
   Widget _buildDesignReferences() {
+    final references = widget.order.designReferences;
+
     return Column(
       children: [
         Row(
@@ -403,17 +458,21 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           ],
         ),
         const SizedBox(height: 12),
-        SizedBox(
-          height: 180,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            children: [
-              _referenceImage('assets/placeholder/placeholder_fabric1.jpeg'),
-              _referenceImage('assets/placeholder/placeholder_fabric2.jpg'),
-              _referenceImage('assets/placeholder/placeholder_fabric3.jpeg'),
-            ],
+        if (references.isEmpty)
+          _buildCard(
+            child: const Text(
+              "No design references added",
+              style: TextStyle(color: Colors.grey),
+            ),
+          )
+        else
+          SizedBox(
+            height: 180,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: references.map(_referenceImage).toList(),
+            ),
           ),
-        ),
       ],
     );
   }
@@ -621,12 +680,21 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
   Widget _referenceImage(String url) {
+    final isNetwork =
+        url.startsWith('http://') ||
+        url.startsWith('https://') ||
+        url.startsWith('file://');
+
     return Container(
       width: 140,
       margin: const EdgeInsets.only(right: 15),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        image: DecorationImage(image: AssetImage(url), fit: BoxFit.cover),
+        image: DecorationImage(
+          image:
+              isNetwork ? NetworkImage(url) : AssetImage(url) as ImageProvider,
+          fit: BoxFit.cover,
+        ),
       ),
     );
   }

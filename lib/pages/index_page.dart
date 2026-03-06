@@ -13,7 +13,6 @@ import 'package:notdle/screens/data_page.dart';
 import 'package:notdle/screens/invoices_screen.dart';
 import 'package:notdle/screens/login_page_screen.dart';
 import 'package:notdle/screens/forget_password_screen.dart';
-import 'package:notdle/screens/order_details_screen.dart';
 import 'package:notdle/screens/personal_account_screen.dart';
 import 'package:notdle/screens/create_business_account_screen.dart';
 import 'package:notdle/screens/initial_setup_screen.dart';

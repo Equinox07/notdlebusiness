@@ -8,7 +8,7 @@ class AppImageProvider extends ChangeNotifier {
 
   AppImageProvider({required this.repository});
 
-  Future<void> saveSingleImage({
+  Future<void> saveSingleImage(String? id, {
     required String ownerId,
     required String ownerType,
     required File file,

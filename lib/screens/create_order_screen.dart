@@ -11,6 +11,8 @@ import 'package:notdle/models/order.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
 import 'package:notdle/providers/invoice_provider.dart';
+import 'package:notdle/providers/image_provider.dart';
+import 'package:notdle/models/image_owner_types.dart';
 import 'package:notdle/providers/order_provider.dart';
 import 'package:notdle/screens/invoice_details_screen.dart';
 import 'package:provider/provider.dart';
@@ -180,6 +182,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       customerId: _selectedCustomer!.id!,
       status: _status,
       paymentStatus: _paymentStatus,
+      totalQuotation: totalAmount > 0 ? totalAmount : 0.0,
+      paidAmount: _depositAmount > 0 ? _depositAmount : 0.0,
       paymentAmount:
           effectivePaymentAmount > 0
               ? effectivePaymentAmount
@@ -190,9 +194,27 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       createdDate: DateTime.now().toIso8601String(),
     );
 
+    debugPrint("Submitting new order: ${newOrder.toJson()}");
+
     final orderProvider = Provider.of<OrderProvider>(context, listen: false);
     final dashProvider = Provider.of<DashBoardProvider>(context, listen: false);
     await orderProvider.addOrder(newOrder);
+
+    // Save design inspiration images if any exist
+    if (_designInspirationImages.isNotEmpty) {
+      final imageProvider = Provider.of<AppImageProvider>(
+        context,
+        listen: false,
+      );
+      for (final image in _designInspirationImages) {
+        await imageProvider.saveMultipleImage(
+          ownerId: newOrder.id,
+          ownerType: ImageOwnerTypes.order,
+          file: image,
+        );
+      }
+    }
+
     dashProvider.fetchCounts();
 
     if (!mounted) return;
@@ -250,7 +272,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       title: 'Invoice for ${newOrder.title}',
       customerId: newOrder.customerId,
       status: 'Pending',
-      total: newOrder.paymentAmount ?? 0.0,
+      total: newOrder.totalQuotation ?? 0.0,
       date: DateTime.now(),
       orderId: newOrder.id,
     );

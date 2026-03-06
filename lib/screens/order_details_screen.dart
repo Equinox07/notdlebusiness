@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 import 'package:intl/intl.dart';
+import 'package:notdle/models/app_image.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';
+import 'package:notdle/models/image_owner_types.dart';
 import 'package:notdle/models/order.dart';
 import 'package:notdle/models/payment.dart';
+import 'package:notdle/providers/image_provider.dart';
+import 'package:notdle/providers/order_provider.dart';
+import 'package:provider/provider.dart';
 
 // Private data model to hold all fetched details
 class _OrderDetailsData {
@@ -35,9 +41,16 @@ class OrderDetailsScreen extends StatefulWidget {
 
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   int _currentStepIndex = 2; // 0: Measure, 1: Cutting, 2: Sewing, etc.
+  late Future<_OrderDetailsData?> _orderDetailsFuture;
+  Future<List<AppImage>>? _customerImagesFuture;
+  late Future<List<AppImage>> _orderImagesFuture;
 
-  double totalQuotation = 1250.00;
-  double paidAmount = 650.00;
+  List<AppImage> _images = [];
+
+  bool _loadingImages = true;
+
+  double paidAmount = 0;
+  double totalQuotation = 0;
 
   List<Payment> paymentHistory = [];
 
@@ -56,12 +69,58 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   @override
   void initState() {
     super.initState();
+    _orderDetailsFuture = _fetchOrderDetails();
+    _orderImagesFuture = _fetchOrderImages();
+    _fetchImages();
     _currentStepIndex = _stageToIndex(widget.order.currentStage);
     totalQuotation =
         widget.order.totalQuotation > 0
             ? widget.order.totalQuotation
             : (widget.order.total ?? 0);
     paidAmount = widget.order.paidAmount;
+  }
+
+  Future<void> _fetchImages() async {
+    final provider = Provider.of<AppImageProvider>(context, listen: false);
+    final images = await provider.getImages(
+      widget.order.id,
+      ImageOwnerTypes.order,
+    );
+    if (mounted) {
+      setState(() {
+        _images = images;
+        _loadingImages = false;
+      });
+    }
+  }
+
+  Future<List<AppImage>> _fetchCustomerImages(String customerId) async {
+    final imageProvider = Provider.of<AppImageProvider>(context, listen: false);
+    return imageProvider.getImages(customerId, ImageOwnerTypes.customer);
+  }
+
+  Future<List<AppImage>> _fetchOrderImages() async {
+    final imageProvider = Provider.of<AppImageProvider>(context, listen: false);
+
+    debugPrint("Fetching order images for order ID: ${widget.order.id}");
+
+    return imageProvider.getImages(widget.order.id, ImageOwnerTypes.order);
+  }
+
+  Future<_OrderDetailsData?> _fetchOrderDetails() async {
+    if (!mounted) return null;
+    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+
+    final data = await orderProvider.getOrderWithDetails(widget.orderId);
+    if (data == null) {
+      return _OrderDetailsData(order: widget.order);
+    }
+
+    return _OrderDetailsData(
+      order: data.order,
+      customer: data.customer,
+      invoice: data.invoice,
+    );
   }
 
   int _stageToIndex(ProductionStage stage) {
@@ -102,144 +161,226 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: OrderDetailsScreen.lightBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-        scrolledUnderElevation: 0,
-        elevation: 0,
-        leadingWidth: 64,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 12, top: 8, bottom: 8),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: const Color(0xFFF4F5F7),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-              color: Colors.black87,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ),
-        ),
-        titleSpacing: 4,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Order Details",
-              style: TextStyle(
-                color: Colors.black87,
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            Text(
-              "Order #${widget.order.orderNumber ?? widget.order.id.substring(0, 6).toUpperCase()}",
-              style: TextStyle(color: Colors.blueGrey[500], fontSize: 12),
-            ),
-          ],
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12, top: 8, bottom: 8),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: OrderDetailsScreen.primaryPurple.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: IconButton(
-                tooltip: 'Edit order',
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.edit_note_rounded,
-                  color: OrderDetailsScreen.primaryPurple,
+    return FutureBuilder<_OrderDetailsData?>(
+      future: _orderDetailsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final details = snapshot.data ?? _OrderDetailsData(order: widget.order);
+        final order = details.order;
+
+        if (_customerImagesFuture == null && details.customer != null) {
+          _customerImagesFuture = _fetchCustomerImages(
+            details.customer!.id ?? '',
+          );
+        }
+
+        return Scaffold(
+          backgroundColor: OrderDetailsScreen.lightBackground,
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            surfaceTintColor: Colors.white,
+            scrolledUnderElevation: 0,
+            elevation: 0,
+            leadingWidth: 64,
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 12, top: 8, bottom: 8),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF4F5F7),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+                  color: Colors.black87,
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
               ),
             ),
+            titleSpacing: 4,
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Order Details",
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  "Order #${order.orderNumber ?? order.id.substring(0, 6).toUpperCase()}",
+                  style: TextStyle(color: Colors.blueGrey[500], fontSize: 12),
+                ),
+              ],
+            ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 12, top: 8, bottom: 8),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: OrderDetailsScreen.primaryPurple.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: IconButton(
+                    tooltip: 'Edit order',
+                    onPressed: () {},
+                    icon: const Icon(
+                      Icons.edit_note_rounded,
+                      color: OrderDetailsScreen.primaryPurple,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(1),
+              child: Divider(
+                height: 1,
+                thickness: 1,
+                color: Colors.grey.shade200,
+              ),
+            ),
           ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Divider(height: 1, thickness: 1, color: Colors.grey.shade200),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            _buildProfileHeader(),
-            const SizedBox(height: 25),
-            _buildProductionStatus(),
-            const SizedBox(height: 20),
-            _buildOutfitDetails(),
-            const SizedBox(height: 20),
-            _buildDeliveryDeadline(),
-            const SizedBox(height: 25),
-            _buildDesignReferences(),
-            const SizedBox(height: 25),
-            _buildPaymentSummary(),
-            const SizedBox(height: 30),
-            _buildActionButtons(),
-            const SizedBox(height: 40),
-          ],
-        ),
-      ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: [
+                const SizedBox(height: 10),
+                _buildProfileHeader(details.customer),
+                const SizedBox(height: 25),
+                _buildProductionStatus(),
+                const SizedBox(height: 20),
+                _buildOutfitDetails(),
+                const SizedBox(height: 20),
+                _buildDeliveryDeadline(),
+                const SizedBox(height: 25),
+                _buildDesignReferences(order),
+                const SizedBox(height: 25),
+                _buildPaymentSummary(order),
+                const SizedBox(height: 30),
+                _buildActionButtons(),
+                const SizedBox(height: 40),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
   // --- UI Sections ---
-  Widget _buildProfileHeader() {
-    return Row(
-      children: [
-        const CircleAvatar(
-          radius: 42,
-          backgroundColor: Colors.white,
-          child: CircleAvatar(
-            radius: 38,
-            backgroundImage: NetworkImage(
-              'https://i.pravatar.cc/150?u=eleanor',
+  Widget _buildProfileHeader(Customer? customer) {
+    final displayName = customer?.name ?? "Unknown Customer";
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          FutureBuilder<List<AppImage>>(
+            future: _customerImagesFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircleAvatar(
+                  radius: 32,
+                  child: CircularProgressIndicator(),
+                );
+              }
+              final images = snapshot.data ?? const <AppImage>[];
+              final imagePath =
+                  images.isNotEmpty ? images.first.localPath : null;
+              final initial =
+                  displayName.trim().isNotEmpty
+                      ? displayName.trim().substring(0, 1).toUpperCase()
+                      : "?";
+
+              return CircleAvatar(
+                radius: 32,
+                backgroundColor: OrderDetailsScreen.primaryPurple.withOpacity(
+                  0.1,
+                ),
+                backgroundImage:
+                    imagePath != null && imagePath.isNotEmpty
+                        ? FileImage(File(imagePath))
+                        : null,
+                child:
+                    (imagePath == null || imagePath.isEmpty)
+                        ? Text(
+                          initial,
+                          style: const TextStyle(
+                            color: OrderDetailsScreen.primaryPurple,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                        : null,
+              );
+            },
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  displayName,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  widget.order.title,
+                  style: const TextStyle(
+                    color: OrderDetailsScreen.primaryPurple,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF3E5F5),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: const Text(
+                    "Priority Client",
+                    style: TextStyle(
+                      color: OrderDetailsScreen.primaryPurple,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-        const SizedBox(width: 15),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Customer ${widget.order.customerId.substring(0, widget.order.customerId.length > 8 ? 8 : widget.order.customerId.length)}",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              widget.order.title,
-              style: TextStyle(
-                color: OrderDetailsScreen.primaryPurple,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF3E5F5),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Text(
-                widget.order.paymentStatus,
-                style: const TextStyle(
-                  color: OrderDetailsScreen.primaryPurple,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -428,8 +569,8 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     );
   }
 
-  Widget _buildDesignReferences() {
-    final references = widget.order.designReferences;
+  Widget _buildDesignReferences(Order order) {
+    final references = order.designReferences;
 
     return Column(
       children: [
@@ -458,26 +599,48 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           ],
         ),
         const SizedBox(height: 12),
-        if (references.isEmpty)
-          _buildCard(
-            child: const Text(
-              "No design references added",
-              style: TextStyle(color: Colors.grey),
-            ),
-          )
-        else
-          SizedBox(
-            height: 180,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: references.map(_referenceImage).toList(),
-            ),
-          ),
+        FutureBuilder<List<AppImage>>(
+          future: _orderImagesFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting &&
+                references.isEmpty) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            final orderImages = snapshot.data ?? const <AppImage>[];
+            final allImagePaths = [
+              ...orderImages.map((img) => img.localPath),
+              ...references,
+            ];
+
+            if (allImagePaths.isEmpty) {
+              return _buildCard(
+                child: const Center(
+                  child: Text(
+                    "No design references added",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              );
+            }
+
+            final widgets =
+                allImagePaths.map((path) => _referenceImage(path)).toList();
+
+            return SizedBox(
+              height: 180,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: widgets,
+              ),
+            );
+          },
+        ),
       ],
     );
   }
 
-  Widget _buildPaymentSummary() {
+  Widget _buildPaymentSummary(Order order) {
     double balance = totalQuotation - paidAmount;
     return _buildCard(
       child: Column(
@@ -680,10 +843,13 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
   Widget _referenceImage(String url) {
+    debugPrint("Loading reference image from: $url");
+
     final isNetwork =
         url.startsWith('http://') ||
         url.startsWith('https://') ||
         url.startsWith('file://');
+    final isLocalFile = !isNetwork;
 
     return Container(
       width: 140,
@@ -692,7 +858,11 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         borderRadius: BorderRadius.circular(20),
         image: DecorationImage(
           image:
-              isNetwork ? NetworkImage(url) : AssetImage(url) as ImageProvider,
+              isNetwork
+                  ? NetworkImage(url)
+                  : (isLocalFile && File(url).existsSync()
+                      ? FileImage(File(url))
+                      : AssetImage(url) as ImageProvider),
           fit: BoxFit.cover,
         ),
       ),

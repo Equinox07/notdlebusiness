@@ -118,6 +118,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
         listen: false,
       );
       await imageProvider.saveSingleImage(
+        "",
         ownerId: _currentUser!.id,
         ownerType: "user",
         file: File(pickedFile.path),

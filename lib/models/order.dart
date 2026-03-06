@@ -141,6 +141,38 @@ class Order {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'customerId': customerId,
+      'status': status,
+      'paymentStatus': paymentStatus,
+      'paymentAmount': paymentAmount,
+      'dueDate': dueDate,
+      'notes': notes,
+      'createdDate': createdDate,
+      'orderNumber': orderNumber,
+      'subtotal': subtotal,
+      'total': total,
+      'tax': tax,
+      'expectedDeliveryDate':
+          expectedDeliveryDate?.toIso8601String(), // Convert to ISO string
+      'syncDate': syncDate?.toIso8601String(), // Convert to ISO string
+      'isSynced': isSynced,
+      'companyId': companyId,
+      'userId': userId,
+      'currentStage':
+          currentStage.toString().split('.').last, // Store enum as string
+      'designReferences': designReferences, // Store list of design references
+      'totalQuotation': totalQuotation, // Store total quotation
+      'paidAmount': paidAmount, // Store paid amount
+      'garmentType': garmentType, // Store garment type
+      'fabric': fabric, // Store fabric
+      'lining': lining, // Store lining
+    };
+  }
+
   // Calculate days remaining
   int get daysLeft =>
       DateTime.parse(dueDate!).difference(DateTime.now()).inDays;

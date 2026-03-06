@@ -6,9 +6,9 @@ import 'package:intl/intl.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/order.dart';
 import 'package:notdle/providers/order_provider.dart';
-import 'package:notdle/screens/order_details_screen.dart';
 import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
+import 'package:notdle/screens/order_details_screen.dart';
 
 class CustomerOrdersScreen extends StatefulWidget {
   final Customer customer;

@@ -8,15 +8,23 @@ import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/invoice_item.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/invoice_provider.dart';
+import 'package:notdle/screens/orders_screen.dart';
 import 'package:provider/provider.dart';
 
 const _kPurple = Color(0xFF6200EE);
-const _kBg = Color(0xFFFBFBFB);
+const _kGold = Color(0xFFD4AF37);
+const _kBg = Color(0xFFF8F9FB);
 
 class CreateInvoiceScreen extends StatefulWidget {
   final Customer? customer;
+  final Invoice? invoice;
   final dynamic order; // Allow order parameter for compatibility
-  const CreateInvoiceScreen({super.key, this.customer, this.order});
+  const CreateInvoiceScreen({
+    super.key,
+    this.customer,
+    this.order,
+    this.invoice,
+  });
 
   @override
   State<CreateInvoiceScreen> createState() => _CreateInvoiceScreenState();
@@ -97,11 +105,12 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     setState(() {
       _items.add(
         InvoiceItem(
-          invoiceId: '',
+          invoiceId: '', // Will be set by provider before saving
           description: '',
           quantity: 1,
           unitPrice: 0.0,
           amount: 0.0,
+          isSynced: false,
         ),
       );
     });
@@ -196,9 +205,63 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
       return;
     }
 
+    // Validate items
+    if (_items.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Please add at least one item",
+            style: GoogleFonts.poppins(),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Validate item details
+    for (var item in _items) {
+      if (item.description.trim().isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Please fill in all item descriptions",
+              style: GoogleFonts.poppins(),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+      if ((item.quantity ?? 0) <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Quantity must be greater than 0",
+              style: GoogleFonts.poppins(),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+      if (item.unitPrice <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Unit price must be greater than 0",
+              style: GoogleFonts.poppins(),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
+
     final invoice = Invoice(
       customerId: _selectedCustomer!.id!,
-      status: 'Draft',
+      status: 'Pending',
       invoiceNumber: _invoiceNumber,
       issueDate: _issueDate,
       dueDate: _dueDate,
@@ -232,7 +295,10 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Error creating invoice", style: GoogleFonts.poppins()),
+          content: Text(
+            "Error creating invoice: ${e.toString()}",
+            style: GoogleFonts.poppins(),
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -247,18 +313,24 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.close, color: Colors.black87),
+          onPressed:
+              () => Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil(OrdersScreen.tag, (route) => false),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.black,
+            size: 20,
+          ),
         ),
         title: Text(
           "New Invoice",
           style: GoogleFonts.poppins(
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: FontWeight.w600,
             color: Colors.black,
           ),
         ),
-        centerTitle: true,
         actions: [
           TextButton(
             onPressed: _saveInvoice,
@@ -345,6 +417,10 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildStatusHeader(),
+            const SizedBox(height: 24),
+            _buildAmountCard(),
+            const SizedBox(height: 24),
             // Customer Selection
             Padding(
               padding: const EdgeInsets.only(left: 4, right: 4, bottom: 12),
@@ -706,6 +782,96 @@ class _CreateInvoiceScreenState extends State<CreateInvoiceScreen> {
     );
   }
 
+  Widget _buildStatusHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Issued on",
+              style: GoogleFonts.poppins(fontSize: 12, color: Colors.blueGrey),
+            ),
+            Text(
+              _issueDate != null
+                  ? DateFormat('MMM dd, yyyy').format(_issueDate!)
+                  : 'N/A',
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: _kGold.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            'PENDING',
+            style: GoogleFonts.poppins(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: _kGold,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAmountCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: _kPurple,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: _kPurple.withOpacity(0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            "Total Amount",
+            style: GoogleFonts.poppins(color: Colors.white70, fontSize: 14),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "\$${_calculateTotal().toStringAsFixed(2)}",
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Divider(color: Colors.white24),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.timer_outlined, color: Colors.white70, size: 16),
+              const SizedBox(width: 8),
+              Text(
+                "Due by ${_dueDate != null ? DateFormat('MMM dd').format(_dueDate!) : 'N/A'}",
+                style: GoogleFonts.poppins(color: Colors.white70, fontSize: 12),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   InputDecoration _inputDecoration(String hint) {
     return InputDecoration(
       hintText: hint,
@@ -744,13 +910,7 @@ class _SectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: const Color(0xFFF0F0F0)),
       ),
       child: child,
     );
@@ -795,14 +955,21 @@ class _InvoiceItemRowState extends State<_InvoiceItemRow> {
     );
   }
 
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    _detailsController.dispose();
+    _quantityController.dispose();
+    _unitPriceController.dispose();
+    super.dispose();
+  }
+
   void _updateAmount(String? value) {
     final quantity = int.tryParse(_quantityController.text) ?? 0;
     final unitPrice = double.tryParse(_unitPriceController.text) ?? 0.0;
     final amount = quantity * unitPrice;
 
-    final updatedItem = InvoiceItem(
-      id: widget.item.id,
-      invoiceId: widget.item.invoiceId,
+    final updatedItem = widget.item.copyWith(
       description: _descriptionController.text,
       quantity: quantity,
       unitPrice: unitPrice,
@@ -836,6 +1003,45 @@ class _InvoiceItemRowState extends State<_InvoiceItemRow> {
                   const SizedBox(height: 6),
                   TextFormField(
                     controller: _descriptionController,
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: const Color(0xFFF9FAFB),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                    ),
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      color: Colors.black87,
+                    ),
+                    onChanged: (value) => _updateAmount(value),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "QTY",
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueGrey.shade400,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  TextFormField(
+                    controller: _quantityController,
+                    keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: const Color(0xFFF9FAFB),

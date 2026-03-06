@@ -49,7 +49,7 @@ app.*.map.json
 screen_snippet*
 
 /lookups
-
+/old
 dashboard.txt
 dshbrd.txt
 

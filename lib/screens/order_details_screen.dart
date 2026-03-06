@@ -1,20 +1,8 @@
-// lib/screens/order_details_screen.dart
-
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/order.dart';
-import 'package:notdle/providers/order_provider.dart';
-import 'package:notdle/screens/create_invoice_screen.dart';
-import 'package:notdle/screens/update_order_modal.dart';
-import 'package:notdle/widgets/custom_app_bar.dart';
-import 'package:provider/provider.dart';
-import 'dart:developer' as _logger;
-import 'dart:math' as _math;
-import 'dart:typed_data' as _typed_data;
-import 'package:url_launcher/url_launcher.dart';
+import 'package:notdle/models/payment.dart';
 
 // Private data model to hold all fetched details
 class _OrderDetailsData {
@@ -25,930 +13,794 @@ class _OrderDetailsData {
 }
 
 class OrderDetailsScreen extends StatefulWidget {
-  static const String tag = "order_details";
-  final String orderId;
+  static const String tag = "order_details_screen";
 
   const OrderDetailsScreen({
     super.key,
-    required Order order,
+    required this.order,
     required this.orderId,
   });
+
+  final Order order;
+  final String orderId;
+
+  static const primaryPurple = Color(0xFF6A1B9A);
+  static const lightBackground = Color(0xFFF8F9FE);
+  static const successGreen = Color(0xFF2E7D32);
 
   @override
   State<OrderDetailsScreen> createState() => _OrderDetailsScreenState();
 }
 
 class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
-  late Future<_OrderDetailsData?> _orderDetailsFuture;
+  int _currentStepIndex = 2; // 0: Measure, 1: Cutting, 2: Sewing, etc.
 
-  @override
-  void initState() {
-    super.initState();
-    _orderDetailsFuture = _fetchOrderDetails();
+  double totalQuotation = 1250.00;
+  double paidAmount = 650.00;
+
+  List<Payment> paymentHistory = [];
+
+  double get totalPaid =>
+      paymentHistory.fold(0, (sum, item) => sum + item.amount);
+  double get remainingBalance => totalQuotation - totalPaid;
+
+  final List<Map<String, dynamic>> _steps = [
+    {'label': 'Measure', 'icon': Icons.check},
+    {'label': 'Cutting', 'icon': Icons.content_cut},
+    {'label': 'Sewing', 'icon': Icons.straighten}, // Changed icon for variety
+    {'label': 'Fitting', 'icon': Icons.person_outline},
+    {'label': 'Ready', 'icon': Icons.inventory_2_outlined},
+  ];
+
+  // 2. Logic: Move to the next stage
+  void _updateStatus() {
+    setState(() {
+      if (_currentStepIndex < _steps.length - 1) {
+        _currentStepIndex++;
+      } else {
+        // Reset or show completion message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Order is Ready for Pickup!")),
+        );
+      }
+    });
   }
 
-  Future<_OrderDetailsData?> _fetchOrderDetails() async {
-    if (!mounted) return null;
-    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-
-    final data = await orderProvider.getOrderWithDetails(widget.orderId);
-
-    if (data != null) {
-      return _OrderDetailsData(
-        order: data.order,
-        customer: data.customer,
-        invoice: data.invoice,
-      );
-    }
-    debugPrint(
-      "Could not fetch details for order ID: ${widget.orderId}. 'getOrderWithDetails' returned null.",
-    );
-    return null;
-  }
-
-  void _refreshOrderData() {
-    if (mounted) {
-      setState(() {
-        _orderDetailsFuture = _fetchOrderDetails();
-      });
-    }
+  void _addPayment(double amount) {
+    setState(() {
+      paidAmount += amount;
+      // Optional: Add logic to cap paidAmount at totalQuotation
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<_OrderDetailsData?>(
-      future: _orderDetailsFuture,
-      builder: (context, snapshot) {
-        final orderDetails = snapshot.data;
-        final order = orderDetails?.order;
-
-        return Scaffold(
-          backgroundColor: Colors.grey.shade50,
-          appBar: CustomAppBar(
-            title: 'Order Details',
-            actions: [
-              if (snapshot.connectionState == ConnectionState.done &&
-                  order != null)
-                IconButton(
-                  icon: const Icon(Icons.edit_note),
-                  onPressed: () => _showUpdateOrderModal(context, order),
-                ),
-            ],
+    return Scaffold(
+      backgroundColor: OrderDetailsScreen.lightBackground,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        scrolledUnderElevation: 0,
+        elevation: 0,
+        leadingWidth: 64,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 12, top: 8, bottom: 8),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: const Color(0xFFF4F5F7),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+              color: Colors.black87,
+              onPressed: () => Navigator.of(context).pop(),
+            ),
           ),
-          body: _buildBody(context, snapshot),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerFloat,
-          floatingActionButton: _buildFab(context, snapshot),
-        );
-      },
-    );
-  }
-
-  Widget _buildBody(
-    BuildContext context,
-    AsyncSnapshot<_OrderDetailsData?> snapshot,
-  ) {
-    if (snapshot.connectionState == ConnectionState.waiting) {
-      return const Center(child: CircularProgressIndicator());
-    } else if (snapshot.hasError) {
-      // Added more detailed error logging for debugging.
-      debugPrint(
-        "FutureBuilder error: ${snapshot.error}\n${snapshot.stackTrace}",
-      );
-      return Center(
-        child: Text("Error: ${snapshot.error}", style: GoogleFonts.poppins()),
-      );
-    } else if (!snapshot.hasData || snapshot.data == null) {
-      return Center(
-        child: Text("Order not found.", style: GoogleFonts.poppins()),
-      );
-    }
-
-    final orderDetails = snapshot.data!;
-    final order = orderDetails.order;
-    final customer = orderDetails.customer;
-    final invoice = orderDetails.invoice;
-
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+        ),
+        titleSpacing: 4,
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _OrderSummaryCard(order: order, paymentStatus: order.paymentStatus),
-            const SizedBox(height: 16),
-            _OrderStatusCard(status: order.status),
-            const SizedBox(height: 16),
-            _TimeInfoCard(orderDate: order.createdAt!, dueDate: order.dueAt),
-            const SizedBox(height: 16),
-            if (customer != null) ...[
-              _CustomerInfoCard(customer: customer),
-              const SizedBox(height: 16),
-            ],
-            if (order.notes != null && order.notes!.isNotEmpty) ...[
-              _NotesCard(notes: order.notes!),
-              const SizedBox(height: 16),
-            ],
-            if (invoice != null) ...[
-              _InvoiceCard(invoice: invoice, order: order),
-              const SizedBox(height: 16),
-            ],
+            const Text(
+              "Order Details",
+              style: TextStyle(
+                color: Colors.black87,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Text(
+              "Order #SF-8802",
+              style: TextStyle(color: Colors.blueGrey[500], fontSize: 12),
+            ),
+          ],
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12, top: 8, bottom: 8),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: OrderDetailsScreen.primaryPurple.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: IconButton(
+                tooltip: 'Edit order',
+                onPressed: () {},
+                icon: const Icon(
+                  Icons.edit_note_rounded,
+                  color: OrderDetailsScreen.primaryPurple,
+                ),
+              ),
+            ),
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(height: 1, thickness: 1, color: Colors.grey.shade200),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            _buildProfileHeader(),
+            const SizedBox(height: 25),
+            _buildProductionStatus(),
+            const SizedBox(height: 20),
+            _buildOutfitDetails(),
+            const SizedBox(height: 20),
+            _buildDeliveryDeadline(),
+            const SizedBox(height: 25),
+            _buildDesignReferences(),
+            const SizedBox(height: 25),
+            _buildPaymentSummary(),
+            const SizedBox(height: 30),
+            _buildActionButtons(),
+            const SizedBox(height: 40),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFab(
-    BuildContext context,
-    AsyncSnapshot<_OrderDetailsData?> snapshot,
-  ) {
-    if (snapshot.connectionState == ConnectionState.waiting ||
-        !snapshot.hasData ||
-        snapshot.data == null) {
-      return const SizedBox.shrink(); // Hide FAB while loading or if no data
-    }
-
-    final orderDetails = snapshot.data!;
-    // Hide FAB if an invoice already exists
-    if (orderDetails.invoice != null) {
-      return const SizedBox.shrink();
-    }
-
-    return FloatingActionButton.extended(
-      onPressed: () async {
-        // Navigate and await result to refresh if an invoice was created.
-        final result = await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder:
-                (context) => CreateInvoiceScreen(order: orderDetails.order),
+  // --- UI Sections ---
+  Widget _buildProfileHeader() {
+    return Row(
+      children: [
+        const CircleAvatar(
+          radius: 42,
+          backgroundColor: Colors.white,
+          child: CircleAvatar(
+            radius: 38,
+            backgroundImage: NetworkImage(
+              'https://i.pravatar.cc/150?u=eleanor',
+            ),
           ),
-        );
-        if (result == true && mounted) {
-          _refreshOrderData();
-        }
-      },
-      backgroundColor: Colors.indigo.shade600,
-      label: Text(
-        "Create Invoice",
-        style: GoogleFonts.poppins(
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
         ),
-      ),
-      icon: const Icon(Icons.receipt, color: Colors.white),
-    );
-  }
-
-  void _showUpdateOrderModal(BuildContext context, Order order) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return UpdateOrderModal(
-          order: order,
-          onOrderUpdated: _refreshOrderData,
-        );
-      },
-    );
-  }
-
-  // Helper widget to build section titles
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: GoogleFonts.poppins(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: Colors.black87,
-      ),
-    );
-  }
-
-  // Helper widget to build the dropdowns
-  Widget _buildDropdown(
-    String label,
-    String value,
-    List<String> items,
-    void Function(String?) onChanged,
-  ) {
-    return DropdownButtonFormField<String>(
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: GoogleFonts.poppins(color: Colors.grey.shade600),
-        filled: true,
-        fillColor: Colors.grey.shade200,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.indigo.shade600, width: 2),
-        ),
-      ),
-      value: value,
-      items:
-          items.map((item) {
-            return DropdownMenuItem<String>(value: item, child: Text(item));
-          }).toList(),
-      onChanged: onChanged,
-    );
-  }
-}
-
-// 📦 Flat Order Summary Card
-class _OrderSummaryCard extends StatelessWidget {
-  final Order order;
-  final String paymentStatus;
-
-  const _OrderSummaryCard({required this.order, required this.paymentStatus});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.indigo.shade600,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.indigo.shade200.withOpacity(0.4),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
+        const SizedBox(width: 15),
+        Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                const Icon(
-                  Icons.shopping_bag_outlined,
-                  color: Colors.white,
-                  size: 28,
+            const Text(
+              "Eleanor Vance",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const Text(
+              "Custom Evening Gown",
+              style: TextStyle(
+                color: OrderDetailsScreen.primaryPurple,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3E5F5),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: const Text(
+                "Priority Client",
+                style: TextStyle(
+                  color: OrderDetailsScreen.primaryPurple,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    order.title,
-                    style: GoogleFonts.poppins(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProductionStatus() {
+    return _buildCard(
+      child: Column(
+        children: [
+          const Text(
+            "PRODUCTION STATUS",
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: List.generate(_steps.length, (index) {
+              bool isDone = index < _currentStepIndex;
+              bool isCurrent = index == _currentStepIndex;
+
+              return Expanded(
+                child: Row(
+                  children: [
+                    _stepItem(
+                      _steps[index]['label'],
+                      _steps[index]['icon'],
+                      isDone,
+                      isCurrent: isCurrent,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
+                    if (index < _steps.length - 1)
+                      _stepLine(index < _currentStepIndex),
+                  ],
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFBF4FF),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Estimated completion for Sewing:",
+                  style: TextStyle(
+                    color: OrderDetailsScreen.primaryPurple,
+                    fontSize: 13,
+                  ),
+                ),
+                Text(
+                  "Oct 18",
+                  style: TextStyle(
+                    color: OrderDetailsScreen.primaryPurple,
+                    fontWeight: FontWeight.bold,
+                    decoration: TextDecoration.underline,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              "Order No: #${order.orderNumber}",
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: Colors.white.withOpacity(0.8),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                _StatusChip(status: order.status),
-                const SizedBox(width: 8),
-                _PaymentStatusChip(status: paymentStatus),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
-}
 
-// 📊 Order Status Tracking Card
-class _OrderStatusCard extends StatelessWidget {
-  final String status;
-
-  const _OrderStatusCard({required this.status});
-
-  int _getOrderStep(String status) {
-    switch (status.toLowerCase()) {
-      case "pending":
-        return 0;
-      case "in progress":
-        return 1;
-      case "ready":
-        return 2;
-      case "completed":
-        return 3;
-      default:
-        return 0;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    int currentStep = _getOrderStep(status);
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
-      ),
-      color: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Order Status',
-              style: GoogleFonts.poppins(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade800,
+  Widget _buildOutfitDetails() {
+    return _buildCard(
+      child: Column(
+        children: [
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Outfit Details",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                _Step(
-                  title: 'Ordered',
-                  isCompleted: currentStep >= 0,
-                  isFirst: true,
-                  isLast: false,
-                ),
-                _Connector(isCompleted: currentStep >= 1),
-                _Step(
-                  title: 'In Progress',
-                  isCompleted: currentStep >= 1,
-                  isFirst: false,
-                  isLast: false,
-                ),
-                _Connector(isCompleted: currentStep >= 2),
-                _Step(
-                  title: 'Ready',
-                  isCompleted: currentStep >= 2,
-                  isFirst: false,
-                  isLast: false,
-                ),
-                _Connector(isCompleted: currentStep >= 3),
-                _Step(
-                  title: 'Completed',
-                  isCompleted: currentStep >= 3,
-                  isFirst: false,
-                  isLast: true,
-                ),
-              ],
-            ),
-          ],
-        ),
+              Icon(
+                Icons.checkroom,
+                color: OrderDetailsScreen.primaryPurple,
+                size: 28,
+              ),
+            ],
+          ),
+          const Divider(height: 30),
+          _detailRow("Garment Type", "Floor-length Evening Gown"),
+          _detailRow("Fabric", "Silk Chiffon with\nEmbroidered Lace"),
+          _detailRow("Lining", "Stretch Satin (Nude)"),
+          _detailRow(
+            "Style Notes",
+            "Open back, sweetheart\nneckline with boning.",
+            isItalic: true,
+          ),
+        ],
       ),
     );
   }
-}
 
-class _Step extends StatelessWidget {
-  final String title;
-  final bool isCompleted;
-  final bool isFirst;
-  final bool isLast;
-
-  const _Step({
-    required this.title,
-    required this.isCompleted,
-    required this.isFirst,
-    required this.isLast,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 24,
-          height: 24,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isCompleted ? Colors.indigo.shade600 : Colors.grey.shade300,
-            border: Border.all(
-              color:
-                  isCompleted ? Colors.indigo.shade600 : Colors.grey.shade300,
-              width: 2,
+  Widget _buildDeliveryDeadline() {
+    return _buildCard(
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF3E5F5),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.calendar_month,
+              color: OrderDetailsScreen.primaryPurple,
             ),
           ),
-          child:
-              isCompleted
-                  ? const Icon(Icons.check, color: Colors.white, size: 16)
-                  : null,
+          const SizedBox(width: 15),
+          const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "DELIVERY DEADLINE",
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                "October 24, 2023",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          const Spacer(),
+          const Column(
+            children: [
+              Text(
+                "5",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: OrderDetailsScreen.primaryPurple,
+                ),
+              ),
+              Text(
+                "DAYS LEFT",
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 8,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesignReferences() {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "Design References",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            TextButton.icon(
+              onPressed: () {},
+              icon: const Icon(
+                Icons.camera_alt,
+                size: 18,
+                color: OrderDetailsScreen.primaryPurple,
+              ),
+              label: const Text(
+                "Add",
+                style: TextStyle(
+                  color: OrderDetailsScreen.primaryPurple,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
-        Text(
-          title,
-          style: GoogleFonts.poppins(
-            fontSize: 12,
-            fontWeight: isCompleted ? FontWeight.w600 : FontWeight.w500,
-            color: isCompleted ? Colors.indigo.shade600 : Colors.grey.shade500,
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 180,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              _referenceImage('assets/placeholder/placeholder_fabric1.jpeg'),
+              _referenceImage('assets/placeholder/placeholder_fabric2.jpg'),
+              _referenceImage('assets/placeholder/placeholder_fabric3.jpeg'),
+            ],
           ),
         ),
       ],
     );
   }
-}
 
-class _Connector extends StatelessWidget {
-  final bool isCompleted;
-
-  const _Connector({required this.isCompleted});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            height: 2,
-            color: isCompleted ? Colors.indigo.shade600 : Colors.grey.shade300,
-          ),
-          const SizedBox(height: 32), // To align with text
-        ],
-      ),
-    );
-  }
-}
-
-// ⌚ Flat Time Info Card
-class _TimeInfoCard extends StatelessWidget {
-  final DateTime orderDate;
-  final DateTime? dueDate;
-  const _TimeInfoCard({required this.orderDate, this.dueDate});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
-      ),
-      color: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Timeline",
-              style: GoogleFonts.poppins(
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade800,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                _buildTimeDetail(
-                  context,
-                  icon: Icons.calendar_today_outlined,
-                  label: 'Order Date',
-                  value: DateFormat('d MMM yyyy').format(orderDate),
-                ),
-                if (dueDate != null) ...[
-                  const SizedBox(width: 16),
-                  _buildTimeDetail(
-                    context,
-                    icon: Icons.event_available_outlined,
-                    label: 'Due Date',
-                    value: DateFormat('d MMM yyyy').format(dueDate!),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimeDetail(
-    BuildContext context, {
-    required String label,
-    required String value,
-    required IconData icon,
-  }) {
-    return Expanded(
+  Widget _buildPaymentSummary() {
+    double balance = totalQuotation - paidAmount;
+    return _buildCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(icon, size: 18, color: Colors.indigo.shade600),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-            ],
+          const Text(
+            "PAYMENT SUMMARY",
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _summaryRow(
+            "Total Quotation",
+            "\$${totalQuotation.toStringAsFixed(2)}",
+            isBold: true,
           ),
           const SizedBox(height: 8),
+          _summaryRow(
+            "Paid Amount",
+            "-\$${paidAmount.toStringAsFixed(2)}",
+            color: Colors.green,
+          ),
+          const Divider(height: 24),
+          _summaryRow(
+            "Remaining Balance",
+            "\$${balance.toStringAsFixed(2)}",
+            color: balance > 0 ? Colors.red : Colors.grey,
+            isBold: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Column(
+      children: [
+        ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: OrderDetailsScreen.primaryPurple,
+            foregroundColor: Colors.white,
+            minimumSize: const Size(double.infinity, 56),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 0,
+          ),
+          onPressed: _updateStatus,
+          icon: const Icon(Icons.sync, color: Colors.white),
+          label: const Text(
+            "Update Status",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(
+              color: OrderDetailsScreen.primaryPurple.withOpacity(0.35),
+              width: 1.2,
+            ),
+            backgroundColor: Colors.white,
+            minimumSize: const Size(double.infinity, 56),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+          onPressed: () => _showPaymentSheet(context),
+          icon: const Icon(
+            Icons.payments_outlined,
+            color: OrderDetailsScreen.primaryPurple,
+          ),
+          label: const Text(
+            "Record Payment",
+            style: TextStyle(
+              color: OrderDetailsScreen.primaryPurple,
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // --- Helper Components ---
+  Widget _buildCard({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  Widget _stepItem(
+    String label,
+    IconData icon,
+    bool isDone, {
+    bool isCurrent = false,
+  }) {
+    final color =
+        isCurrent || isDone
+            ? OrderDetailsScreen.primaryPurple
+            : Colors.grey[300];
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 16,
+          backgroundColor: color,
+          child: Icon(
+            icon,
+            size: 14,
+            color: isDone || isCurrent ? Colors.white : Colors.grey[400],
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            color:
+                isCurrent ? OrderDetailsScreen.primaryPurple : Colors.grey[600],
+            fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _stepLine(bool active) {
+    return Expanded(
+      child: Container(
+        height: 2,
+        margin: const EdgeInsets.only(top: 15),
+        color: active ? OrderDetailsScreen.primaryPurple : Colors.grey[300],
+      ),
+    );
+  }
+
+  Widget _detailRow(String label, String value, {bool isItalic = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+          const Spacer(),
           Text(
             value,
-            style: GoogleFonts.poppins(
-              fontSize: 16,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.grey.shade800,
+              fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
             ),
           ),
         ],
       ),
     );
   }
-}
 
-// 👤 Flat Customer Info Card
-class _CustomerInfoCard extends StatelessWidget {
-  final Customer customer;
+  Widget _summaryRow(
+    String label,
+    String value, {
+    bool isBold = false,
+    Color color = Colors.black,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 15)),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
 
-  const _CustomerInfoCard({required this.customer});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
+  Widget _referenceImage(String url) {
+    return Container(
+      width: 140,
+      margin: const EdgeInsets.only(right: 15),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        image: DecorationImage(image: AssetImage(url), fit: BoxFit.cover),
       ),
-      color: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    );
+  }
+
+  void _showPaymentSheet(BuildContext context) {
+    final TextEditingController controller = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Allows the sheet to move up with the keyboard
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      builder:
+          (context) => Padding(
+            padding: EdgeInsets.only(
+              bottom:
+                  MediaQuery.of(context).viewInsets.bottom, // Keyboard padding
+              left: 20,
+              right: 20,
+              top: 20,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Customer Info",
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade800,
+                Align(
+                  child: Container(
+                    width: 44,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
-                Row(
-                  children: [
-                    if (customer.phone != null && customer.phone!.isNotEmpty)
-                      IconButton(
-                        icon: Icon(
-                          Icons.call_outlined,
-                          color: Colors.green.shade600,
-                        ),
-                        onPressed:
-                            () => launchUrl(Uri.parse('tel:${customer.phone}')),
-                      ),
-                    if (customer.email != null && customer.email!.isNotEmpty)
-                      IconButton(
-                        icon: Icon(
-                          Icons.email_outlined,
-                          color: Colors.blue.shade600,
-                        ),
-                        onPressed:
-                            () => launchUrl(
-                              Uri.parse('mailto:${customer.email}'),
-                            ),
-                      ),
-                  ],
+                const SizedBox(height: 16),
+                const Text(
+                  "Record Payment",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                const CircleAvatar(
-                  radius: 24,
-                  backgroundColor: Colors.indigo,
-                  child: Icon(Icons.person, color: Colors.white),
+                const SizedBox(height: 6),
+                Text(
+                  "Enter the amount received for this order",
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                 ),
-                const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      customer.name,
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade800,
+                const SizedBox(height: 15),
+                TextField(
+                  controller: controller,
+                  keyboardType: TextInputType.number,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    labelText: "Amount Received",
+                    prefixText: "\$ ",
+                    filled: true,
+                    fillColor: Colors.grey.shade50,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: Colors.grey.shade300),
+                    ),
+                    focusedBorder: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(14)),
+                      borderSide: BorderSide(
+                        color: OrderDetailsScreen.primaryPurple,
+                        width: 1.4,
                       ),
                     ),
-                    if (customer.phone != null && customer.phone!.isNotEmpty)
-                      Text(
-                        customer.phone!,
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 50),
+                          side: BorderSide(color: Colors.grey.shade300),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text(
+                          "Cancel",
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: OrderDetailsScreen.primaryPurple,
+                          minimumSize: const Size(double.infinity, 50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 0,
+                        ),
+                        onPressed: () {
+                          final val = double.tryParse(controller.text);
+                          if (val != null && val > 0) {
+                            _addPayment(val);
+                            Navigator.pop(context); // Close the sheet
+                            return;
+                          }
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Enter a valid payment amount greater than 0',
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          "Confirm",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
+                const SizedBox(height: 20),
               ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// 📄 Notes Card Widget
-class _NotesCard extends StatelessWidget {
-  final String notes;
-
-  const _NotesCard({required this.notes});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
-      ),
-      color: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Notes",
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey.shade800,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              notes,
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                color: Colors.grey.shade600,
-                height: 1.5,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// 🧾 Invoice Card Widget
-class _InvoiceCard extends StatelessWidget {
-  final Invoice invoice;
-  final Order order;
-  const _InvoiceCard({required this.invoice, required this.order});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
-      ),
-      color: Colors.white,
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Invoice Details",
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade800,
-                  ),
-                ),
-                Text(
-                  "Invoice ID: #${invoice.id.substring(0, 8)}",
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                _buildTimeDetail(
-                  context,
-                  icon: Icons.monetization_on_outlined,
-                  label: 'Amount',
-                  value: NumberFormat.currency(
-                    symbol: '₦',
-                  ).format(invoice.total),
-                ),
-                const SizedBox(width: 16),
-                _buildTimeDetail(
-                  context,
-                  icon: Icons.receipt_long,
-                  label: 'Status',
-                  value: invoice.status,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                _buildTimeDetail(
-                  context,
-                  icon: Icons.calendar_today_outlined,
-                  label: 'Order Date',
-                  value: DateFormat('d MMM yyyy').format(order.createdAt!),
-                ),
-                if (order.dueAt != null) ...[
-                  const SizedBox(width: 16),
-                  _buildTimeDetail(
-                    context,
-                    icon: Icons.event_available_outlined,
-                    label: 'Due Date',
-                    value: DateFormat('d MMM yyyy').format(order.dueAt!),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimeDetail(
-    BuildContext context, {
-    required String label,
-    required String value,
-    required IconData icon,
-  }) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 18, color: Colors.indigo.shade600),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade800,
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-// Reusable Status Chip Widget
-class _StatusChip extends StatelessWidget {
-  final String status;
-
-  const _StatusChip({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: _getStatusColor(status).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        status,
-        style: GoogleFonts.poppins(
-          color: _getStatusColor(status),
-          fontWeight: FontWeight.w600,
-          fontSize: 12,
-        ),
-      ),
     );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case "Completed":
-        return Colors.green.shade600;
-      case "In Progress":
-        return Colors.blue.shade600;
-      case "Pending":
-        return Colors.orange.shade600;
-      case "Cancelled":
-        return Colors.red.shade600;
-      default:
-        return Colors.grey.shade600;
-    }
-  }
-}
-
-// Reusable Payment Status Chip Widget
-class _PaymentStatusChip extends StatelessWidget {
-  final String status;
-
-  const _PaymentStatusChip({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: _getPaymentStatusColor(status).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        status,
-        style: GoogleFonts.poppins(
-          color: _getPaymentStatusColor(status),
-          fontWeight: FontWeight.w600,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-
-  Color _getPaymentStatusColor(String status) {
-    switch (status) {
-      case "Paid":
-        return Colors.green.shade600;
-      case "Partially Paid":
-        return Colors.blue.shade600;
-      case "Unpaid":
-        return Colors.orange.shade600;
-      case "Refunded":
-        return Colors.red.shade600;
-      default:
-        return Colors.grey.shade600;
-    }
-  }
-}
-
-// Reusable Info Row Widget
-class _InfoRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color iconColor;
-
-  const _InfoRow({
-    required this.icon,
-    required this.label,
-    required this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
+  Widget _buildTransactionHistory() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: iconColor, size: 20),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(
-            label,
-            style: GoogleFonts.poppins(
-              fontSize: 16,
-              color: Colors.grey.shade700,
-            ),
+        const Text(
+          "PAYMENT HISTORY",
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey,
           ),
+        ),
+        const SizedBox(height: 10),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: paymentHistory.length,
+          separatorBuilder: (context, index) => const Divider(),
+          itemBuilder: (context, index) {
+            final payment = paymentHistory[index];
+            return ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.receipt_long, color: Colors.green),
+              title: Text("\$${payment.amount.toStringAsFixed(2)}"),
+              subtitle: Text(
+                "via ${payment.method} • ${payment.paymentDate.day}/${payment.paymentDate.month}",
+              ),
+              trailing:
+                  payment.referenceNumber != null
+                      ? Text(
+                        "Ref: ${payment.referenceNumber}",
+                        style: const TextStyle(fontSize: 10),
+                      )
+                      : null,
+            );
+          },
         ),
       ],
     );

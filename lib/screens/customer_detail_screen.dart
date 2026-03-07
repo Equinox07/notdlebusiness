@@ -487,50 +487,71 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
   }
 
   Widget _buildRecentOrders() {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return FutureBuilder<List<Order>>(
+      future: Provider.of<OrderProvider>(
+        context,
+      ).getLatestCustomerOrders(widget.customer.id!),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        final orders = snapshot.data ?? [];
+        return Column(
           children: [
-            Text(
-              "Recent Orders",
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.w600, // slightly less bold
-                color: Colors.black,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Recent Orders",
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  "See all",
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: const Color(0xFF6200EE),
+                  ),
+                ),
+              ],
             ),
-            Text(
-              "See all",
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF6200EE),
+            const SizedBox(height: 16),
+            if (orders.isEmpty)
+              const Text("No recent orders")
+            else
+              ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: orders.length,
+                separatorBuilder:
+                    (context, index) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final order = orders[index];
+                  return _buildOrderItem(
+                    order.title,
+                    "Order #${order.orderNumber ?? ''}",
+                    NumberFormat.currency(
+                      symbol: '\$',
+                    ).format(order.totalQuotation ?? 0),
+                    order.createdAt != null
+                        ? DateFormat('MMM d, y').format(order.createdAt!)
+                        : 'N/A',
+                    order.status.toUpperCase(),
+                    _getStatusColor(order.status),
+                    _getPaymentStatusColor(order.paymentStatus),
+                  );
+                },
               ),
-            ),
           ],
-        ),
-        const SizedBox(height: 16),
-        _buildOrderItem(
-          "Custom Silk Blouse",
-          "Order #SF-1204",
-          "\$320.00",
-          "Oct 12, 2023",
-          "COMPLETED",
-          const Color(0xFFE6F4EA), // Soft green bg
-          const Color(0xFF1E8E3E), // Dark green text
-        ),
-        const SizedBox(height: 12),
-        _buildOrderItem(
-          "Tailored Wool Blazer",
-          "Order #SF-1188",
-          "\$850.00",
-          "Sep 28, 2023",
-          "IN PROGRESS",
-          const Color(0xFFF3E8FF), // Soft purple bg
-          const Color(0xFF6200EE), // Purple text
-        ),
-      ],
+        );
+      },
     );
   }
 
@@ -816,28 +837,28 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
   Color _getStatusColor(String status) {
     switch (status) {
       case "Completed":
-        return Colors.green.shade600;
+        return Colors.green.shade400;
       case "In Progress":
-        return Colors.blue.shade600;
+        return Colors.blue.shade400;
       case "Pending":
-        return Colors.orange.shade600;
+        return Colors.orange.shade400;
       case "Cancelled":
-        return Colors.red.shade600;
+        return Colors.red.shade400;
       default:
-        return Colors.grey.shade700;
+        return Colors.grey.shade500;
     }
   }
 
   Color _getPaymentStatusColor(String status) {
     switch (status) {
       case "Paid":
-        return Colors.green.shade600;
+        return Colors.green.shade400;
       case "Partially Paid":
-        return Colors.orange.shade600;
+        return Colors.orange.shade400;
       case "Unpaid":
-        return Colors.red.shade600;
+        return Colors.red.shade400;
       default:
-        return Colors.grey.shade700;
+        return Colors.grey.shade500;
     }
   }
 

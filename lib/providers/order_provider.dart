@@ -110,6 +110,10 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<List<Order>> getLatestCustomerOrders(String customerId) async {
+    return await orderDao.getLatestCustomerOrders(customerId);
+  }
+
   Future<void> fetchLatestOrdersForCustomer(String customerId) async {
     _isLoading = true;
     notifyListeners();

@@ -10,7 +10,7 @@ class Money {
   double get amount => _cents / 100.0;
 
   // Returns a string formatted as currency (e.g., $10.50 or €10,50)
-  String format({String? locale, String? currencyCode}) {
+  String format(double d, {String? locale, String? currencyCode, required String symbol}) {
     final format = NumberFormat.simpleCurrency(
       locale: locale,
       name: currencyCode,

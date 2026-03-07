@@ -3,9 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/navigation/app_navigation.dart';
-import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
 import 'package:notdle/providers/notification_provider.dart';
+import 'package:notdle/services/session_manager.dart';
+import 'package:notdle/utils/money.dart';
 import 'package:notdle/utils/session_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:notdle/models/financial_overview_stats.dart';
@@ -13,6 +14,7 @@ import 'package:notdle/models/order.dart';
 import 'package:notdle/models/production_status.dart';
 import 'package:notdle/providers/financial_provider.dart';
 import 'package:notdle/providers/order_provider.dart';
+import 'package:notdle/models/company.dart';
 
 class DashboardHome extends StatefulWidget {
   const DashboardHome({super.key});
@@ -25,6 +27,7 @@ class _DashboardHomeState extends State<DashboardHome> {
   late Future<ProductionStatus> _productionStatusFuture;
   late Future<FinancialOverviewStats> _financialOverviewFuture;
   late Future<List<Order>> _upcomingDeadlinesFuture;
+  Company? _company;
 
   @override
   void initState() {
@@ -32,9 +35,18 @@ class _DashboardHomeState extends State<DashboardHome> {
     _loadDashboardData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<DashBoardProvider>(context, listen: false).fetchCounts();
-      Provider.of<CompanyProvider>(context, listen: false).fetchCompany();
+      _loadCompany();
       SessionHelper.checkCompanySession(context);
     });
+  }
+
+  void _loadCompany() async {
+    final company = await SessionManager.getCompany();
+    if (mounted) {
+      setState(() {
+        _company = company;
+      });
+    }
   }
 
   void _loadDashboardData() {
@@ -56,9 +68,9 @@ class _DashboardHomeState extends State<DashboardHome> {
     final dashboardProvider = Provider.of<DashBoardProvider>(context);
     final notificationProvider = Provider.of<NotificationProvider>(context);
     final isTablet = MediaQuery.of(context).size.shortestSide >= 600;
-    final companyProvider = Provider.of<CompanyProvider>(context);
 
-    final companyName = companyProvider.company?.businessName ?? '';
+    final companyName = _company?.businessName ?? '';
+    final currencySymbol = _company?.currency ?? '\$';
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
@@ -198,7 +210,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                         return _DashboardStatCard(
                           title: 'Revenue (This Month)',
                           value:
-                              '\$${stats?.thisMonthIncome.toStringAsFixed(2) ?? '0.00'}',
+                              '$currencySymbol${stats?.thisMonthIncome.toStringAsFixed(2) ?? '0.00'}',
                           subtext: '+0% from last month',
                           icon: Icons.attach_money,
                           color: Colors.green,
@@ -212,7 +224,7 @@ class _DashboardHomeState extends State<DashboardHome> {
                         return _DashboardStatCard(
                           title: 'Outstanding Payments',
                           value:
-                              '\$${stats?.pendingPayments.toStringAsFixed(2) ?? '0.00'} unpaid',
+                              '$currencySymbol${stats?.pendingPayments.toStringAsFixed(2) ?? '0.00'} unpaid',
                           subtext: '0 clients pending',
                           icon: Icons.payment,
                           color: Colors.red,
@@ -234,6 +246,7 @@ class _DashboardHomeState extends State<DashboardHome> {
               // Financial Overview Section
               _FinancialOverview(
                 financialOverviewFuture: _financialOverviewFuture,
+                currencySymbol: currencySymbol,
               ),
               const SizedBox(height: 32),
 
@@ -750,9 +763,13 @@ class _UrgentAlerts extends StatelessWidget {
 }
 
 class _FinancialOverview extends StatelessWidget {
-  final Future<FinancialOverviewStats> financialOverviewFuture;
+  final String currencySymbol;
 
-  const _FinancialOverview({required this.financialOverviewFuture});
+  const _FinancialOverview({
+    required this.financialOverviewFuture,
+    required this.currencySymbol,
+  });
+  final Future<FinancialOverviewStats> financialOverviewFuture;
 
   @override
   Widget build(BuildContext context) {
@@ -805,25 +822,30 @@ class _FinancialOverview extends StatelessWidget {
                 _FinancialCard(
                   label: "Today's Income",
                   value:
-                      "\$${stats?.todaysIncome.toStringAsFixed(2) ?? '0.00'}",
+                      "$currencySymbol${stats?.todaysIncome.toStringAsFixed(2) ?? '0.00'}",
                   color: Colors.green,
                 ),
                 _FinancialCard(
                   label: "This Week",
                   value:
-                      "\$${stats?.thisWeekIncome.toStringAsFixed(2) ?? '0.00'}",
+                      "$currencySymbol${stats?.thisWeekIncome.toStringAsFixed(2) ?? '0.00'}",
                   color: Colors.blue,
                 ),
                 _FinancialCard(
                   label: "This Month",
                   value:
-                      "\$${stats?.thisMonthIncome.toStringAsFixed(2) ?? '0.00'}",
+                      stats?.formatCurrency(
+                        stats.thisMonthIncome,
+                        currencyCode: currencySymbol,
+                      ) ??
+                      "$currencySymbol 0.00",
+                  //"$currencySymbol${stats?.thisMonthIncome.toStringAsFixed(2) ?? '0.00'}"
                   color: Colors.orange,
                 ),
                 _FinancialCard(
                   label: "Pending Payments",
                   value:
-                      "\$${stats?.pendingPayments.toStringAsFixed(2) ?? '0.00'}",
+                      "$currencySymbol${stats?.pendingPayments.toStringAsFixed(2) ?? '0.00'}",
                   color: Colors.red,
                 ),
               ],
@@ -870,11 +892,16 @@ class _FinancialCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             value,
-            style: GoogleFonts.poppins(
-              fontSize: 18,
+            style: TextStyle(
+              fontFamily: "Roboto",
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              fontSize: 18,
             ),
+            // style: GoogleFonts.poppins(
+            //   fontSize: 18,
+            //   fontWeight: FontWeight.bold,
+            //   color: Colors.black87,
+            // ),
           ),
         ],
       ),

@@ -118,6 +118,21 @@ class Company {
     };
   }
 
+  String get currencySymbol {
+    switch (currency) {
+      case 'GHS':
+        return '₵';
+      case 'USD':
+        return '\$';
+      case 'EUR':
+        return '€';
+      case 'GBP':
+        return '£';
+      default:
+        return '\$';
+    }
+  }
+
   Company copyWith({
     String? id,
     String? businessName,

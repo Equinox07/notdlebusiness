@@ -817,7 +817,8 @@ class _$OrderDao extends OrderDao {
 
   @override
   Future<List<Order>> getAllOrders() async {
-    return _queryAdapter.queryList('SELECT * FROM orders ORDER BY dueDate ASC',
+    return _queryAdapter.queryList(
+        'SELECT * FROM orders ORDER BY createdDate DESC',
         mapper: (Map<String, Object?> row) => Order(
             title: row['title'] as String,
             customerId: row['customerId'] as String,
@@ -904,6 +905,46 @@ class _$OrderDao extends OrderDao {
   Future<List<Order>> getAllCustomerOrders(String customerId) async {
     return _queryAdapter.queryList(
         'SELECT * FROM orders WHERE customerId = ?1 ORDER BY dueDate ASC',
+        mapper: (Map<String, Object?> row) => Order(
+            title: row['title'] as String,
+            customerId: row['customerId'] as String,
+            status: row['status'] as String,
+            paymentStatus: row['paymentStatus'] as String,
+            paymentAmount: row['paymentAmount'] as double?,
+            dueDate: row['dueDate'] as String?,
+            notes: row['notes'] as String?,
+            createdDate: row['createdDate'] as String,
+            id: row['id'] as String?,
+            orderNumber: row['orderNumber'] as String?,
+            subtotal: row['subtotal'] as double?,
+            total: row['total'] as double?,
+            tax: row['tax'] as double?,
+            expectedDeliveryDate: _dateTimeNullConvertor
+                .decode(row['expectedDeliveryDate'] as int?),
+            syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
+            isSynced: (row['isSynced'] as int) != 0,
+            companyId: row['companyId'] as String?,
+            userId: row['userId'] as String?,
+            currentStage:
+                _productionStageConverter.decode(row['currentStage'] as String),
+            designReferences:
+                _stringListConverter.decode(row['designReferences'] as String),
+            totalQuotation: row['totalQuotation'] as double,
+            totalQuotationCents: row['totalQuotationCents'] as int,
+            paidAmount: row['paidAmount'] as double,
+            paidAmountCents: row['paidAmountCents'] as int,
+            garmentType: row['garmentType'] as String,
+            fabric: row['fabric'] as String,
+            lining: row['lining'] as String,
+            subtotalCents: row['subtotalCents'] as int?,
+            totalCents: row['totalCents'] as int?),
+        arguments: [customerId]);
+  }
+
+  @override
+  Future<List<Order>> getLatestCustomerOrders(String customerId) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM orders WHERE customerId = ?1 ORDER BY createdDate DESC',
         mapper: (Map<String, Object?> row) => Order(
             title: row['title'] as String,
             customerId: row['customerId'] as String,

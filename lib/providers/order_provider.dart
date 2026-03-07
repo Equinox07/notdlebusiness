@@ -112,15 +112,18 @@ class OrderProvider extends ChangeNotifier {
 
   Future<ProductionStatus> getProductionStatusCounts() async {
     final measureCount =
-        await orderDao.getCountForStage(ProductionStage.measure.name) ?? 0;
+        await orderDao.getCountForStage(ProductionStage.measure.toString()) ??
+        0;
     final cuttingCount =
-        await orderDao.getCountForStage(ProductionStage.cutting.name) ?? 0;
+        await orderDao.getCountForStage(ProductionStage.cutting.toString()) ??
+        0;
     final sewingCount =
-        await orderDao.getCountForStage(ProductionStage.sewing.name) ?? 0;
+        await orderDao.getCountForStage(ProductionStage.sewing.toString()) ?? 0;
     final fittingCount =
-        await orderDao.getCountForStage(ProductionStage.fitting.name) ?? 0;
+        await orderDao.getCountForStage(ProductionStage.fitting.toString()) ??
+        0;
     final readyCount =
-        await orderDao.getCountForStage(ProductionStage.ready.name) ?? 0;
+        await orderDao.getCountForStage(ProductionStage.ready.toString()) ?? 0;
 
     return ProductionStatus(
       measureCount: measureCount,

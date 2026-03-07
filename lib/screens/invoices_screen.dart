@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/providers/customer_provider.dart';
+import 'package:notdle/providers/financial_provider.dart';
 import 'package:notdle/providers/invoice_provider.dart';
 import 'package:notdle/screens/invoice_details_screen.dart';
 import 'package:notdle/screens/create_invoice_screen.dart';
@@ -29,11 +30,21 @@ class InvoicesScreen extends StatefulWidget {
 class _InvoicesScreenState extends State<InvoicesScreen> {
   late Future<List<_InvoiceWithCustomer>> _invoicesFuture;
   String _selectedFilter = 'All';
+  late Future<double> _totalRevenueFuture;
 
   @override
   void initState() {
     super.initState();
     _invoicesFuture = _fetchInvoicesWithCustomers();
+    _totalRevenueFuture = _fetchTotalRevenue();
+  }
+
+  Future<double> _fetchTotalRevenue() async {
+    final financialProvider = Provider.of<FinancialProvider>(
+      context,
+      listen: false,
+    );
+    return await financialProvider.getTotalRevenue();
   }
 
   Future<List<_InvoiceWithCustomer>> _fetchInvoicesWithCustomers() async {
@@ -202,7 +213,10 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
                                 ),
                               ),
                               const SizedBox(height: 24),
-                              _RevenueSummaryCards(invoices: allInvoices),
+                              _RevenueSummaryCards(
+                                invoices: allInvoices,
+                                totalRevenueFuture: _totalRevenueFuture,
+                              ),
                               const SizedBox(height: 32),
                               Row(
                                 mainAxisAlignment:
@@ -392,19 +406,20 @@ class _InvoicesScreenState extends State<InvoicesScreen> {
 
 class _RevenueSummaryCards extends StatelessWidget {
   final List<_InvoiceWithCustomer> invoices;
+  final Future<double> totalRevenueFuture;
 
-  const _RevenueSummaryCards({required this.invoices});
+  const _RevenueSummaryCards({
+    required this.invoices,
+    required this.totalRevenueFuture,
+  });
 
   @override
   Widget build(BuildContext context) {
-    double totalRevenue = 0;
     double pendingAmount = 0;
     double overdueAmount = 0;
 
     for (var item in invoices) {
-      if (item.invoice.status == 'Paid') {
-        totalRevenue += item.invoice.total ?? 0;
-      } else if (item.invoice.status == 'Pending') {
+      if (item.invoice.status == 'Pending') {
         pendingAmount += item.invoice.total ?? 0;
       }
       // Simple overdue logic for placeholder
@@ -435,47 +450,60 @@ class _RevenueSummaryCards extends StatelessWidget {
               ),
             ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "TOTAL REVENUE",
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white.withOpacity(0.7),
-                  letterSpacing: 1.2,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                NumberFormat.currency(symbol: '\$').format(totalRevenue),
-                style: GoogleFonts.poppins(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(
-                    Icons.trending_up,
-                    color: Colors.lightGreenAccent,
-                    size: 16,
+          child: FutureBuilder<double>(
+            future: totalRevenueFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                   ),
-                  const SizedBox(width: 4),
+                );
+              }
+              final totalRevenue = snapshot.data ?? 0.0;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    "+12.5% vs last month",
+                    "TOTAL REVENUE",
                     style: GoogleFonts.poppins(
                       fontSize: 12,
-                      color: Colors.lightGreenAccent,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white.withOpacity(0.7),
+                      letterSpacing: 1.2,
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  Text(
+                    NumberFormat.currency(symbol: '\$').format(totalRevenue),
+                    style: GoogleFonts.poppins(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.trending_up,
+                        color: Colors.lightGreenAccent,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        "+12.5% vs last month",
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: Colors.lightGreenAccent,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
-              ),
-            ],
+              );
+            },
           ),
         ),
         const SizedBox(height: 16),

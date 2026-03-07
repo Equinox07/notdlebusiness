@@ -511,12 +511,12 @@ class _$CustomerDao extends CustomerDao {
                   'name': item.name,
                   'phone': item.phone,
                   'email': item.email,
-                  'lastVisit': _dateTimeConvertor.encode(item.lastVisit),
+                  'lastVisit': _dateTimeConverter.encode(item.lastVisit),
                   'gender': item.gender,
                   'address': item.address,
                   'imagePath': item.imagePath,
                   'profileImageUrl': item.profileImageUrl,
-                  'createdDate': _dateTimeConvertor.encode(item.createdDate),
+                  'createdDate': _dateTimeConverter.encode(item.createdDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
                   'isSynced': item.isSynced ? 1 : 0,
                   'companyId': item.companyId,
@@ -531,12 +531,12 @@ class _$CustomerDao extends CustomerDao {
                   'name': item.name,
                   'phone': item.phone,
                   'email': item.email,
-                  'lastVisit': _dateTimeConvertor.encode(item.lastVisit),
+                  'lastVisit': _dateTimeConverter.encode(item.lastVisit),
                   'gender': item.gender,
                   'address': item.address,
                   'imagePath': item.imagePath,
                   'profileImageUrl': item.profileImageUrl,
-                  'createdDate': _dateTimeConvertor.encode(item.createdDate),
+                  'createdDate': _dateTimeConverter.encode(item.createdDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
                   'isSynced': item.isSynced ? 1 : 0,
                   'companyId': item.companyId,
@@ -551,12 +551,12 @@ class _$CustomerDao extends CustomerDao {
                   'name': item.name,
                   'phone': item.phone,
                   'email': item.email,
-                  'lastVisit': _dateTimeConvertor.encode(item.lastVisit),
+                  'lastVisit': _dateTimeConverter.encode(item.lastVisit),
                   'gender': item.gender,
                   'address': item.address,
                   'imagePath': item.imagePath,
                   'profileImageUrl': item.profileImageUrl,
-                  'createdDate': _dateTimeConvertor.encode(item.createdDate),
+                  'createdDate': _dateTimeConverter.encode(item.createdDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
                   'isSynced': item.isSynced ? 1 : 0,
                   'companyId': item.companyId,
@@ -583,12 +583,12 @@ class _$CustomerDao extends CustomerDao {
             name: row['name'] as String,
             phone: row['phone'] as String,
             email: row['email'] as String?,
-            lastVisit: _dateTimeConvertor.decode(row['lastVisit'] as int),
+            lastVisit: _dateTimeConverter.decode(row['lastVisit'] as int),
             gender: row['gender'] as String,
             address: row['address'] as String?,
             imagePath: row['imagePath'] as String?,
             profileImageUrl: row['profileImageUrl'] as String?,
-            createdDate: _dateTimeConvertor.decode(row['createdDate'] as int),
+            createdDate: _dateTimeConverter.decode(row['createdDate'] as int),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
             isSynced: (row['isSynced'] as int) != 0,
             companyId: row['companyId'] as String?,
@@ -603,12 +603,12 @@ class _$CustomerDao extends CustomerDao {
             name: row['name'] as String,
             phone: row['phone'] as String,
             email: row['email'] as String?,
-            lastVisit: _dateTimeConvertor.decode(row['lastVisit'] as int),
+            lastVisit: _dateTimeConverter.decode(row['lastVisit'] as int),
             gender: row['gender'] as String,
             address: row['address'] as String?,
             imagePath: row['imagePath'] as String?,
             profileImageUrl: row['profileImageUrl'] as String?,
-            createdDate: _dateTimeConvertor.decode(row['createdDate'] as int),
+            createdDate: _dateTimeConverter.decode(row['createdDate'] as int),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
             isSynced: (row['isSynced'] as int) != 0,
             companyId: row['companyId'] as String?,
@@ -1024,12 +1024,12 @@ class _$OrderDao extends OrderDao {
             name: row['name'] as String,
             phone: row['phone'] as String,
             email: row['email'] as String?,
-            lastVisit: _dateTimeConvertor.decode(row['lastVisit'] as int),
+            lastVisit: _dateTimeConverter.decode(row['lastVisit'] as int),
             gender: row['gender'] as String,
             address: row['address'] as String?,
             imagePath: row['imagePath'] as String?,
             profileImageUrl: row['profileImageUrl'] as String?,
-            createdDate: _dateTimeConvertor.decode(row['createdDate'] as int),
+            createdDate: _dateTimeConverter.decode(row['createdDate'] as int),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
             isSynced: (row['isSynced'] as int) != 0,
             companyId: row['companyId'] as String?,
@@ -1197,7 +1197,7 @@ class _$MeasurementDao extends MeasurementDao {
                   'name': item.name,
                   'measurementValues':
                       _measurementMapConverter.encode(item.measurementValues),
-                  'createdDate': _dateTimeConvertor.encode(item.createdDate),
+                  'createdDate': _dateTimeConverter.encode(item.createdDate),
                   'updatedDate':
                       _dateTimeNullConvertor.encode(item.updatedDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
@@ -1216,7 +1216,7 @@ class _$MeasurementDao extends MeasurementDao {
                   'name': item.name,
                   'measurementValues':
                       _measurementMapConverter.encode(item.measurementValues),
-                  'createdDate': _dateTimeConvertor.encode(item.createdDate),
+                  'createdDate': _dateTimeConverter.encode(item.createdDate),
                   'updatedDate':
                       _dateTimeNullConvertor.encode(item.updatedDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
@@ -1235,7 +1235,7 @@ class _$MeasurementDao extends MeasurementDao {
                   'name': item.name,
                   'measurementValues':
                       _measurementMapConverter.encode(item.measurementValues),
-                  'createdDate': _dateTimeConvertor.encode(item.createdDate),
+                  'createdDate': _dateTimeConverter.encode(item.createdDate),
                   'updatedDate':
                       _dateTimeNullConvertor.encode(item.updatedDate),
                   'syncDate': _dateTimeNullConvertor.encode(item.syncDate),
@@ -1267,7 +1267,7 @@ class _$MeasurementDao extends MeasurementDao {
             name: row['name'] as String,
             measurementValues: _measurementMapConverter
                 .decode(row['measurementValues'] as String),
-            createdDate: _dateTimeConvertor.decode(row['createdDate'] as int),
+            createdDate: _dateTimeConverter.decode(row['createdDate'] as int),
             updatedDate:
                 _dateTimeNullConvertor.decode(row['updatedDate'] as int?),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
@@ -1286,7 +1286,7 @@ class _$MeasurementDao extends MeasurementDao {
             name: row['name'] as String,
             measurementValues: _measurementMapConverter
                 .decode(row['measurementValues'] as String),
-            createdDate: _dateTimeConvertor.decode(row['createdDate'] as int),
+            createdDate: _dateTimeConverter.decode(row['createdDate'] as int),
             updatedDate:
                 _dateTimeNullConvertor.decode(row['updatedDate'] as int?),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
@@ -1302,7 +1302,7 @@ class _$MeasurementDao extends MeasurementDao {
       String customerId) async {
     return _queryAdapter.queryList(
         'SELECT * FROM measurements WHERE customerId = ?1 ORDER BY createdDate ASC',
-        mapper: (Map<String, Object?> row) => Measurement(id: row['id'] as String?, customerId: row['customerId'] as String, name: row['name'] as String, measurementValues: _measurementMapConverter.decode(row['measurementValues'] as String), createdDate: _dateTimeConvertor.decode(row['createdDate'] as int), updatedDate: _dateTimeNullConvertor.decode(row['updatedDate'] as int?), syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?), isSynced: (row['isSynced'] as int) != 0, companyId: row['companyId'] as String?, userId: row['userId'] as String?, unit: row['unit'] as String),
+        mapper: (Map<String, Object?> row) => Measurement(id: row['id'] as String?, customerId: row['customerId'] as String, name: row['name'] as String, measurementValues: _measurementMapConverter.decode(row['measurementValues'] as String), createdDate: _dateTimeConverter.decode(row['createdDate'] as int), updatedDate: _dateTimeNullConvertor.decode(row['updatedDate'] as int?), syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?), isSynced: (row['isSynced'] as int) != 0, companyId: row['companyId'] as String?, userId: row['userId'] as String?, unit: row['unit'] as String),
         arguments: [customerId]);
   }
 
@@ -1317,7 +1317,7 @@ class _$MeasurementDao extends MeasurementDao {
             name: row['name'] as String,
             measurementValues: _measurementMapConverter
                 .decode(row['measurementValues'] as String),
-            createdDate: _dateTimeConvertor.decode(row['createdDate'] as int),
+            createdDate: _dateTimeConverter.decode(row['createdDate'] as int),
             updatedDate:
                 _dateTimeNullConvertor.decode(row['updatedDate'] as int?),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
@@ -1337,7 +1337,7 @@ class _$MeasurementDao extends MeasurementDao {
             name: row['name'] as String,
             measurementValues: _measurementMapConverter
                 .decode(row['measurementValues'] as String),
-            createdDate: _dateTimeConvertor.decode(row['createdDate'] as int),
+            createdDate: _dateTimeConverter.decode(row['createdDate'] as int),
             updatedDate:
                 _dateTimeNullConvertor.decode(row['updatedDate'] as int?),
             syncDate: _dateTimeNullConvertor.decode(row['syncDate'] as int?),
@@ -1437,7 +1437,7 @@ class _$InvoiceDao extends InvoiceDao {
                   'companyId': item.companyId,
                   'amount': item.amount,
                   'amountCents': item.amountCents,
-                  'paymentDate': _dateTimeConvertor.encode(item.paymentDate),
+                  'paymentDate': _dateTimeConverter.encode(item.paymentDate),
                   'referenceNumber': item.referenceNumber,
                   'notes': item.notes,
                   'status': item.status,
@@ -1509,7 +1509,7 @@ class _$InvoiceDao extends InvoiceDao {
                   'companyId': item.companyId,
                   'amount': item.amount,
                   'amountCents': item.amountCents,
-                  'paymentDate': _dateTimeConvertor.encode(item.paymentDate),
+                  'paymentDate': _dateTimeConverter.encode(item.paymentDate),
                   'referenceNumber': item.referenceNumber,
                   'notes': item.notes,
                   'status': item.status,
@@ -1676,7 +1676,7 @@ class _$InvoiceDao extends InvoiceDao {
             companyId: row['companyId'] as String?,
             amount: row['amount'] as double,
             amountCents: row['amountCents'] as int,
-            paymentDate: _dateTimeConvertor.decode(row['paymentDate'] as int),
+            paymentDate: _dateTimeConverter.decode(row['paymentDate'] as int),
             referenceNumber: row['referenceNumber'] as String?,
             notes: row['notes'] as String?,
             status: row['status'] as String,
@@ -1754,8 +1754,8 @@ class _$ProjectDao extends ProjectDao {
                       _dateTimeNullConvertor.encode(item.completedDate),
                   'budget': item.budget,
                   'spent': item.spent,
-                  'created_at': _dateTimeConvertor.encode(item.createdAt),
-                  'updated_at': _dateTimeConvertor.encode(item.updatedAt),
+                  'created_at': _dateTimeConverter.encode(item.createdAt),
+                  'updated_at': _dateTimeConverter.encode(item.updatedAt),
                   'is_synced': item.isSynced ? 1 : 0,
                   'sync_date': _dateTimeNullConvertor.encode(item.syncDate),
                   'user_id': item.userId
@@ -1777,8 +1777,8 @@ class _$ProjectDao extends ProjectDao {
                       _dateTimeNullConvertor.encode(item.completedDate),
                   'budget': item.budget,
                   'spent': item.spent,
-                  'created_at': _dateTimeConvertor.encode(item.createdAt),
-                  'updated_at': _dateTimeConvertor.encode(item.updatedAt),
+                  'created_at': _dateTimeConverter.encode(item.createdAt),
+                  'updated_at': _dateTimeConverter.encode(item.updatedAt),
                   'is_synced': item.isSynced ? 1 : 0,
                   'sync_date': _dateTimeNullConvertor.encode(item.syncDate),
                   'user_id': item.userId
@@ -1800,8 +1800,8 @@ class _$ProjectDao extends ProjectDao {
                       _dateTimeNullConvertor.encode(item.completedDate),
                   'budget': item.budget,
                   'spent': item.spent,
-                  'created_at': _dateTimeConvertor.encode(item.createdAt),
-                  'updated_at': _dateTimeConvertor.encode(item.updatedAt),
+                  'created_at': _dateTimeConverter.encode(item.createdAt),
+                  'updated_at': _dateTimeConverter.encode(item.updatedAt),
                   'is_synced': item.isSynced ? 1 : 0,
                   'sync_date': _dateTimeNullConvertor.encode(item.syncDate),
                   'user_id': item.userId
@@ -1898,7 +1898,7 @@ class _$ProjectDao extends ProjectDao {
     return _queryAdapter.queryList(
         'SELECT * FROM projects      WHERE company_id = ?1      AND deadline < ?2     AND status NOT IN (\'COMPLETED\', \'CANCELLED\')     ORDER BY deadline ASC',
         mapper: (Map<String, Object?> row) => Project(id: row['id'] as String?, companyId: row['company_id'] as String, clientId: row['client_id'] as String, title: row['title'] as String, description: row['description'] as String?, status: ProjectStatus.values[row['status'] as int], startDate: _dateTimeNullConvertor.decode(row['start_date'] as int?), deadline: _dateTimeNullConvertor.decode(row['deadline'] as int?), completedDate: _dateTimeNullConvertor.decode(row['completed_date'] as int?), budget: row['budget'] as double, spent: row['spent'] as double, createdAt: _dateTimeNullConvertor.decode(row['created_at'] as int?), updatedAt: _dateTimeNullConvertor.decode(row['updated_at'] as int?), isSynced: (row['is_synced'] as int) != 0, syncDate: _dateTimeNullConvertor.decode(row['sync_date'] as int?), userId: row['user_id'] as String?),
-        arguments: [companyId, _dateTimeConvertor.encode(date)]);
+        arguments: [companyId, _dateTimeConverter.encode(date)]);
   }
 
   @override
@@ -1929,8 +1929,8 @@ class _$ProjectDao extends ProjectDao {
             userId: row['user_id'] as String?),
         arguments: [
           companyId,
-          _dateTimeConvertor.encode(startDate),
-          _dateTimeConvertor.encode(endDate)
+          _dateTimeConverter.encode(startDate),
+          _dateTimeConverter.encode(endDate)
         ]);
   }
 
@@ -2010,7 +2010,7 @@ class _$PaymentDao extends PaymentDao {
                   'companyId': item.companyId,
                   'amount': item.amount,
                   'amountCents': item.amountCents,
-                  'paymentDate': _dateTimeConvertor.encode(item.paymentDate),
+                  'paymentDate': _dateTimeConverter.encode(item.paymentDate),
                   'referenceNumber': item.referenceNumber,
                   'notes': item.notes,
                   'status': item.status,
@@ -2030,7 +2030,7 @@ class _$PaymentDao extends PaymentDao {
                   'companyId': item.companyId,
                   'amount': item.amount,
                   'amountCents': item.amountCents,
-                  'paymentDate': _dateTimeConvertor.encode(item.paymentDate),
+                  'paymentDate': _dateTimeConverter.encode(item.paymentDate),
                   'referenceNumber': item.referenceNumber,
                   'notes': item.notes,
                   'status': item.status,
@@ -2050,7 +2050,7 @@ class _$PaymentDao extends PaymentDao {
                   'companyId': item.companyId,
                   'amount': item.amount,
                   'amountCents': item.amountCents,
-                  'paymentDate': _dateTimeConvertor.encode(item.paymentDate),
+                  'paymentDate': _dateTimeConverter.encode(item.paymentDate),
                   'referenceNumber': item.referenceNumber,
                   'notes': item.notes,
                   'status': item.status,
@@ -2082,7 +2082,7 @@ class _$PaymentDao extends PaymentDao {
             companyId: row['companyId'] as String?,
             amount: row['amount'] as double,
             amountCents: row['amountCents'] as int,
-            paymentDate: _dateTimeConvertor.decode(row['paymentDate'] as int),
+            paymentDate: _dateTimeConverter.decode(row['paymentDate'] as int),
             referenceNumber: row['referenceNumber'] as String?,
             notes: row['notes'] as String?,
             status: row['status'] as String,
@@ -2102,7 +2102,7 @@ class _$PaymentDao extends PaymentDao {
             companyId: row['companyId'] as String?,
             amount: row['amount'] as double,
             amountCents: row['amountCents'] as int,
-            paymentDate: _dateTimeConvertor.decode(row['paymentDate'] as int),
+            paymentDate: _dateTimeConverter.decode(row['paymentDate'] as int),
             referenceNumber: row['referenceNumber'] as String?,
             notes: row['notes'] as String?,
             status: row['status'] as String,
@@ -2124,7 +2124,7 @@ class _$PaymentDao extends PaymentDao {
             companyId: row['companyId'] as String?,
             amount: row['amount'] as double,
             amountCents: row['amountCents'] as int,
-            paymentDate: _dateTimeConvertor.decode(row['paymentDate'] as int),
+            paymentDate: _dateTimeConverter.decode(row['paymentDate'] as int),
             referenceNumber: row['referenceNumber'] as String?,
             notes: row['notes'] as String?,
             status: row['status'] as String,
@@ -2138,11 +2138,11 @@ class _$PaymentDao extends PaymentDao {
 
   @override
   Future<double?> getIncomeBetween(
-    String start,
-    String end,
+    int start,
+    int end,
   ) async {
     return _queryAdapter.query(
-        'SELECT SUM(amount) FROM payments WHERE date >= ?1 AND date <= ?2',
+        'SELECT IFNULL(SUM(amount), 0.0) FROM payments WHERE paymentDate >= ?1 AND paymentDate <= ?2',
         mapper: (Map<String, Object?> row) => row.values.first as double,
         arguments: [start, end]);
   }
@@ -2150,7 +2150,13 @@ class _$PaymentDao extends PaymentDao {
   @override
   Future<double?> getPendingPayments() async {
     return _queryAdapter.query(
-        'SELECT (SELECT SUM(totalQuotation) FROM orders) - (SELECT SUM(amount) FROM payments)',
+        'SELECT (SELECT IFNULL(SUM(totalQuotation), 0.0) FROM orders) - (SELECT IFNULL(SUM(amount), 0.0) FROM payments)',
+        mapper: (Map<String, Object?> row) => row.values.first as double);
+  }
+
+  @override
+  Future<double?> getTotalRevenue() async {
+    return _queryAdapter.query('SELECT IFNULL(SUM(amount), 0.0) FROM payments',
         mapper: (Map<String, Object?> row) => row.values.first as double);
   }
 
@@ -2186,7 +2192,7 @@ class _$AppImageDao extends AppImageDao {
                   'ownerId': item.ownerId,
                   'ownerType': item.ownerType,
                   'syncStatus': item.syncStatus,
-                  'createdAt': _dateTimeConvertor.encode(item.createdAt)
+                  'createdAt': _dateTimeConverter.encode(item.createdAt)
                 }),
         _appImageUpdateAdapter = UpdateAdapter(
             database,
@@ -2200,7 +2206,7 @@ class _$AppImageDao extends AppImageDao {
                   'ownerId': item.ownerId,
                   'ownerType': item.ownerType,
                   'syncStatus': item.syncStatus,
-                  'createdAt': _dateTimeConvertor.encode(item.createdAt)
+                  'createdAt': _dateTimeConverter.encode(item.createdAt)
                 }),
         _appImageDeletionAdapter = DeletionAdapter(
             database,
@@ -2214,7 +2220,7 @@ class _$AppImageDao extends AppImageDao {
                   'ownerId': item.ownerId,
                   'ownerType': item.ownerType,
                   'syncStatus': item.syncStatus,
-                  'createdAt': _dateTimeConvertor.encode(item.createdAt)
+                  'createdAt': _dateTimeConverter.encode(item.createdAt)
                 });
 
   final sqflite.DatabaseExecutor database;
@@ -2244,7 +2250,7 @@ class _$AppImageDao extends AppImageDao {
             ownerId: row['ownerId'] as String,
             ownerType: row['ownerType'] as String,
             syncStatus: row['syncStatus'] as String,
-            createdAt: _dateTimeConvertor.decode(row['createdAt'] as int)),
+            createdAt: _dateTimeConverter.decode(row['createdAt'] as int)),
         arguments: [ownerId, ownerType]);
   }
 
@@ -2275,6 +2281,7 @@ class _$AppImageDao extends AppImageDao {
 }
 
 // ignore_for_file: unused_element
+final _dateTimeConverter = DateTimeConverter();
 final _dateTimeConvertor = DateTimeConvertor();
 final _measurementMapConverter = MeasurementMapConverter();
 final _dateTimeNullConvertor = DateTimeNullConvertor();

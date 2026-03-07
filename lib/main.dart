@@ -8,6 +8,7 @@ import 'package:notdle/providers/app_provider.dart';
 import 'package:notdle/providers/company_provider.dart';
 import 'package:notdle/providers/customer_provider.dart';
 import 'package:notdle/providers/dashboard_provider.dart';
+import 'package:notdle/providers/financial_provider.dart';
 import 'package:notdle/providers/invoice_provider.dart';
 import 'package:notdle/providers/measurement_provider.dart';
 import 'package:notdle/models/repository/image_repository.dart';
@@ -325,6 +326,9 @@ void main() async {
                   ImageStorageService(),
                 ),
               ),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => FinancialProvider(paymentDao: db.paymentDao),
         ),
       ],
       child: const IndexPage(),

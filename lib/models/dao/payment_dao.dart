@@ -22,12 +22,15 @@ abstract class PaymentDao {
   Future<List<Payment>> getPaymentsForInvoice(String invoiceId);
 
   @Query(
-    'SELECT SUM(amount) FROM payments WHERE date >= :start AND date <= :end',
+    'SELECT IFNULL(SUM(amount), 0.0) FROM payments WHERE paymentDate >= :start AND paymentDate <= :end',
   )
-  Future<double?> getIncomeBetween(String start, String end);
+  Future<double?> getIncomeBetween(int start, int end);
 
   @Query(
-    'SELECT (SELECT SUM(totalQuotation) FROM orders) - (SELECT SUM(amount) FROM payments)',
+    'SELECT (SELECT IFNULL(SUM(totalQuotation), 0.0) FROM orders) - (SELECT IFNULL(SUM(amount), 0.0) FROM payments)',
   )
   Future<double?> getPendingPayments();
+
+  @Query('SELECT IFNULL(SUM(amount), 0.0) FROM payments')
+  Future<double?> getTotalRevenue();
 }

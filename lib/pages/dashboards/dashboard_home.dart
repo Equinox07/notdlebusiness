@@ -8,6 +8,11 @@ import 'package:notdle/providers/dashboard_provider.dart';
 import 'package:notdle/providers/notification_provider.dart';
 import 'package:notdle/utils/session_helper.dart';
 import 'package:provider/provider.dart';
+import 'package:notdle/models/financial_overview_stats.dart';
+import 'package:notdle/models/order.dart';
+import 'package:notdle/models/production_status.dart';
+import 'package:notdle/providers/financial_provider.dart';
+import 'package:notdle/providers/order_provider.dart';
 
 class DashboardHome extends StatefulWidget {
   const DashboardHome({super.key});
@@ -17,15 +22,32 @@ class DashboardHome extends StatefulWidget {
 }
 
 class _DashboardHomeState extends State<DashboardHome> {
-  // final _dbHelper = DatabaseHelper.instance;
+  late Future<ProductionStatus> _productionStatusFuture;
+  late Future<FinancialOverviewStats> _financialOverviewFuture;
+  late Future<List<Order>> _upcomingDeadlinesFuture;
 
   @override
   void initState() {
     super.initState();
+    _loadDashboardData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<DashBoardProvider>(context, listen: false).fetchCounts();
       Provider.of<CompanyProvider>(context, listen: false).fetchCompany();
       SessionHelper.checkCompanySession(context);
+    });
+  }
+
+  void _loadDashboardData() {
+    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+    final financialProvider = Provider.of<FinancialProvider>(
+      context,
+      listen: false,
+    );
+
+    setState(() {
+      _productionStatusFuture = orderProvider.getProductionStatusCounts();
+      _financialOverviewFuture = financialProvider.getFinancialOverview();
+      _upcomingDeadlinesFuture = orderProvider.fetchOrdersDueInNext7Days();
     });
   }
 
@@ -190,7 +212,9 @@ class _DashboardHomeState extends State<DashboardHome> {
               const SizedBox(height: 32),
 
               // Financial Overview Section
-              const _FinancialOverview(),
+              _FinancialOverview(
+                financialOverviewFuture: _financialOverviewFuture,
+              ),
               const SizedBox(height: 32),
 
               // Production Status
@@ -212,68 +236,91 @@ class _DashboardHomeState extends State<DashboardHome> {
                 ],
               ),
               const SizedBox(height: 12),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _StatusCard(
-                      count: 3,
-                      label: "DESIGN",
-                      color: Colors.purple.shade50,
-                      textColor: Colors.purple,
+              FutureBuilder<ProductionStatus>(
+                future: _productionStatusFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return const Center(child: Text('Error loading stats'));
+                  }
+                  final status = snapshot.data;
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _StatusCard(
+                          count: status?.measureCount ?? 0,
+                          label: "DESIGN",
+                          color: Colors.purple.shade50,
+                          textColor: Colors.purple,
+                        ),
+                        _StatusCard(
+                          count: status?.cuttingCount ?? 0,
+                          label: "CUTTING",
+                          color: Colors.indigo.shade50,
+                          textColor: Colors.indigo,
+                        ),
+                        _StatusCard(
+                          count: status?.sewingCount ?? 0,
+                          label: "SEWING",
+                          color: Colors.orange.shade50,
+                          textColor: Colors.orange,
+                        ),
+                        _StatusCard(
+                          count: status?.fittingCount ?? 0,
+                          label: "FINISHING",
+                          color: Colors.green.shade50,
+                          textColor: Colors.green,
+                        ),
+                        _StatusCard(
+                          count: status?.readyCount ?? 0,
+                          label: "READY",
+                          color: Colors.blue.shade50,
+                          textColor: Colors.blue,
+                        ),
+                      ],
                     ),
-                    _StatusCard(
-                      count: 5,
-                      label: "CUTTING",
-                      color: Colors.indigo.shade50,
-                      textColor: Colors.indigo,
-                    ),
-                    _StatusCard(
-                      count: 2,
-                      label: "SEWING",
-                      color: Colors.orange.shade50,
-                      textColor: Colors.orange,
-                    ),
-                    _StatusCard(
-                      count: 1,
-                      label: "FINISHING",
-                      color: Colors.green.shade50,
-                      textColor: Colors.green,
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
               const SizedBox(height: 32),
 
               // Upcoming Deadlines Section
               _SectionTitle(text: "Upcoming Deadlines"),
               const SizedBox(height: 16),
-              _DeadlineListItem(
-                name: "Elena Rossi",
-                item: "Silk Gala Gown",
-                dueText: "Due in 2d",
-                status: "SEWING",
-                statusColor: Colors.orange.shade100,
-                statusTextColor: Colors.orange.shade800,
-                icon: Icons.checkroom,
-              ),
-              _DeadlineListItem(
-                name: "Marcus J.",
-                item: "Bespoke Suit",
-                dueText: "Due in 5d",
-                status: "FITTING",
-                statusColor: Colors.purple.shade100,
-                statusTextColor: Colors.purple.shade800,
-                icon: Icons.checkroom,
-              ),
-              _DeadlineListItem(
-                name: "Sophia Chen",
-                item: "Cocktail Dress",
-                dueText: "Due Tomorrow",
-                status: "READY",
-                statusColor: Colors.green.shade100,
-                statusTextColor: Colors.green.shade800,
-                icon: Icons.check_circle_outline,
+              FutureBuilder<List<Order>>(
+                future: _upcomingDeadlinesFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return const Center(child: Text('Error loading deadlines'));
+                  }
+                  final deadlines = snapshot.data ?? [];
+                  if (deadlines.isEmpty) {
+                    return const Center(child: Text('No upcoming deadlines.'));
+                  }
+                  return ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: deadlines.length,
+                    itemBuilder: (context, index) {
+                      final order = deadlines[index];
+                      return _DeadlineListItem(
+                        name: order.title,
+                        item: order.garmentType,
+                        dueText: 'Due in ${order.daysLeft}d',
+                        status: order.currentStage.name.toUpperCase(),
+                        statusColor: Colors.orange.shade100,
+                        statusTextColor: Colors.orange.shade800,
+                        icon: Icons.checkroom,
+                      );
+                    },
+                  );
+                },
               ),
               const SizedBox(height: 80), // Padding for FAB
             ],
@@ -683,7 +730,9 @@ class _UrgentAlerts extends StatelessWidget {
 }
 
 class _FinancialOverview extends StatelessWidget {
-  const _FinancialOverview();
+  final Future<FinancialOverviewStats> financialOverviewFuture;
+
+  const _FinancialOverview({required this.financialOverviewFuture});
 
   @override
   Widget build(BuildContext context) {
@@ -715,35 +764,51 @@ class _FinancialOverview extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 12),
-        GridView.count(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 2,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          childAspectRatio: 1.6,
-          children: const [
-            _FinancialCard(
-              label: "Today's Income",
-              value: "\$0",
-              color: Colors.green,
-            ),
-            _FinancialCard(
-              label: "This Week",
-              value: "\$0",
-              color: Colors.blue,
-            ),
-            _FinancialCard(
-              label: "This Month",
-              value: "\$0",
-              color: Colors.orange,
-            ),
-            _FinancialCard(
-              label: "Pending Payments",
-              value: "\$0",
-              color: Colors.red,
-            ),
-          ],
+        FutureBuilder<FinancialOverviewStats>(
+          future: financialOverviewFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return const Center(child: Text('Error loading financials'));
+            }
+            final stats = snapshot.data;
+            return GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 1.6,
+              children: [
+                _FinancialCard(
+                  label: "Today's Income",
+                  value:
+                      "\$${stats?.todaysIncome.toStringAsFixed(2) ?? '0.00'}",
+                  color: Colors.green,
+                ),
+                _FinancialCard(
+                  label: "This Week",
+                  value:
+                      "\$${stats?.thisWeekIncome.toStringAsFixed(2) ?? '0.00'}",
+                  color: Colors.blue,
+                ),
+                _FinancialCard(
+                  label: "This Month",
+                  value:
+                      "\$${stats?.thisMonthIncome.toStringAsFixed(2) ?? '0.00'}",
+                  color: Colors.orange,
+                ),
+                _FinancialCard(
+                  label: "Pending Payments",
+                  value:
+                      "\$${stats?.pendingPayments.toStringAsFixed(2) ?? '0.00'}",
+                  color: Colors.red,
+                ),
+              ],
+            );
+          },
         ),
       ],
     );

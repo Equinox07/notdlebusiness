@@ -10,6 +10,7 @@ import 'package:notdle/models/dao/measurement_dao.dart';
 import 'package:notdle/models/dao/order_dao.dart';
 import 'package:notdle/models/dao/project_dao.dart';
 import 'package:notdle/models/dao/payment_dao.dart';
+import 'package:notdle/models/date_time_converter.dart';
 import 'package:notdle/models/datetime_convertor.dart';
 import 'package:notdle/models/datetime_null_convertor.dart';
 import 'package:notdle/models/invoice_item.dart';
@@ -31,6 +32,7 @@ import 'package:notdle/models/app_image.dart';
 part 'app_database.g.dart'; // The file that will be generated
 
 @TypeConverters([
+  DateTimeConverter,
   DateTimeConvertor,
   MeasurementMapConverter,
   DateTimeNullConvertor,

@@ -30,6 +30,11 @@ abstract class OrderDao {
   )
   Future<List<Order>> getAllCustomerOrders(String customerId);
 
+  @Query(
+    'SELECT * FROM orders WHERE customerId = :customerId ORDER BY createdDate DESC',
+  )
+  Future<List<Order>> getLatestCustomerOrders(String customerId);
+
   @Query('SELECT COUNT(*) FROM orders WHERE status != "Completed"')
   Future<int?> getActiveOrderCount();
 

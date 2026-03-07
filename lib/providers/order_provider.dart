@@ -110,6 +110,16 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> fetchLatestOrdersForCustomer(String customerId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    _customerOrders = await orderDao.getLatestCustomerOrders(customerId);
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
   Future<ProductionStatus> getProductionStatusCounts() async {
     final measureCount =
         await orderDao.getCountForStage(ProductionStage.measure.toString()) ??

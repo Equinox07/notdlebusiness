@@ -308,55 +308,51 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
   }
 
   Widget _buildDetailsTab() {
-    // final styles =
-    //     widget.customer.stylePreferences
-    //         ?.split(", ")
-    //         .where((s) => s.isNotEmpty)
-    //         .toList() ??
-    //     [];
+    return Consumer<OrderProvider>(
+      builder: (context, orderProvider, child) {
+        final orders = orderProvider.customerOrders;
+        final totalSpent = orders.fold<double>(
+          0,
+          (sum, order) => sum + (order.total ?? 0),
+        );
+        final lastOrderDate =
+            orders.isNotEmpty
+                ? orders
+                    .map((o) => o.createdAt)
+                    .where((d) => d != null)
+                    .reduce((a, b) => a!.isAfter(b!) ? a : b)
+                : null;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 16,
-      ), // reduced from 24
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: _buildMetricCard("TOTAL SPENT", "\$4,250.00"),
-              ), // Could be calculated from orders
-              const SizedBox(width: 12), // reduced from 16
-              Expanded(child: _buildMetricCard("LAST ORDER", "Oct 12")),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildMetricCard(
+                      "TOTAL SPENT",
+                      NumberFormat.currency(symbol: '\$').format(totalSpent),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildMetricCard(
+                      "LAST ORDER",
+                      lastOrderDate != null
+                          ? DateFormat('MMM d, y').format(lastOrderDate)
+                          : "N/A",
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildRecentOrders(),
             ],
           ),
-          const SizedBox(height: 16), // reduced from 20/24
-          // if (styles.isNotEmpty ||
-          //     widget.customer.stylePreferences == null) ...[
-          //   // show default if empty for design matching
-          //   _buildStylePreferences(
-          //     styles.isEmpty
-          //         ? [
-          //           "Minimalist",
-          //           "Silk Fabrics",
-          //           "Neutral Palette",
-          //           "Tailored Fit",
-          //           "Sustainable",
-          //         ]
-          //         : styles,
-          //   ),
-          //   const SizedBox(height: 16), // reduced from 24
-          // ],
-          // if (widget.customer.notes != null &&
-          //     widget.customer.notes!.isNotEmpty) ...[
-          //   _buildNotesSection(),
-          //   const SizedBox(height: 20), // reduced from 32
-          // ],
-          _buildRecentOrders(),
-        ],
-      ),
+        );
+      },
     );
   }
 

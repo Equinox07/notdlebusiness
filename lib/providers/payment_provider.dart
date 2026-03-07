@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:notdle/models/dao/payment_dao.dart';
 import 'package:notdle/models/payment.dart';
+import 'package:notdle/providers/financial_provider.dart';
+import 'package:notdle/providers/invoice_provider.dart';
 import 'package:notdle/services/api_service.dart';
 import 'package:notdle/services/session_manager.dart';
 
 class PaymentProvider extends ChangeNotifier {
   final PaymentDao paymentDao;
+  final InvoiceProvider invoiceProvider;
+  final FinancialProvider financialProvider;
 
-  PaymentProvider({required this.paymentDao});
+  PaymentProvider({
+    required this.paymentDao,
+    required this.invoiceProvider,
+    required this.financialProvider,
+  });
 
   List<Payment> _payments = [];
   List<Payment> get payments => _payments;
@@ -33,6 +41,10 @@ class PaymentProvider extends ChangeNotifier {
 
     await paymentDao.insertPayment(updatedPayment);
     await fetchPaymentsForInvoice(payment.invoiceId);
+
+    // Refresh invoices and financial data
+    await invoiceProvider.fetchInvoices();
+    financialProvider.refresh();
   }
 
   Future<void> updatePayment(Payment payment) async {
@@ -43,5 +55,9 @@ class PaymentProvider extends ChangeNotifier {
   Future<void> deletePayment(Payment payment) async {
     await paymentDao.deletePayment(payment);
     await fetchPaymentsForInvoice(payment.invoiceId);
+  }
+
+  Future<double> getTotalPaidForInvoice(String invoiceId) async {
+    return await paymentDao.getTotalPaidForInvoice(invoiceId) ?? 0.0;
   }
 }

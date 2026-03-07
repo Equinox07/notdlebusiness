@@ -22,6 +22,11 @@ abstract class PaymentDao {
   Future<List<Payment>> getPaymentsForInvoice(String invoiceId);
 
   @Query(
+    'SELECT IFNULL(SUM(amount), 0.0) FROM payments WHERE invoiceId = :invoiceId',
+  )
+  Future<double?> getTotalPaidForInvoice(String invoiceId);
+
+  @Query(
     'SELECT IFNULL(SUM(amount), 0.0) FROM payments WHERE paymentDate >= :start AND paymentDate <= :end',
   )
   Future<double?> getIncomeBetween(int start, int end);

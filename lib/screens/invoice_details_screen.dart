@@ -6,7 +6,9 @@ import 'package:intl/intl.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/invoice.dart';
 import 'package:notdle/models/invoice_item.dart';
+import 'package:notdle/models/payment.dart';
 import 'package:notdle/providers/customer_provider.dart';
+import 'package:notdle/providers/payment_provider.dart';
 import 'package:notdle/screens/create_invoice_screen.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -16,12 +18,38 @@ const _kPurple = Color(0xFF6200EE);
 const _kGold = Color(0xFFD4AF37);
 const _kBg = Color(0xFFF8F9FB);
 
-class InvoiceDetailsScreen extends StatelessWidget {
+class InvoiceDetailsScreen extends StatefulWidget {
   final Invoice invoice;
 
   static const tag = 'invoice-details';
 
   const InvoiceDetailsScreen({super.key, required this.invoice});
+
+  @override
+  State<InvoiceDetailsScreen> createState() => _InvoiceDetailsScreenState();
+}
+
+class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
+  double _totalPaid = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPaymentData();
+  }
+
+  void _loadPaymentData() async {
+    final paymentProvider = Provider.of<PaymentProvider>(
+      context,
+      listen: false,
+    );
+    final totalPaid = await paymentProvider.getTotalPaidForInvoice(
+      widget.invoice.id,
+    );
+    setState(() {
+      _totalPaid = totalPaid;
+    });
+  }
 
   Future<void> _generateAndSendInvoice(
     Invoice invoice,
@@ -47,18 +75,10 @@ class InvoiceDetailsScreen extends StatelessWidget {
               pw.Text("Total Amount: \$${invoice.total!.toStringAsFixed(2)}"),
               pw.SizedBox(height: 20),
               pw.Text("Items:"),
-              pw.Column(
-                children:
-                    invoice.items.map((item) {
-                      return pw.Row(
-                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                        children: [
-                          pw.Text(item.description),
-                          pw.Text("\$${item.amount.toStringAsFixed(2)}"),
-                        ],
-                      );
-                    }).toList(),
-              ),
+              // pw.Column(
+              //   children:
+              //       invoice.items.map((item) => _buildItemRow(item)).toList(),
+              // ),
             ],
           );
         },
@@ -80,13 +100,13 @@ class InvoiceDetailsScreen extends StatelessWidget {
     Customer? customer = await Provider.of<CustomerProvider>(
       context,
       listen: false,
-    ).getCustomerById(invoice.customerId);
+    ).getCustomerById(widget.invoice.customerId);
     final updatedInvoice = await Navigator.push(
       context,
       MaterialPageRoute(
         builder:
             (context) => CreateInvoiceScreen(
-              invoice: invoice, // Pass the existing invoice to the form
+              invoice: widget.invoice, // Pass the existing invoice to the form
               customer: customer,
             ),
       ),
@@ -95,6 +115,89 @@ class InvoiceDetailsScreen extends StatelessWidget {
     if (updatedInvoice != null) {
       // Refresh the UI with updated data from the provider
     }
+  }
+
+  void _showRecordPaymentDialog(BuildContext context) {
+    final amountController = TextEditingController();
+    final notesController = TextEditingController();
+    String paymentMethod = 'Cash';
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Record Payment'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: amountController,
+                decoration: const InputDecoration(labelText: 'Amount'),
+                keyboardType: TextInputType.number,
+              ),
+              DropdownButtonFormField<String>(
+                value: paymentMethod,
+                decoration: const InputDecoration(labelText: 'Payment Method'),
+                items:
+                    ['Cash', 'Bank Transfer', 'Credit Card']
+                        .map(
+                          (method) => DropdownMenuItem(
+                            value: method,
+                            child: Text(method),
+                          ),
+                        )
+                        .toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    paymentMethod = value;
+                  }
+                },
+              ),
+              TextField(
+                controller: notesController,
+                decoration: const InputDecoration(labelText: 'Notes'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final amount = double.tryParse(amountController.text);
+                if (amount == null || amount <= 0) {
+                  // Show an error or return
+                  return;
+                }
+
+                final newPayment = Payment(
+                  invoiceId: widget.invoice.id,
+                  amount: amount,
+                  amountCents: (amount * 100).toInt(),
+                  paymentDate: DateTime.now(),
+                  status: 'Completed',
+                  method: paymentMethod,
+                  notes: notesController.text,
+                );
+
+                final paymentProvider = Provider.of<PaymentProvider>(
+                  context,
+                  listen: false,
+                );
+                await paymentProvider.addPayment(newPayment);
+
+                // Reload data and close dialog
+                _loadPaymentData();
+                Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -113,7 +216,7 @@ class InvoiceDetailsScreen extends StatelessWidget {
           ),
         ),
         title: Text(
-          invoice.invoiceNumber ?? 'N/A',
+          widget.invoice.invoiceNumber ?? 'N/A',
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.w600,
@@ -153,7 +256,7 @@ class InvoiceDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildStatusHeader() {
-    bool isPaid = invoice.status.toLowerCase() == 'paid';
+    bool isPaid = widget.invoice.status.toLowerCase() == 'paid';
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -165,8 +268,8 @@ class InvoiceDetailsScreen extends StatelessWidget {
               style: GoogleFonts.poppins(fontSize: 12, color: Colors.blueGrey),
             ),
             Text(
-              invoice.issueDate != null
-                  ? DateFormat('MMM dd, yyyy').format(invoice.issueDate!)
+              widget.invoice.issueDate != null
+                  ? DateFormat('MMM dd, yyyy').format(widget.invoice.issueDate!)
                   : 'N/A',
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.w600,
@@ -185,7 +288,7 @@ class InvoiceDetailsScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            invoice.status.toUpperCase(),
+            widget.invoice.status.toUpperCase(),
             style: GoogleFonts.poppins(
               fontSize: 11,
               fontWeight: FontWeight.bold,
@@ -198,6 +301,7 @@ class InvoiceDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildAmountCard() {
+    final outstanding = widget.invoice.total! - _totalPaid;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -220,7 +324,7 @@ class InvoiceDetailsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            "\$${invoice.total!.toStringAsFixed(2)}",
+            "\$${widget.invoice.total!.toStringAsFixed(2)}",
             style: GoogleFonts.poppins(
               color: Colors.white,
               fontSize: 32,
@@ -231,13 +335,45 @@ class InvoiceDetailsScreen extends StatelessWidget {
           const Divider(color: Colors.white24),
           const SizedBox(height: 12),
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              const Icon(Icons.timer_outlined, color: Colors.white70, size: 16),
-              const SizedBox(width: 8),
-              Text(
-                "Due by ${invoice.dueDate != null ? DateFormat('MMM dd').format(invoice.dueDate!) : 'N/A'}",
-                style: GoogleFonts.poppins(color: Colors.white70, fontSize: 12),
+              Column(
+                children: [
+                  Text(
+                    "Total Paid",
+                    style: GoogleFonts.poppins(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                  Text(
+                    "\$${_totalPaid.toStringAsFixed(2)}",
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  Text(
+                    "Outstanding",
+                    style: GoogleFonts.poppins(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
+                  ),
+                  Text(
+                    "\$${outstanding.toStringAsFixed(2)}",
+                    style: GoogleFonts.poppins(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -264,7 +400,7 @@ class InvoiceDetailsScreen extends StatelessWidget {
           future: Provider.of<CustomerProvider>(
             context,
             listen: false,
-          ).getCustomerById(invoice.customerId),
+          ).getCustomerById(widget.invoice.customerId),
           builder: (context, snapshot) {
             final customer = snapshot.data;
 
@@ -339,7 +475,7 @@ class InvoiceDetailsScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        ...invoice.items.map((item) => _buildItemRow(item)),
+        ...widget.invoice.items.map((item) => _buildItemRow(item)),
       ],
     );
   }
@@ -398,16 +534,19 @@ class InvoiceDetailsScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _summaryRow("Subtotal", "\$${invoice.subtotal!.toStringAsFixed(2)}"),
+          _summaryRow(
+            "Subtotal",
+            "\$${widget.invoice.subtotal!.toStringAsFixed(2)}",
+          ),
           const SizedBox(height: 10),
-          _summaryRow("Tax", "+\$${invoice.tax!.toStringAsFixed(2)}"),
+          _summaryRow("Tax", "+\$${widget.invoice.tax!.toStringAsFixed(2)}"),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 12),
             child: Divider(),
           ),
           _summaryRow(
             "Grand Total",
-            "\$${invoice.total!.toStringAsFixed(2)}",
+            "\$${widget.invoice.total!.toStringAsFixed(2)}",
             isTotal: true,
           ),
         ],
@@ -466,18 +605,14 @@ class InvoiceDetailsScreen extends StatelessWidget {
             Expanded(
               flex: 2,
               child: ElevatedButton.icon(
-                icon: const Icon(
-                  Icons.send_rounded,
-                  size: 18,
-                  color: Colors.white,
-                ),
+                icon: const Icon(Icons.payment, size: 18, color: Colors.white),
                 label: const Text(
-                  "Send Invoice",
+                  "Record Payment",
                   style: TextStyle(color: Colors.white),
                 ),
-                onPressed:
-                    () =>
-                        _generateAndSendInvoice(invoice, Navigator.of(context)),
+                onPressed: () {
+                  _showRecordPaymentDialog(context);
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _kPurple,
                   padding: const EdgeInsets.symmetric(vertical: 16),

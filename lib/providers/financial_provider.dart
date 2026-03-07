@@ -59,4 +59,8 @@ class FinancialProvider extends ChangeNotifier {
   Future<double> getTotalRevenue() async {
     return await paymentDao.getTotalRevenue() ?? 0.0;
   }
+
+  void refresh() {
+    notifyListeners();
+  }
 }

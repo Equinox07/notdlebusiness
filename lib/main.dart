@@ -305,6 +305,34 @@ void main() async {
           create: (context) => InvoiceProvider(invoiceDao: db.invoiceDao),
         ),
         ChangeNotifierProvider(
+          create: (context) => FinancialProvider(paymentDao: db.paymentDao),
+        ),
+        ChangeNotifierProxyProvider2<
+          InvoiceProvider,
+          FinancialProvider,
+          PaymentProvider
+        >(
+          create:
+              (context) => PaymentProvider(
+                paymentDao: db.paymentDao,
+                invoiceProvider: Provider.of<InvoiceProvider>(
+                  context,
+                  listen: false,
+                ),
+                financialProvider: Provider.of<FinancialProvider>(
+                  context,
+                  listen: false,
+                ),
+              ),
+          update:
+              (context, invoiceProvider, financialProvider, paymentProvider) =>
+                  PaymentProvider(
+                    paymentDao: db.paymentDao,
+                    invoiceProvider: invoiceProvider,
+                    financialProvider: financialProvider,
+                  ),
+        ),
+        ChangeNotifierProvider(
           create: (context) => CompanyProvider(companyDao: db.companyDao),
         ),
         ChangeNotifierProvider(
@@ -315,21 +343,6 @@ void main() async {
               ),
         ),
         ChangeNotifierProvider(create: (context) => NotificationProvider()),
-        ChangeNotifierProvider(
-          create: (context) => PaymentProvider(paymentDao: db.paymentDao),
-        ),
-        ChangeNotifierProvider(
-          create:
-              (context) => AppImageProvider(
-                repository: ImageRepository(
-                  db.appImageDao,
-                  ImageStorageService(),
-                ),
-              ),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => FinancialProvider(paymentDao: db.paymentDao),
-        ),
       ],
       child: const IndexPage(),
     ),

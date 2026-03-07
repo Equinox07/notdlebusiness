@@ -2137,6 +2137,14 @@ class _$PaymentDao extends PaymentDao {
   }
 
   @override
+  Future<double?> getTotalPaidForInvoice(String invoiceId) async {
+    return _queryAdapter.query(
+        'SELECT IFNULL(SUM(amount), 0.0) FROM payments WHERE invoiceId = ?1',
+        mapper: (Map<String, Object?> row) => row.values.first as double,
+        arguments: [invoiceId]);
+  }
+
+  @override
   Future<double?> getIncomeBetween(
     int start,
     int end,

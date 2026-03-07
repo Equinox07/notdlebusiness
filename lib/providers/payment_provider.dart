@@ -40,9 +40,9 @@ class PaymentProvider extends ChangeNotifier {
     );
 
     await paymentDao.insertPayment(updatedPayment);
-    await fetchPaymentsForInvoice(payment.invoiceId);
+    // await fetchPaymentsForInvoice(payment.invoiceId); // This can cause issues if the provider is disposed.
 
-    // Refresh invoices and financial data
+    // Refresh invoices and financial data, which will in turn update the UI.
     await invoiceProvider.fetchInvoices();
     financialProvider.refresh();
   }

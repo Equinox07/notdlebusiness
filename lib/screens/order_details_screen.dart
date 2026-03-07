@@ -540,65 +540,91 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         due != null ? DateFormat('MMMM d, y').format(due) : "No due date set";
     final daysLeft = due != null ? due.difference(DateTime.now()).inDays : null;
 
-    return _buildCard(
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF3E5F5),
-              borderRadius: BorderRadius.circular(12),
+    return GestureDetector(
+      onTap: () {
+        if (due == null) {
+          _selectDueDate(context);
+        }
+      },
+      child: _buildCard(
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF3E5F5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.calendar_month,
+                color: OrderDetailsScreen.primaryPurple,
+              ),
             ),
-            child: const Icon(
-              Icons.calendar_month,
-              color: OrderDetailsScreen.primaryPurple,
+            const SizedBox(width: 15),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "DELIVERY DEADLINE",
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  dueDateText,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(width: 15),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "DELIVERY DEADLINE",
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
+            const Spacer(),
+            Column(
+              children: [
+                Text(
+                  daysLeft?.toString() ?? '--',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: OrderDetailsScreen.primaryPurple,
+                  ),
                 ),
-              ),
-              Text(
-                dueDateText,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                Text(
+                  daysLeft == null ? "NO DATE" : "DAYS LEFT",
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          Column(
-            children: [
-              Text(
-                daysLeft?.toString() ?? '--',
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: OrderDetailsScreen.primaryPurple,
-                ),
-              ),
-              Text(
-                daysLeft == null ? "NO DATE" : "DAYS LEFT",
-                style: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 8,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _selectDueDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      final updatedOrder = widget.order.copyWith(
+        dueDate: picked.toIso8601String(),
+      );
+      final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+      await orderProvider.updateOrder(updatedOrder);
+      setState(() {
+        _orderDetailsFuture = _fetchOrderDetails();
+      });
+    }
   }
 
   Widget _buildDesignReferences(Order order) {

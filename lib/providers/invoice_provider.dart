@@ -8,6 +8,7 @@ import '../models/invoice.dart';
 import '../models/order.dart';
 import 'package:notdle/services/api_service.dart';
 import 'package:notdle/services/session_manager.dart';
+import 'package:notdle/models/invoice_with_payments.dart';
 
 class InvoiceProvider extends ChangeNotifier {
   final InvoiceDao invoiceDao;
@@ -59,6 +60,17 @@ class InvoiceProvider extends ChangeNotifier {
   Future<void> deleteInvoice(Invoice invoice) async {
     await invoiceDao.deleteInvoice(invoice);
     await fetchInvoices();
+  }
+
+  Future<InvoiceWithPayments?> getInvoiceWithPayments(String invoiceId) async {
+    final invoice = await invoiceDao.getInvoiceById(invoiceId);
+    if (invoice == null) {
+      return null;
+    }
+    final payments = await invoiceDao.getPayments(invoiceId);
+    final items = await invoiceDao.getInvoiceItems(invoiceId);
+    final fullInvoice = invoice.copyWith(items: items);
+    return InvoiceWithPayments(invoice: fullInvoice, payments: payments);
   }
 
   /// ✅ Auto-generate an invoice from an order

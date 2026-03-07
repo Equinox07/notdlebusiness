@@ -7,7 +7,7 @@ import 'package:notdle/models/order_item.dart'; // Import OrderItem
 @dao
 abstract class OrderDao {
   // Order methods
-  @Query('SELECT * FROM orders ORDER BY dueDate ASC')
+  @Query('SELECT * FROM orders ORDER BY createdDate DESC')
   Future<List<Order>> getAllOrders();
 
   @Query('SELECT * FROM orders WHERE id = :id')

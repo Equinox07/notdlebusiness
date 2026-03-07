@@ -343,6 +343,15 @@ void main() async {
               ),
         ),
         ChangeNotifierProvider(create: (context) => NotificationProvider()),
+        ChangeNotifierProvider(
+          create:
+              (context) => AppImageProvider(
+                repository: ImageRepository(
+                  db.appImageDao,
+                  ImageStorageService(),
+                ),
+              ),
+        ),
       ],
       child: const IndexPage(),
     ),

@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:notdle/models/customer.dart';
 import 'package:notdle/models/order.dart';
 import 'package:notdle/navigation/app_navigation.dart';
+import 'package:notdle/screens/order_details_screen.dart';
 import 'package:notdle/widgets/custom_app_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:notdle/models/measurement.dart';
@@ -701,7 +702,9 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen>
       onTap: () async {
         await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) => ClientOrderDetailsScreen(order: order),
+            builder:
+                (context) =>
+                    OrderDetailsScreen(order: order, orderId: order.id!),
           ),
         );
         // Refresh orders after returning from details screen

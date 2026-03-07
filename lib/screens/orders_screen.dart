@@ -60,6 +60,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
         ),
       );
     }
+    detailedOrders.sort(
+      (a, b) => b.order.createdAt!.compareTo(a.order.createdAt!),
+    );
     return detailedOrders;
   }
 

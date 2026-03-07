@@ -178,26 +178,46 @@ class _DashboardHomeState extends State<DashboardHome> {
                       icon: Icons.settings, // Sewing machine closest match
                       color: Colors.purple,
                     ),
-                    const _DashboardStatCard(
-                      title: 'Upcoming Deadlines',
-                      value: '0',
-                      subtext: 'Next due in 2 days',
-                      icon: Icons.calendar_today_outlined,
-                      color: Colors.orange,
+                    FutureBuilder<List<Order>>(
+                      future: _upcomingDeadlinesFuture,
+                      builder: (context, snapshot) {
+                        final count = snapshot.data?.length ?? 0;
+                        return _DashboardStatCard(
+                          title: 'Upcoming Deadlines',
+                          value: count.toString(),
+                          subtext: 'Next due in 2 days',
+                          icon: Icons.calendar_today_outlined,
+                          color: Colors.orange,
+                        );
+                      },
                     ),
-                    const _DashboardStatCard(
-                      title: 'Revenue (This Month)',
-                      value: '\$0',
-                      subtext: '+0% from last month',
-                      icon: Icons.attach_money,
-                      color: Colors.green,
+                    FutureBuilder<FinancialOverviewStats>(
+                      future: _financialOverviewFuture,
+                      builder: (context, snapshot) {
+                        final stats = snapshot.data;
+                        return _DashboardStatCard(
+                          title: 'Revenue (This Month)',
+                          value:
+                              '\$${stats?.thisMonthIncome.toStringAsFixed(2) ?? '0.00'}',
+                          subtext: '+0% from last month',
+                          icon: Icons.attach_money,
+                          color: Colors.green,
+                        );
+                      },
                     ),
-                    const _DashboardStatCard(
-                      title: 'Outstanding Payments',
-                      value: '\$0 unpaid',
-                      subtext: '0 clients pending',
-                      icon: Icons.payment,
-                      color: Colors.red,
+                    FutureBuilder<FinancialOverviewStats>(
+                      future: _financialOverviewFuture,
+                      builder: (context, snapshot) {
+                        final stats = snapshot.data;
+                        return _DashboardStatCard(
+                          title: 'Outstanding Payments',
+                          value:
+                              '\$${stats?.pendingPayments.toStringAsFixed(2) ?? '0.00'} unpaid',
+                          subtext: '0 clients pending',
+                          icon: Icons.payment,
+                          color: Colors.red,
+                        );
+                      },
                     ),
                     const _DashboardStatCard(
                       title: 'Appointments Today',
